@@ -21,6 +21,13 @@ Each ACI represents a discrete, governed change to the repository. Completion re
 | ACI-009 | CI/CD Hardening | Complete | [ACI-009-completion-report.md](../reports/ACI-009-completion-report.md) |
 | ACI-010 | Docker Hub Publish | Complete | [ACI-010-completion-report.md](../reports/ACI-010-completion-report.md) |
 | ACI-011 | PA Documentation | Complete | [ACI-011-completion-report.md](../reports/ACI-011-completion-report.md) |
+| ACI-012 | PA Certification | Complete | [ACI-012-completion-report.md](../reports/ACI-012-completion-report.md) |
+
+## PA Certification
+
+**Status:** Certified (2026-06-27)  
+**Report:** [PA_CERTIFICATION_REPORT.md](../reports/PA_CERTIFICATION_REPORT.md)  
+**Certifying commit:** `a0edd22`
 
 ## Conventions
 

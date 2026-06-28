@@ -1,6 +1,6 @@
 # NOPE Lite — PA Risk Register
 
-Known risks for the NOPE Lite Production Artifact. Review before PA certification (ACI-012).
+Known risks for the NOPE Lite Production Artifact. Certified under ACI-012 (2026-06-27).
 
 | ID | Risk | Severity | Mitigation | Status |
 |----|------|----------|------------|--------|
@@ -13,7 +13,8 @@ Known risks for the NOPE Lite Production Artifact. Review before PA certificatio
 | R-007 | `nebula_local/` loss deletes local continuity | Medium | Operator responsibility; git-tracked `data/` unchanged | Accepted |
 | R-008 | Docker Hub `latest` tag moves on each deployable push | Low | Pin `:deployable` or commit SHA tag | Mitigated |
 | R-009 | Missing Docker Hub secrets fails deployable CI | High | DOCKER_HUB.md; secrets configured (`taig2k`) | Mitigated |
-| R-011 | Hub image name migration `taig-nope-portal` → `taig_nope_portal` | Medium | CI `DOCKER_HUB_IMAGE_NAME` updated; republish on deployable push | Open |
+| R-010 | Public Docker image exposes application surface | Expected | PA scope; no secrets in image; no auth by design | Accepted |
+| R-011 | Hub image name migration `taig-nope-portal` → `taig_nope_portal` | Medium | Published at certification (Run 28308975083) | Mitigated |
 
 ## Out of Scope (Not Risks — By Design)
 

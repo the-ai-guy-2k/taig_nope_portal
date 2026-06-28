@@ -45,6 +45,8 @@ const REQUIRED_PATHS = [
   'docs/reports',
   'docs/reports/PA_validation_report.md',
   'docs/reports/ACI-011-completion-report.md',
+  'docs/reports/PA_CERTIFICATION_REPORT.md',
+  'docs/reports/ACI-012-completion-report.md',
   '.github/workflows/ci.yml',
   'scripts/validate-preservation.js',
   'scripts/validate-operator-visual.js',

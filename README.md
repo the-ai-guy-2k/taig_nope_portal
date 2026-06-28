@@ -1,6 +1,6 @@
 # NOPE Lite — TAIG NOPE Portal
 
-NOPE Lite proves the TAIG execution framework. **Version:** Docker Foundation (ACI-008) · **PA Documentation:** ACI-011
+NOPE Lite proves the TAIG execution framework. **Version:** Docker Foundation (ACI-008) · **Status:** **PA Certified** (ACI-012)
 
 The **Docker Hub image** `taig2k/taig_nope_portal:deployable` is the canonical deployment artifact for PE and PAPEV missions.
 
@@ -14,6 +14,7 @@ The **Docker Hub image** `taig2k/taig_nope_portal:deployable` is the canonical d
 | [docs/DOCKER_HUB.md](docs/DOCKER_HUB.md) | Published image and tags |
 | [docs/PA_RISK_REGISTER.md](docs/PA_RISK_REGISTER.md) | Known risks |
 | [docs/reports/PA_validation_report.md](docs/reports/PA_validation_report.md) | PA validation evidence |
+| [docs/reports/PA_CERTIFICATION_REPORT.md](docs/reports/PA_CERTIFICATION_REPORT.md) | Formal PA certification |
 
 ## Quick Start (Docker Hub — Recommended)
 
@@ -136,12 +137,7 @@ taskkill /PID <pid> /F
 
 Authentication, database, cloud sync, AWS, Terraform.
 
-## Approved AEP — Remaining ACIs
+## PA Certification
 
-| ACI | Title |
-|-----|-------|
-| ACI-012 | PA Certification |
-
-## Next Steps
-
-ACI-012 — PA Certification.
+**Certified:** 2026-06-27 (ACI-012) — approved for PE and PAPEV lifecycle.  
+**Report:** [docs/reports/PA_CERTIFICATION_REPORT.md](docs/reports/PA_CERTIFICATION_REPORT.md)
