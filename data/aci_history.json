@@ -1,0 +1,22 @@
+{
+  "aci_history": [
+    {
+      "id": "aci-001",
+      "number": "ACI-001",
+      "title": "Repository Foundation",
+      "status": "complete",
+      "job_order_id": "jo-aci-002-seed",
+      "created_at": "2026-06-27T00:00:00.000Z",
+      "completed_at": "2026-06-27T00:35:00.000Z"
+    },
+    {
+      "id": "aci-002",
+      "number": "ACI-002",
+      "title": "Data Model Foundation",
+      "status": "in_progress",
+      "job_order_id": "jo-aci-002-seed",
+      "created_at": "2026-06-28T00:00:00.000Z",
+      "completed_at": null
+    }
+  ]
+}

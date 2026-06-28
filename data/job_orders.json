@@ -1,0 +1,64 @@
+{
+  "job_orders": [
+    {
+      "id": "jo-aci-002-seed",
+      "title": "ACI-002 Data Model Foundation",
+      "mission": "Establish the JSON-backed execution data model with Job Order as the root object, supporting truth states, governance artifacts, and operator continuity for NOPE Lite.",
+      "status": "active",
+      "current_truth": {
+        "statement": "Repository foundation (ACI-001) is complete. Express application runs with health endpoint. JSON storage directory exists but contains no execution objects.",
+        "source": "ACI-001 completion report",
+        "recorded_at": "2026-06-27T00:35:00.000Z",
+        "recorded_by": "operator"
+      },
+      "next_truth": {
+        "statement": "All core execution JSON files exist with validated schemas. Seed Job Order loads without errors. Validation scripts and CI enforce data integrity.",
+        "rationale": "Data model must be stable before ACI-003 introduces execution UI.",
+        "recorded_at": "2026-06-28T00:00:00.000Z"
+      },
+      "target_truth": {
+        "statement": "NOPE Lite has a complete MVP data model where every execution artifact links to a Job Order and can be loaded, validated, and extended by subsequent ACIs.",
+        "criteria": [
+          "Six JSON storage files populated and validated",
+          "Model modules under src/models/",
+          "Seed Job Order demonstrates all required object types",
+          "CI includes data validation"
+        ],
+        "recorded_at": "2026-06-28T00:00:00.000Z"
+      },
+      "human_summary": {
+        "summary": "ACI-002 is building the data layer. The seed Job Order tracks this ACI itself as a meta-demonstration of the model.",
+        "author": "operator",
+        "updated_at": "2026-06-28T00:00:00.000Z"
+      },
+      "minority_report_current": "mr-seed-001",
+      "minority_report_previous": null,
+      "aep": "AEP-001-NOPE-LITE-MVP",
+      "acis": ["aci-001", "aci-002"],
+      "operator_actions": ["oa-seed-001"],
+      "completion_reports": [],
+      "timeline": ["te-seed-001"],
+      "risks": [
+        {
+          "id": "risk-seed-001",
+          "description": "Schema changes before ACI-003 may require seed data migration.",
+          "severity": "low",
+          "status": "open",
+          "created_at": "2026-06-28T00:00:00.000Z"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": "art-seed-001",
+          "name": "ACI-001 Completion Report",
+          "path": "docs/reports/ACI-001-completion-report.md",
+          "type": "document",
+          "created_at": "2026-06-27T00:35:00.000Z"
+        }
+      ],
+      "passdown": null,
+      "created_at": "2026-06-28T00:00:00.000Z",
+      "updated_at": "2026-06-28T00:00:00.000Z"
+    }
+  ]
+}

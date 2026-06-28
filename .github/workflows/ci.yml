@@ -34,6 +34,9 @@ jobs:
       - name: Validate JavaScript syntax
         run: npm run validate:syntax
 
+      - name: Validate data model
+        run: npm run validate:data
+
       - name: Start application and verify health endpoint
         run: |
           npm start &

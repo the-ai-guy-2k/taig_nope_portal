@@ -1,0 +1,13 @@
+{
+  "minority_reports": [
+    {
+      "id": "mr-seed-001",
+      "job_order_id": "jo-aci-002-seed",
+      "title": "Data model scope boundary",
+      "content": "ACI-002 establishes persistence and schemas only. No execution UI or workflow logic is included. Operator may perceive incomplete product until ACI-003.",
+      "status": "open",
+      "created_at": "2026-06-28T00:00:00.000Z",
+      "updated_at": "2026-06-28T00:00:00.000Z"
+    }
+  ]
+}

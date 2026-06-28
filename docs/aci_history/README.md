@@ -11,6 +11,7 @@ Each ACI represents a discrete, governed change to the repository. Completion re
 | ACI | Title | Status | Report |
 |-----|-------|--------|--------|
 | ACI-001 | Repository Foundation | Complete | [ACI-001-completion-report.md](../reports/ACI-001-completion-report.md) |
+| ACI-002 | Data Model Foundation | Complete | [ACI-002-completion-report.md](../reports/ACI-002-completion-report.md) |
 
 ## Conventions
 
