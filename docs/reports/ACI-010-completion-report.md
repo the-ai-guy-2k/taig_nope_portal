@@ -55,16 +55,18 @@ validate → docker-build → publish → docker-pull-validation → pipeline-re
 
 ## Docker Artifact Verification
 
-_Recorded by CI on successful `deployable` publish (see workflow artifacts `ci-reports-publish`, `ci-reports-docker-pull`)._
+### CI Run [28308700309](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28308700309) (deployable, `2ad53d1`)
 
-| Field | Source |
+| Field | Value |
 |-------|--------|
-| Image Name | `DOCKERHUB_USERNAME/taig-nope-portal` |
-| Image Tags | `latest`, `deployable`, `<commit-sha>` |
-| Image Digest | `docker-publish.json` → per-tag manifest digest |
-| Compressed Image Size | `docker-artifact.json` → `compressed_size_bytes` |
-| Container Startup Time | `docker-artifact.json` → `container_startup_ms` |
-| Docker Pull Validation | `docker-artifact.json` → `docker_pull_validation` PASS/FAIL |
+| Image Name | `<DOCKERHUB_USERNAME>/taig-nope-portal` |
+| Image Tags | `latest`, `deployable`, `2ad53d1` |
+| Image Digest | Recorded in `docker-publish.json` artifact per tag |
+| Compressed Image Size | Recorded in `docker-artifact.json` |
+| Container Startup Time | Recorded in `docker-artifact.json` → `container_startup_ms` |
+| Docker Pull Validation | **PASS** |
+
+Download `ci-reports-docker-pull` artifact from the CI run for exact digest and size values.
 
 ### Operator pull and run
 
@@ -98,17 +100,35 @@ docker run --rm -p 3000:3000 \
 | `DOCKERHUB_USERNAME` | Docker Hub namespace |
 | `DOCKERHUB_TOKEN` | Docker Hub access token |
 
+## Pipeline Performance
+
+### deployable — [Run 28308700309](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28308700309)
+
+| Metric | Value |
+|--------|-------|
+| Total execution time | ~116s (wall clock) |
+| Longest job | Docker Hub Publish (42s) |
+| Fastest job | Pipeline Report (8s) |
+| Failed retry count | 0 |
+
+| Job | Duration | Result |
+|-----|----------|--------|
+| Validation + Smoke Tests | 15s | success |
+| Docker Build | 32s | success |
+| Docker Hub Publish | 42s | success |
+| Docker Pull Validation + Smoke | 19s | success |
+| Pipeline Report | 8s | success |
+
+### main — [Run 28308670315](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28308670315)
+
+Publish and pull validation skipped (not deployable). validate + docker-build + pipeline-report: **success**.
+
 ## GitHub Actions Results
 
-| Branch | Expected behavior |
-|--------|-------------------|
-| `main` | validate + docker-build + pipeline-report (no publish) |
-| `deployable` | Full pipeline including publish + pull validation |
-
-| Branch | Actions |
-|--------|---------|
-| `main` | _(pending CI on push)_ |
-| `deployable` | _(pending CI + publish — requires secrets)_ |
+| Branch | Result |
+|--------|--------|
+| `main` | [Run 28308670315](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28308670315) — **success** |
+| `deployable` | [Run 28308700309](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28308700309) — **success** (publish + pull validation) |
 
 ## Risks Discovered
 
@@ -130,7 +150,7 @@ Per approved AEP, ACI-011 is **PA Documentation**:
 
 | Commit | Branch | Message |
 |--------|--------|---------|
-| _(pending)_ | `main`, `deployable` | ACI-010: Docker Hub Publish |
+| `2ad53d1` | `main`, `deployable` | ACI-010: Docker Hub publish from deployable with pull validation. |
 
 ## Governance Note
 
