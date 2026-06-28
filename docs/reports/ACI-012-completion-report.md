@@ -92,7 +92,7 @@ No blocking risks. Accepted risks documented in [PA_RISK_REGISTER.md](../PA_RISK
 
 | Branch | Commit |
 |--------|--------|
-| `main` | `1c9ecd5` |
+| `main` | `a2cb588` |
 
 ## Next Lifecycle Phase
 
