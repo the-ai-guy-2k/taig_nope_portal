@@ -55,11 +55,12 @@ ACI-001 established the complete development foundation for the NOPE Lite Produc
 
 ### GitHub Actions
 
-See [GitHub Actions results](#github-actions-results) section below for workflow run status after push.
+| Branch | Run | Status | Jobs |
+|--------|-----|--------|------|
+| `main` | [Run #1](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28306456128) | **success** | Validate Foundation, Docker Build Validation |
+| `deployable` | [Run #2](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28306457644) | **success** | Validate Foundation, Docker Build Validation |
 
-## GitHub Actions Results
-
-_Will be updated after initial push and CI run._
+Both workflow runs completed successfully on commit `cd9edaa`.
 
 ## Risks Discovered
 
@@ -80,7 +81,10 @@ _Will be updated after initial push and CI run._
 
 ## Commit IDs
 
-_Will be updated after git initialization and push._
+| Branch | Commit | Message |
+|--------|--------|---------|
+| `main` | `cd9edaa2225e7d53bb35d1b60b9100d8117a4e10` | ACI-001: Establish repository foundation for NOPE Lite portal. |
+| `deployable` | `cd9edaa2225e7d53bb35d1b60b9100d8117a4e10` | Same commit as `main` (initial foundation) |
 
 ## Governance Note
 
