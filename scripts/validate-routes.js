@@ -15,6 +15,8 @@ const ROUTES = [
   { path: '/job-orders/new', expect: 'Create Job Order' },
   { path: '/job-orders/jo-aci-002-seed', expect: 'ACI-002 Data Model Foundation' },
   { path: '/job-orders/jo-aci-002-seed/edit', expect: 'Edit Job Order' },
+  { path: '/job-orders/jo-aci-002-seed/operator-actions', expect: 'Operator Actions' },
+  { path: '/job-orders/jo-aci-002-seed/minority-report/edit', expect: 'Minority Report' },
   { path: '/timeline', expect: 'Timeline' },
   { path: '/aci-history', expect: 'ACI History' },
   { path: '/completion-reports', expect: 'Completion Reports' },

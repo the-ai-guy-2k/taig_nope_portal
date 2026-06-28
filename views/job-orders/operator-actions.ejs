@@ -1,0 +1,120 @@
+<%- include('../partials/head', { pageTitle }) %>
+<div class="app">
+  <%- include('../partials/header', { executionMode: 'operational' }) %>
+  <div class="app-body">
+    <%- include('../partials/nav', { activeNav }) %>
+    <main class="workspace-main workspace-main--solo">
+      <section class="jo-header">
+        <h1 class="jo-title">Operator Actions</h1>
+        <p class="panel-meta">
+          Job Order: <a href="/job-orders/<%= jobOrder.id %>" class="text-link"><%= jobOrder.title %></a>
+        </p>
+      </section>
+
+      <% if (errors.length) { %>
+        <section class="panel-card form-errors" role="alert">
+          <h2 class="panel-heading">Validation Errors</h2>
+          <ul class="error-list">
+            <% errors.forEach(function(error) { %>
+              <li><%= error %></li>
+            <% }); %>
+          </ul>
+        </section>
+      <% } %>
+
+      <section class="panel-card form-section">
+        <h2 class="panel-heading">Create Operator Action</h2>
+        <form method="post" action="/job-orders/<%= jobOrder.id %>/operator-actions" class="job-order-form">
+          <div class="form-field">
+            <label for="action">Action</label>
+            <textarea id="action" name="action" rows="3" required><%= formValues.action %></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="operator">Owner</label>
+              <input type="text" id="operator" name="operator" value="<%= formValues.operator %>" required>
+            </div>
+            <div class="form-field">
+              <label for="status">Status</label>
+              <select id="status" name="status">
+                <% statuses.forEach(function(status) { %>
+                  <option value="<%= status %>"<%= formValues.status === status ? ' selected' : '' %>><%= status %></option>
+                <% }); %>
+              </select>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" rows="2"><%= formValues.notes %></textarea>
+          </div>
+          <fieldset class="risk-fieldset">
+            <legend>Checklist</legend>
+            <% for (let i = 0; i < 3; i++) { %>
+              <% const item = (formValues.checklist && formValues.checklist[i]) || { text: '', completed: false }; %>
+              <div class="form-field checklist-row">
+                <label>
+                  <input type="checkbox" name="checklist[<%= i %>][completed]" value="on"<%= item.completed ? ' checked' : '' %>>
+                  <input type="text" name="checklist[<%= i %>][text]" value="<%= item.text %>" placeholder="Checklist item <%= i + 1 %>">
+                </label>
+              </div>
+            <% } %>
+          </fieldset>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Create Action</button>
+            <a href="/job-orders/<%= jobOrder.id %>" class="btn btn-secondary">Back to Job Order</a>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel-card">
+        <h2 class="panel-heading">All Operator Actions</h2>
+        <% if (actions.length) { %>
+          <ul class="action-list action-list--page">
+            <% actions.forEach(function(action) { %>
+              <li class="action-item panel-card nested-card">
+                <div class="action-item-header">
+                  <span class="status-badge status-<%= action.status === 'completed' ? 'complete' : 'active' %>"><%= action.status %></span>
+                  <span class="panel-meta">Owner: <%= action.operator %></span>
+                </div>
+                <p class="action-text"><%= action.action %></p>
+                <p class="panel-meta">Created: <%= formatDate(action.created_at) %></p>
+                <% if (action.completed_at) { %>
+                  <p class="panel-meta">Completed: <%= formatDate(action.completed_at) %></p>
+                <% } %>
+                <% if (action.notes) { %>
+                  <p class="panel-meta"><%= action.notes %></p>
+                <% } %>
+                <% if (action.checklist && action.checklist.length) { %>
+                  <ul class="checklist">
+                    <% action.checklist.forEach(function(item) { %>
+                      <li class="checklist-item<%= item.completed ? ' checklist-item--done' : '' %>">
+                        <%= item.completed ? '☑' : '☐' %> <%= item.text %>
+                      </li>
+                    <% }); %>
+                  </ul>
+                <% } %>
+                <% if (action.status === 'open') { %>
+                  <div class="form-actions">
+                    <form method="post" action="/job-orders/<%= jobOrder.id %>/operator-actions/<%= action.id %>" class="inline-form">
+                      <input type="hidden" name="intent" value="complete">
+                      <button type="submit" class="btn btn-sm btn-primary">Complete</button>
+                    </form>
+                    <form method="post" action="/job-orders/<%= jobOrder.id %>/operator-actions/<%= action.id %>" class="inline-form">
+                      <input type="hidden" name="intent" value="archive">
+                      <button type="submit" class="btn btn-sm btn-secondary">Archive</button>
+                    </form>
+                  </div>
+                <% } %>
+              </li>
+            <% }); %>
+          </ul>
+        <% } else { %>
+          <p class="panel-empty">No operator actions yet.</p>
+        <% } %>
+      </section>
+    </main>
+  </div>
+  <%- include('../partials/footer') %>
+</div>
+<script src="/js/dashboard.js"></script>
+<%- include('../partials/foot') %>

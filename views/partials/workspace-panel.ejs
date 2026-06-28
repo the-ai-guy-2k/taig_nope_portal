@@ -1,31 +1,55 @@
 <aside class="info-panel" aria-label="Job Order information">
   <section class="panel-card">
-    <h2 class="panel-heading">Current Minority Report</h2>
+    <div class="panel-card-header-row">
+      <h2 class="panel-heading">Current Minority Report</h2>
+      <a href="/job-orders/<%= view.jobOrder.id %>/minority-report/edit" class="btn btn-sm btn-secondary">New Report</a>
+    </div>
     <% if (view.minorityReport) { %>
-      <h3 class="panel-subheading"><%= view.minorityReport.title %></h3>
-      <p class="panel-body"><%= view.minorityReport.content %></p>
-      <p class="panel-meta">Status: <%= view.minorityReport.status %></p>
+      <%- include('minority-report-summary', { report: view.minorityReport, formattedAt: view.formatted.minority_report_at }) %>
     <% } else { %>
       <p class="panel-empty">No minority report on file.</p>
+      <p><a href="/job-orders/<%= view.jobOrder.id %>/minority-report/edit" class="text-link">Create Minority Report</a></p>
     <% } %>
   </section>
 
   <section class="panel-card">
-    <h2 class="panel-heading">Operator Actions Required</h2>
-    <% if (view.operatorActions.length) { %>
+    <h2 class="panel-heading">Previous Minority Report</h2>
+    <% if (view.minorityReportPrevious) { %>
+      <%- include('minority-report-summary', { report: view.minorityReportPrevious, formattedAt: view.formatted.minority_report_previous_at }) %>
+    <% } else { %>
+      <p class="panel-empty">No previous minority report.</p>
+    <% } %>
+  </section>
+
+  <section class="panel-card">
+    <div class="panel-card-header-row">
+      <h2 class="panel-heading">Operator Actions Required</h2>
+      <a href="/job-orders/<%= view.jobOrder.id %>/operator-actions" class="btn btn-sm btn-secondary">Manage</a>
+    </div>
+    <% if (view.openOperatorActions.length) { %>
       <ul class="action-list">
-        <% view.operatorActions.forEach(function(action) { %>
+        <% view.openOperatorActions.forEach(function(action) { %>
           <li class="action-item">
+            <div class="action-item-header">
+              <span class="status-badge status-active"><%= action.status %></span>
+              <span class="panel-meta">Owner: <%= action.operator %></span>
+            </div>
             <p class="action-text"><%= action.action %></p>
-            <p class="panel-meta">Operator: <%= action.operator %></p>
-            <% if (action.notes) { %>
-              <p class="panel-meta"><%= action.notes %></p>
+            <p class="panel-meta">Created: <%= view.actionFormatted[action.id].created_at %></p>
+            <% if (action.checklist && action.checklist.length) { %>
+              <ul class="checklist">
+                <% action.checklist.forEach(function(item) { %>
+                  <li class="checklist-item<%= item.completed ? ' checklist-item--done' : '' %>">
+                    <%= item.completed ? '☑' : '☐' %> <%= item.text %>
+                  </li>
+                <% }); %>
+              </ul>
             <% } %>
           </li>
         <% }); %>
       </ul>
     <% } else { %>
-      <p class="panel-empty">No operator actions required.</p>
+      <p class="panel-empty">No open operator actions.</p>
     <% } %>
   </section>
 

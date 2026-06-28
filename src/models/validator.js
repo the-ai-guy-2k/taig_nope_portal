@@ -172,7 +172,8 @@ function validateJobOrderReferences(jobOrder, collections) {
       const linked =
         jobOrder.minority_report_current === report.id ||
         jobOrder.minority_report_previous === report.id;
-      if (!linked) {
+      const isHistorical = ['superseded', 'archived', 'resolved'].includes(report.status);
+      if (!linked && !isHistorical) {
         errors.push(`Minority report ${report.id} references job order ${jobOrderId} but is not linked on the job order`);
       }
     }

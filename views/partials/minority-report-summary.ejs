@@ -1,0 +1,25 @@
+<h3 class="panel-subheading"><%= report.title %></h3>
+<p class="panel-meta">Status: <%= report.status %> · Updated: <%= formattedAt %></p>
+
+<dl class="mr-fields">
+  <dt>Mission</dt>
+  <dd><%= report.mission %></dd>
+  <dt>Current Phase</dt>
+  <dd><%= report.current_phase %></dd>
+  <dt>Human Summary</dt>
+  <dd><%= report.human_summary %></dd>
+  <dt>Current Truth</dt>
+  <dd><%= report.current_truth %></dd>
+  <dt>Completed</dt>
+  <dd><%= report.completed %></dd>
+  <dt>Remaining</dt>
+  <dd><%= report.remaining %></dd>
+  <dt>Risk</dt>
+  <dd><%= report.risk %></dd>
+  <dt>Next Truth</dt>
+  <dd><%= report.next_truth %></dd>
+  <dt>Next Action</dt>
+  <dd><%= report.next_action %></dd>
+  <dt>Target</dt>
+  <dd><%= report.target %></dd>
+</dl>

@@ -6,7 +6,8 @@
  */
 
 const JOB_ORDER_STATUSES = ['draft', 'active', 'blocked', 'complete', 'archived'];
-const MINORITY_REPORT_STATUSES = ['open', 'resolved', 'superseded'];
+const MINORITY_REPORT_STATUSES = ['open', 'resolved', 'superseded', 'archived'];
+const OPERATOR_ACTION_STATUSES = ['open', 'completed', 'archived'];
 const RISK_SEVERITIES = ['low', 'medium', 'high'];
 const RISK_STATUSES = ['open', 'mitigated', 'accepted'];
 const ACI_STATUSES = ['planned', 'in_progress', 'complete', 'cancelled'];
@@ -28,14 +29,38 @@ const SCHEMAS = {
     required: ['summary', 'updated_at'],
     optional: ['author'],
   },
-  minorityReport: {
-    required: ['id', 'job_order_id', 'title', 'content', 'status', 'created_at', 'updated_at'],
+  checklistItem: {
+    required: ['text', 'completed'],
     optional: [],
+  },
+  minorityReport: {
+    required: [
+      'id',
+      'job_order_id',
+      'title',
+      'status',
+      'created_at',
+      'updated_at',
+      'mission',
+      'current_phase',
+      'human_summary',
+      'current_truth',
+      'completed',
+      'remaining',
+      'risk',
+      'next_truth',
+      'next_action',
+      'target',
+    ],
+    optional: ['content'],
     enums: { status: MINORITY_REPORT_STATUSES },
   },
   operatorAction: {
-    required: ['id', 'job_order_id', 'action', 'operator', 'created_at'],
-    optional: ['notes'],
+    required: ['id', 'job_order_id', 'action', 'operator', 'status', 'created_at'],
+    optional: ['notes', 'completed_at'],
+    enums: { status: OPERATOR_ACTION_STATUSES },
+    arrays: ['checklist'],
+    arrayItems: { checklist: 'checklistItem' },
   },
   aci: {
     required: ['id', 'number', 'title', 'status', 'created_at'],
@@ -118,6 +143,7 @@ module.exports = {
   DATA_FILES,
   JOB_ORDER_STATUSES,
   MINORITY_REPORT_STATUSES,
+  OPERATOR_ACTION_STATUSES,
   RISK_SEVERITIES,
   RISK_STATUSES,
   ACI_STATUSES,

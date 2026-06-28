@@ -1,35 +1,39 @@
 # NOPE Lite — TAIG NOPE Portal
 
-Repository foundation, execution data model, and Job Order workflow for the NOPE Lite Production Artifact.
+Repository foundation, execution data model, Job Order workflow, and operational awareness layer for NOPE Lite.
 
-**Version:** Job Order Workflow (ACI-004)
+**Version:** Operational Awareness (ACI-005)
 
-## Repository Overview
+## Operational Workflow
 
-ACI-001–003 established foundation, data model, and read-only UI. ACI-004 adds Job Order create, edit, and save with JSON-backed persistence and validation.
+ACI-005 adds editable **Operator Actions** and **Minority Reports** with automatic current/previous rotation.
 
-- **Repository:** https://github.com/the-ai-guy-2k/taig_nope_portal.git
-- **Branches:** `main`, `deployable`
-
-## Job Order Workflow
-
-Operators can create, edit, and save Job Orders through HTML forms. All writes pass through `src/services/jobOrderPersistence.js` and `src/models/writer.js` with full schema validation before persistence.
-
-### Editable Fields
-
-Mission, status, current/next/target truth, human summary, risks, and passdown.
-
-### Routes
+### Operator Actions
 
 | Route | Method | Purpose |
 |-------|--------|---------|
-| `/job-orders/new` | GET | Create form |
-| `/job-orders` | POST | Create Job Order |
-| `/job-orders/:id/edit` | GET | Edit form |
-| `/job-orders/:id` | POST | Update Job Order |
-| `/job-orders/:id` | GET | View Job Order (read-only workspace) |
+| `/job-orders/:id/operator-actions` | GET | List and create actions |
+| `/job-orders/:id/operator-actions` | POST | Create action |
+| `/job-orders/:id/operator-actions/:actionId` | POST | Update, complete, or archive |
 
-Read routes (`/`, `/dashboard`, `/job-orders`, placeholders) continue to function.
+Statuses: `open`, `completed`, `archived`. Includes owner, checklist, created/completed dates.
+
+### Minority Reports
+
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/job-orders/:id/minority-report/edit` | GET | New report form |
+| `/job-orders/:id/minority-report` | POST | Save with rotation |
+
+Saving a new report moves the current report to **Previous**, marks it superseded, and preserves history in `data/minority_reports.json`.
+
+### Dashboard Panels
+
+The execution cockpit right panel displays:
+
+- Current and Previous Minority Reports (mission, phase, truth states, risk, next action, target)
+- Open Operator Actions Required (status, owner, checklist, dates)
+- Timeline and Risks
 
 ## Run Instructions
 
@@ -41,8 +45,8 @@ npm start
 ```
 
 - **Dashboard:** http://localhost:3000/dashboard
-- **Create Job Order:** http://localhost:3000/job-orders/new
-- **Seed Job Order:** http://localhost:3000/job-orders/jo-aci-002-seed
+- **Operator Actions:** http://localhost:3000/job-orders/jo-aci-002-seed/operator-actions
+- **Minority Report:** http://localhost:3000/job-orders/jo-aci-002-seed/minority-report/edit
 
 ## Validation Scripts
 
@@ -50,14 +54,11 @@ npm start
 npm run validate:structure
 npm run validate:syntax
 npm run validate:data
-npm run validate:workflow   # Create, update, read-after-write, failure tests
+npm run validate:workflow
+npm run validate:operational
 npm run validate:routes
 ```
 
-## CI Overview
-
-GitHub Actions runs all validation scripts including workflow persistence tests and route checks.
-
 ## Next Steps
 
-ACI-005 may introduce operator action editing, minority report editing, and authentication.
+ACI-006 may introduce authentication, notifications, or execution engine capabilities.

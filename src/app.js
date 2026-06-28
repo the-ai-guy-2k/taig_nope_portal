@@ -23,7 +23,7 @@ app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
     service: 'taig-nope-portal',
-    version: 'Job Order Workflow',
+    version: 'Operational Awareness',
   });
 });
 

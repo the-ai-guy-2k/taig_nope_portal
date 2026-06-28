@@ -1,0 +1,92 @@
+<%- include('../partials/head', { pageTitle }) %>
+<div class="app">
+  <%- include('../partials/header', { executionMode: 'operational' }) %>
+  <div class="app-body">
+    <%- include('../partials/nav', { activeNav }) %>
+    <main class="workspace-main workspace-main--solo">
+      <section class="jo-header">
+        <h1 class="jo-title">Minority Report</h1>
+        <p class="panel-meta">
+          Job Order: <a href="/job-orders/<%= jobOrder.id %>" class="text-link"><%= jobOrder.title %></a>
+        </p>
+        <p class="field-hint">Saving a new report moves the current report to Previous and preserves history.</p>
+      </section>
+
+      <% if (errors.length) { %>
+        <section class="panel-card form-errors" role="alert">
+          <h2 class="panel-heading">Validation Errors</h2>
+          <ul class="error-list">
+            <% errors.forEach(function(error) { %>
+              <li><%= error %></li>
+            <% }); %>
+          </ul>
+        </section>
+      <% } %>
+
+      <% if (currentReport) { %>
+        <section class="panel-card">
+          <h2 class="panel-heading">Current Report (will become Previous)</h2>
+          <p class="panel-subheading"><%= currentReport.title %></p>
+        </section>
+      <% } %>
+
+      <form method="post" action="/job-orders/<%= jobOrder.id %>/minority-report" class="job-order-form">
+        <section class="panel-card form-section">
+          <h2 class="panel-heading">New Minority Report</h2>
+          <div class="form-field">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" value="<%= values.title %>" required>
+          </div>
+          <div class="form-field">
+            <label for="mission">Mission</label>
+            <textarea id="mission" name="mission" rows="3" required><%= values.mission %></textarea>
+          </div>
+          <div class="form-field">
+            <label for="current_phase">Current Phase</label>
+            <input type="text" id="current_phase" name="current_phase" value="<%= values.current_phase %>" required>
+          </div>
+          <div class="form-field">
+            <label for="human_summary">Human Summary</label>
+            <textarea id="human_summary" name="human_summary" rows="3" required><%= values.human_summary %></textarea>
+          </div>
+          <div class="form-field">
+            <label for="current_truth">Current Truth</label>
+            <textarea id="current_truth" name="current_truth" rows="3" required><%= values.current_truth %></textarea>
+          </div>
+          <div class="form-field">
+            <label for="completed">Completed</label>
+            <textarea id="completed" name="completed" rows="2" required><%= values.completed %></textarea>
+          </div>
+          <div class="form-field">
+            <label for="remaining">Remaining</label>
+            <textarea id="remaining" name="remaining" rows="2" required><%= values.remaining %></textarea>
+          </div>
+          <div class="form-field">
+            <label for="risk">Risk</label>
+            <textarea id="risk" name="risk" rows="2" required><%= values.risk %></textarea>
+          </div>
+          <div class="form-field">
+            <label for="next_truth">Next Truth</label>
+            <textarea id="next_truth" name="next_truth" rows="3" required><%= values.next_truth %></textarea>
+          </div>
+          <div class="form-field">
+            <label for="next_action">Next Action</label>
+            <textarea id="next_action" name="next_action" rows="2" required><%= values.next_action %></textarea>
+          </div>
+          <div class="form-field">
+            <label for="target">Target</label>
+            <textarea id="target" name="target" rows="3" required><%= values.target %></textarea>
+          </div>
+        </section>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save Minority Report</button>
+          <a href="/job-orders/<%= jobOrder.id %>" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </main>
+  </div>
+  <%- include('../partials/footer') %>
+</div>
+<script src="/js/dashboard.js"></script>
+<%- include('../partials/foot') %>

@@ -10,7 +10,8 @@
     "validate:syntax": "node scripts/validate-syntax.js",
     "validate:data": "node scripts/validate-data.js",
     "validate:routes": "node scripts/validate-routes.js",
-    "validate:workflow": "node scripts/validate-workflow.js"
+    "validate:workflow": "node scripts/validate-workflow.js",
+    "validate:operational": "node scripts/validate-operational.js"
   },
   "engines": {
     "node": ">=20.0.0"

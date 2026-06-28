@@ -40,6 +40,9 @@ jobs:
       - name: Validate workflow persistence
         run: npm run validate:workflow
 
+      - name: Validate operational workflows
+        run: npm run validate:operational
+
       - name: Start application and verify routes
         run: npm run validate:routes
 

@@ -31,14 +31,23 @@ function buildJobOrderView(jobOrder, collections) {
     (report) => report.id === jobOrder.minority_report_current,
   ) || null;
 
-  const operatorActions = resolveByIds(jobOrder.operator_actions, collections.operator_actions);
+  const minorityReportPrevious = collections.minority_reports.find(
+    (report) => report.id === jobOrder.minority_report_previous,
+  ) || null;
+
+  const operatorActions = resolveByIds(jobOrder.operator_actions, collections.operator_actions)
+    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+  const openOperatorActions = operatorActions.filter((item) => item.status === 'open');
+
   const timeline = resolveByIds(jobOrder.timeline, collections.timeline)
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
 
   return {
     jobOrder,
     minorityReport,
+    minorityReportPrevious,
     operatorActions,
+    openOperatorActions,
     timeline,
     risks: jobOrder.risks || [],
     formatted: {
@@ -49,7 +58,16 @@ function buildJobOrderView(jobOrder, collections) {
       target_truth_at: formatDate(jobOrder.target_truth?.recorded_at),
       human_summary_at: formatDate(jobOrder.human_summary?.updated_at),
       passdown_at: formatDate(jobOrder.passdown?.handed_off_at),
+      minority_report_at: formatDate(minorityReport?.updated_at),
+      minority_report_previous_at: formatDate(minorityReportPrevious?.updated_at),
     },
+    actionFormatted: operatorActions.reduce((acc, action) => {
+      acc[action.id] = {
+        created_at: formatDate(action.created_at),
+        completed_at: formatDate(action.completed_at),
+      };
+      return acc;
+    }, {}),
   };
 }
 

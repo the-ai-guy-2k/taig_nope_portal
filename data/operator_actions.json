@@ -5,8 +5,24 @@
       "job_order_id": "jo-aci-002-seed",
       "action": "Reviewed ACI-002 data model schema definitions",
       "operator": "operator",
+      "status": "open",
       "notes": "Confirmed Job Order is root object with ID references to supporting collections.",
-      "created_at": "2026-06-28T00:00:00.000Z"
+      "checklist": [
+        {
+          "text": "Verify schema definitions in src/models/",
+          "completed": true
+        },
+        {
+          "text": "Confirm seed data loads",
+          "completed": true
+        },
+        {
+          "text": "Review operator action requirements for ACI-005",
+          "completed": false
+        }
+      ],
+      "created_at": "2026-06-28T00:00:00.000Z",
+      "completed_at": null
     }
   ]
 }

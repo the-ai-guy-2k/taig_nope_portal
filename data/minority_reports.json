@@ -6,6 +6,16 @@
       "title": "Data model scope boundary",
       "content": "ACI-002 establishes persistence and schemas only. No execution UI or workflow logic is included. Operator may perceive incomplete product until ACI-003.",
       "status": "open",
+      "mission": "Establish JSON-backed execution data model without premature UI scope creep.",
+      "current_phase": "ACI-005 operational awareness layer",
+      "human_summary": "Foundation and data model are complete. UI shell and Job Order workflow exist. Operator awareness features are now in scope.",
+      "current_truth": "Read-only cockpit and Job Order CRUD are operational.",
+      "completed": "Repository foundation, data model, UI shell, Job Order workflow",
+      "remaining": "Operator Actions and Minority Report editing with rotation",
+      "risk": "Operators may expect full execution engine before it is implemented",
+      "next_truth": "Operator Actions and Minority Reports are editable with automatic rotation",
+      "next_action": "Complete ACI-005 validation and operator testing",
+      "target": "Mission status understandable from dashboard within seconds",
       "created_at": "2026-06-28T00:00:00.000Z",
       "updated_at": "2026-06-28T00:00:00.000Z"
     }
