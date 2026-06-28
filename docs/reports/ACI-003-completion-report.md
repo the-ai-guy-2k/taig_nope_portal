@@ -81,7 +81,12 @@ Seed Job Order title `ACI-002 Data Model Foundation` renders on `/`, `/dashboard
 
 ## GitHub Actions Results
 
-_Will be updated after push._
+| Branch | Run | Status |
+|--------|-----|--------|
+| `main` | [Run](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28306772487) | **success** |
+| `deployable` | [Run](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28306773002) | **success** |
+
+Both runs completed on commit `0c09c23` including route validation.
 
 ## Risks Discovered
 
@@ -102,7 +107,9 @@ _Will be updated after push._
 
 ## Commit IDs
 
-_Will be updated after push._
+| Commit | Branch | Message |
+|--------|--------|---------|
+| `0c09c23` | `main`, `deployable` | ACI-003: Add read-only MVP execution cockpit UI shell. |
 
 ## Governance Note
 
