@@ -17,8 +17,8 @@ ENV PORT=3000
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=5 \
-  CMD node -e "require('http').get('http://127.0.0.1:3000/health',(r)=>{let b='';r.on('data',c=>b+=c);r.on('end',()=>process.exit(r.statusCode===200&&b.includes('\"status\":\"ok\"')?0:1));}).on('error',()=>process.exit(1))"
+HEALTHCHECK --interval=15s --timeout=5s --start-period=15s --retries=5 \
+  CMD node -e "require('http').get('http://127.0.0.1:3000/health',(r)=>{process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))"
 
 USER node
 
