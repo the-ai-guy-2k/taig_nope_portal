@@ -76,7 +76,7 @@ Validation suite PASSED (9 stages, ~4s)
 
 ### Docker (`npm run validate:docker`)
 
-Local Docker Desktop was not running during implementation. Container validation executes in GitHub Actions on Ubuntu.
+Validated in GitHub Actions ([Run 28308291227](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28308291227)): build, startup, HEALTHCHECK, health, dashboard, preservation, smoke flows, operator visual parity — all passed.
 
 CI job `Docker Foundation Validation` runs:
 
@@ -99,8 +99,8 @@ CI triggered on push to `main` and `deployable`.
 
 | Branch | Actions |
 |--------|---------|
-| `main` | [Workflow runs](https://github.com/the-ai-guy-2k/taig_nope_portal/actions?query=branch%3Amain) |
-| `deployable` | [Workflow runs](https://github.com/the-ai-guy-2k/taig_nope_portal/actions?query=branch%3Adeployable) |
+| `main` | [Run 28308291227](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28308291227) | **success** |
+| `deployable` | [Actions](https://github.com/the-ai-guy-2k/taig_nope_portal/actions?query=branch%3Adeployable) | **success** (commit `a1e77b2`) |
 
 ## OPERATOR VISUAL VERIFICATION
 
@@ -140,6 +140,8 @@ Per approved AEP, ACI-009 is **CI/CD Hardening**:
 | Commit | Branch | Message |
 |--------|--------|---------|
 | `b39f206` | `main`, `deployable` | ACI-008: Docker Foundation for production container deployment. |
+| `612a22e` | `main`, `deployable` | docs: finalize ACI-008 completion report with commit evidence. |
+| `a1e77b2` | `main`, `deployable` | fix: Docker HEALTHCHECK and container validation resilience for CI. |
 
 ## Governance Note
 
