@@ -11,6 +11,7 @@ nebula_local/
 aiw_local/
 *.local.md
 .tmp-preservation-test/
+ci-reports/
 
 # Logs
 logs/

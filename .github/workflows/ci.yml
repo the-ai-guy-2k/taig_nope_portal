@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
@@ -10,19 +10,35 @@ on:
       - main
       - deployable
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  DOCKER_IMAGE: taig-nope-portal:ci
+  CI_REPORT_DIR: ci-reports
+
+permissions:
+  contents: read
+
 jobs:
   validate:
     name: Validation + Smoke Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Record build metadata
+        run: node scripts/ci-metadata.js
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
       - name: Validate repository structure
@@ -34,19 +50,106 @@ jobs:
       - name: Run complete validation suite
         run: npm run validate:all
 
+      - name: Upload validation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-reports-validate
+          path: ci-reports/
+          retention-days: 14
+
+      - name: Write job summary
+        if: always()
+        run: node scripts/ci-pipeline-summary.js
+
   docker:
     name: Docker Foundation Validation
     runs-on: ubuntu-latest
     needs: validate
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image with cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          tags: ${{ env.DOCKER_IMAGE }}
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          labels: |
+            org.opencontainers.image.title=taig-nope-portal
+            org.opencontainers.image.description=NOPE Lite TAIG NOPE Portal
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
 
-      - name: Validate Docker build, startup, and container smoke tests
+      - name: Validate container runtime
+        env:
+          SKIP_DOCKER_BUILD: 'true'
         run: npm run validate:docker
+
+      - name: Upload Docker validation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-reports-docker
+          path: ci-reports/
+          retention-days: 14
+
+      - name: Write job summary
+        if: always()
+        run: node scripts/ci-pipeline-summary.js
+
+  pipeline-report:
+    name: Pipeline Report
+    runs-on: ubuntu-latest
+    needs:
+      - validate
+      - docker
+    if: always()
+
+    steps:
+      - name: Download validation reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ci-reports-*
+          path: ci-reports
+          merge-multiple: true
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Record pipeline performance
+        run: node scripts/ci-pipeline-performance.js
+
+      - name: Upload consolidated pipeline reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-reports-pipeline
+          path: ci-reports/
+          retention-days: 30
+
+      - name: Write workflow summary
+        if: always()
+        run: node scripts/ci-pipeline-summary.js
+
+      - name: Fail pipeline if required jobs failed
+        if: needs.validate.result != 'success' || needs.docker.result != 'success'
+        run: |
+          echo "Pipeline failed."
+          echo "  validate: ${{ needs.validate.result }}"
+          echo "  docker: ${{ needs.docker.result }}"
+          exit 1

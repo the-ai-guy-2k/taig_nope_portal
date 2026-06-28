@@ -7,12 +7,15 @@
  */
 
 const { execSync } = require('child_process');
+const fs = require('fs');
 const path = require('path');
 const querystring = require('querystring');
 const { httpRequest, followRequest, waitForServer } = require('./lib/test-server');
 
 const ROOT = path.join(__dirname, '..');
+const REPORT_DIR = process.env.CI_REPORT_DIR || path.join(ROOT, 'ci-reports');
 const IMAGE = process.env.DOCKER_IMAGE || 'taig-nope-portal:ci';
+const SKIP_BUILD = ['1', 'true', 'yes'].includes(String(process.env.SKIP_DOCKER_BUILD || '').toLowerCase());
 const CONTAINER = process.env.DOCKER_CONTAINER || 'taig-nope-portal-ci-test';
 const HOST_PORT = Number(process.env.DOCKER_VALIDATE_PORT || 3010);
 const EXPECTED_VERSION = 'Docker Foundation (ACI-008)';
@@ -44,10 +47,18 @@ function removeContainer() {
 }
 
 function buildImage() {
+  if (SKIP_BUILD) {
+    console.log(`Skipping Docker build (SKIP_DOCKER_BUILD set). Using image ${IMAGE}.`);
+    docker(`docker image inspect ${IMAGE}`);
+    return 0;
+  }
+
   console.log(`Building Docker image ${IMAGE}...`);
+  const startedAt = Date.now();
   dockerInherit(`docker build -t ${IMAGE} .`);
   docker(`docker image inspect ${IMAGE}`);
   console.log('Docker image build passed.');
+  return Date.now() - startedAt;
 }
 
 function startContainer() {
@@ -263,8 +274,13 @@ async function testOperatorVisualParity() {
 
 async function runContainerValidation() {
   const failures = [];
+  const checks = [];
 
   const tests = [
+    ['Container startup and HEALTHCHECK', async () => {
+      await waitForDockerHealthy();
+      console.log('  ✓ Container startup and HEALTHCHECK');
+    }],
     ['Health endpoint', testHealthEndpoint],
     ['Dashboard load', testDashboard],
     ['Seed Job Order', testSeedJobOrder],
@@ -275,45 +291,68 @@ async function runContainerValidation() {
 
   await waitForServer(HOST_PORT);
 
-  try {
-    await waitForDockerHealthy();
-    console.log('  ✓ Container startup and HEALTHCHECK');
-  } catch (err) {
-    failures.push(`Container startup: ${err.message}`);
-  }
-
   for (const [name, fn] of tests) {
+    const startedAt = Date.now();
     try {
       await fn();
+      checks.push({ name, status: 'passed', duration_ms: Date.now() - startedAt });
     } catch (err) {
+      checks.push({ name, status: 'failed', duration_ms: Date.now() - startedAt, error: err.message });
       failures.push(`${name}: ${err.message}`);
     }
   }
 
-  return failures;
+  return { failures, checks };
+}
+
+function writeReport(report) {
+  fs.mkdirSync(REPORT_DIR, { recursive: true });
+  fs.writeFileSync(
+    path.join(REPORT_DIR, 'validate-docker.json'),
+    `${JSON.stringify(report, null, 2)}\n`,
+    'utf8',
+  );
 }
 
 async function main() {
-  console.log('Docker validation for NOPE Lite (ACI-008)');
+  console.log('Docker validation for NOPE Lite');
+  const startedAt = Date.now();
   const failures = [];
+  let checks = [];
+  let buildMs = 0;
 
   try {
-    buildImage();
+    buildMs = buildImage();
     startContainer();
 
-    const containerFailures = await runContainerValidation();
-    failures.push(...containerFailures);
+    const result = await runContainerValidation();
+    failures.push(...result.failures);
+    checks = result.checks;
   } catch (err) {
     failures.push(err.message);
     try {
       const logs = docker(`docker logs ${CONTAINER}`);
       console.error('Container logs:\n', logs);
+      fs.mkdirSync(REPORT_DIR, { recursive: true });
+      fs.writeFileSync(path.join(REPORT_DIR, 'docker-failure.log'), logs, 'utf8');
     } catch {
       // ignore log retrieval errors
     }
   } finally {
     removeContainer();
   }
+
+  const totalMs = Date.now() - startedAt;
+  writeReport({
+    recorded_at: new Date().toISOString(),
+    status: failures.length > 0 ? 'failed' : 'passed',
+    image: IMAGE,
+    build_skipped: SKIP_BUILD,
+    build_ms: buildMs,
+    total_ms: totalMs,
+    checks,
+    failures,
+  });
 
   if (failures.length > 0) {
     console.error('Docker validation failed:');
@@ -322,7 +361,7 @@ async function main() {
   }
 
   console.log('');
-  console.log('Docker validation passed.');
+  console.log(`Docker validation passed (${(totalMs / 1000).toFixed(1)}s).`);
   console.log('OPERATOR VISUAL VERIFICATION: PASS');
   console.log('Observations: container UI matches local application shell, navigation, and execution data.');
   console.log('Corrective actions taken: none.');

@@ -1,7 +1,7 @@
 {
   "name": "taig-nope-portal",
   "version": "0.1.0",
-  "description": "NOPE Lite — TAIG NOPE Portal (Docker Foundation)",
+  "description": "NOPE Lite — TAIG NOPE Portal (CI/CD Hardening)",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -19,6 +19,9 @@
     "smoke": "node scripts/smoke-tests.js",
     "validate:all": "node scripts/validate-all.js",
     "validate:docker": "node scripts/validate-docker.js",
+    "ci:metadata": "node scripts/ci-metadata.js",
+    "ci:summary": "node scripts/ci-pipeline-summary.js",
+    "ci:performance": "node scripts/ci-pipeline-performance.js",
     "docker:build": "docker build -t taig-nope-portal:local .",
     "docker:run": "docker run --rm -p 3000:3000 -v nope-nebula-local:/app/nebula_local taig-nope-portal:local",
     "preserve:snapshot": "node -e \"require('./src/services/localPreservation').savePreservationSnapshot(); console.log('Preservation snapshot saved.');\""

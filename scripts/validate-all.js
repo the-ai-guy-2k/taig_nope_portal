@@ -5,10 +5,12 @@
  * Runs the complete NOPE Lite validation suite in dependency order.
  */
 
-const { spawnSync } = require('child_process');
+const fs = require('fs');
 const path = require('path');
+const { spawnSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
+const REPORT_DIR = process.env.CI_REPORT_DIR || path.join(ROOT, 'ci-reports');
 
 const SUITE = [
   { label: 'Repository structure', file: 'scripts/validate-structure.js' },
@@ -22,40 +24,70 @@ const SUITE = [
   { label: 'Operator visual verification', file: 'scripts/validate-operator-visual.js' },
 ];
 
+function writeReport(report) {
+  fs.mkdirSync(REPORT_DIR, { recursive: true });
+  fs.writeFileSync(
+    path.join(REPORT_DIR, 'validate-all.json'),
+    `${JSON.stringify(report, null, 2)}\n`,
+    'utf8',
+  );
+}
+
 function runStep(step) {
   console.log('');
   console.log(`=== ${step.label} ===`);
 
+  const startedAt = Date.now();
   const result = spawnSync(process.execPath, [path.join(ROOT, step.file)], {
     cwd: ROOT,
     stdio: 'inherit',
     env: process.env,
   });
+  const durationMs = Date.now() - startedAt;
 
-  return result.status === 0;
+  return {
+    label: step.label,
+    file: step.file,
+    status: result.status === 0 ? 'passed' : 'failed',
+    duration_ms: durationMs,
+    exit_code: result.status,
+  };
 }
 
 function main() {
   console.log('NOPE Lite — complete validation suite');
   const startedAt = Date.now();
-  const failures = [];
+  const stages = [];
+  let failedStage = null;
 
   for (const step of SUITE) {
-    if (!runStep(step)) {
-      failures.push(step.label);
+    const result = runStep(step);
+    stages.push(result);
+    if (result.status !== 'passed') {
+      failedStage = result.label;
       break;
     }
   }
 
-  const elapsed = ((Date.now() - startedAt) / 1000).toFixed(1);
+  const totalMs = Date.now() - startedAt;
+  const report = {
+    recorded_at: new Date().toISOString(),
+    status: failedStage ? 'failed' : 'passed',
+    failed_stage: failedStage,
+    total_ms: totalMs,
+    stage_count: SUITE.length,
+    stages,
+  };
+
+  writeReport(report);
 
   console.log('');
-  if (failures.length > 0) {
-    console.error(`Validation suite FAILED at: ${failures[0]} (${elapsed}s)`);
+  if (failedStage) {
+    console.error(`Validation suite FAILED at: ${failedStage} (${(totalMs / 1000).toFixed(1)}s)`);
     process.exit(1);
   }
 
-  console.log(`Validation suite PASSED (${SUITE.length} stages, ${elapsed}s)`);
+  console.log(`Validation suite PASSED (${SUITE.length} stages, ${(totalMs / 1000).toFixed(1)}s)`);
 }
 
 main();

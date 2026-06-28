@@ -1,8 +1,47 @@
 # NOPE Lite — TAIG NOPE Portal
 
-NOPE Lite proves the TAIG execution framework. **Version:** Docker Foundation (ACI-008)
+NOPE Lite proves the TAIG execution framework. **Version:** Docker Foundation (ACI-008) · **Pipeline:** CI/CD Hardening (ACI-009)
 
-The **Docker image** is the canonical deployment artifact for CI/CD, future Docker Hub publication, and PAPEV deployment.
+The **Docker image** is the canonical deployment artifact. Every push to `main` and `deployable` runs the full CI/CD pipeline.
+
+## CI/CD Architecture
+
+```
+push / pull_request (main, deployable)
+        │
+        ▼
+┌───────────────────────────┐
+│  validate                 │  npm run validate:all
+│  Validation + Smoke Tests │  → ci-reports/validate-all.json
+└─────────────┬─────────────┘
+              │ needs
+              ▼
+┌───────────────────────────┐
+│  docker                   │  buildx + GHA cache
+│  Docker Foundation        │  SKIP_DOCKER_BUILD validate:docker
+└─────────────┬─────────────┘  → ci-reports/validate-docker.json
+              │ needs (always)
+              ▼
+┌───────────────────────────┐
+│  pipeline-report          │  timing + workflow summary
+│  Pipeline Report          │  → ci-reports/pipeline-performance.json
+└───────────────────────────┘
+```
+
+| Feature | Implementation |
+|---------|----------------|
+| Concurrency | Cancel in-progress runs per branch |
+| Build metadata | `scripts/ci-metadata.js` → `build-metadata.json` |
+| Per-stage timing | `validate-all.json`, `validate-docker.json` |
+| Docker cache | `docker/build-push-action` with `type=gha` |
+| OCI labels | `image.revision`, `image.source`, `image.created` |
+| Artifacts | `ci-reports-*` retained 14–30 days |
+| Workflow summary | `scripts/ci-pipeline-summary.js` |
+| Branch protection | See [docs/BRANCH_PROTECTION.md](docs/BRANCH_PROTECTION.md) |
+
+### Pipeline gates (every push)
+
+Structure · syntax · data · workflow · operational · preservation · routes · smoke · operator visual · Docker build · Docker runtime
 
 ## Docker
 
@@ -86,6 +125,9 @@ Nine stages: structure, syntax, data, workflow, operational, preservation, route
 | `npm run smoke` | End-to-end HTTP smoke tests (port 3100) |
 | `npm run validate:operator-visual` | Operator HTML verification (port 3099) |
 | `npm run audit:routes` | Operator port audit (port 3000, requires running server) |
+| `npm run ci:metadata` | Record CI build metadata locally |
+| `npm run ci:performance` | Aggregate pipeline timing report |
+| `npm run ci:summary` | Print CI workflow summary |
 
 ### Operator visual verification
 
@@ -132,11 +174,10 @@ taskkill /PID <pid> /F
 
 | ACI | Title |
 |-----|-------|
-| ACI-009 | CI/CD Hardening |
 | ACI-010 | Docker Hub Publish |
 | ACI-011 | PA Documentation |
 | ACI-012 | PA Certification |
 
 ## Next Steps
 
-ACI-009 — CI/CD Hardening.
+ACI-010 — Docker Hub Publish.

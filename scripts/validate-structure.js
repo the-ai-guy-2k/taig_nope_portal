@@ -36,14 +36,18 @@ const REQUIRED_PATHS = [
   'data/timeline.json',
   'src/models/index.js',
   'docs/aci_history/README.md',
+  'docs/BRANCH_PROTECTION.md',
   'docs/reports',
+  '.github/workflows/ci.yml',
   'scripts/validate-preservation.js',
   'scripts/validate-operator-visual.js',
   'scripts/smoke-tests.js',
   'scripts/validate-all.js',
   'scripts/validate-docker.js',
+  'scripts/ci-metadata.js',
+  'scripts/ci-pipeline-summary.js',
+  'scripts/ci-pipeline-performance.js',
   'scripts/lib/test-server.js',
-  '.github/workflows',
 ];
 
 const missing = REQUIRED_PATHS.filter((relativePath) => {
