@@ -62,7 +62,12 @@ npm run validate:routes     — passed (11 routes)
 
 ## GitHub Actions Results
 
-_Will be updated after push._
+| Branch | Run | Status |
+|--------|-----|--------|
+| `main` | [Run](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28306962994) | **success** |
+| `deployable` | [Run](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28306963692) | **success** |
+
+Both runs completed on commit `7445ae6` including workflow persistence tests.
 
 ## Risks Discovered
 
@@ -82,7 +87,9 @@ _Will be updated after push._
 
 ## Commit IDs
 
-_Will be updated after push._
+| Commit | Branch | Message |
+|--------|--------|---------|
+| `7445ae6` | `main`, `deployable` | ACI-004: Implement Job Order create, edit, and save workflow. |
 
 ## Governance Note
 
