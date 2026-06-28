@@ -1,0 +1,26 @@
+{
+  "name": "taig-nope-portal",
+  "version": "0.1.0",
+  "description": "NOPE Lite — TAIG NOPE Portal (MVP Foundation)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "validate:structure": "node scripts/validate-structure.js",
+    "validate:syntax": "node scripts/validate-syntax.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "nope",
+    "taig",
+    "portal"
+  ],
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.21.2"
+  }
+}

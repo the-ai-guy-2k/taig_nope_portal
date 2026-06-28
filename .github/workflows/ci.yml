@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - deployable
+  pull_request:
+    branches:
+      - main
+      - deployable
+
+jobs:
+  validate:
+    name: Validate Foundation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Validate repository structure
+        run: npm run validate:structure
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate JavaScript syntax
+        run: npm run validate:syntax
+
+      - name: Start application and verify health endpoint
+        run: |
+          npm start &
+          APP_PID=$!
+          trap "kill $APP_PID" EXIT
+
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:3000/health > /tmp/health.json; then
+              echo "Health check response:"
+              cat /tmp/health.json
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "Application failed to respond on /health within 30 seconds."
+          exit 1
+
+  docker-build:
+    name: Docker Build Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t taig-nope-portal:ci .
+
+      - name: Verify image exists
+        run: docker image inspect taig-nope-portal:ci

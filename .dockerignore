@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+.git
+.github
+.gitignore
+.dockerignore
+README.md
+docs
+nebula_local
+.nebula
+aiw_local
+*.local.md
+coverage
+.env
+.env.*
