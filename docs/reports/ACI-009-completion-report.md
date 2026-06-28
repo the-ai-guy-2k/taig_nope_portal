@@ -71,31 +71,36 @@ Structure · syntax · data · workflow · operational · preservation · routes
 
 ## Pipeline Performance
 
-_Local run (validate job only; Docker validated in CI):_
+### CI Run [28308549570](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28308549570) (commit `7d37080`)
 
 | Metric | Value |
 |--------|-------|
-| Total execution time | ~3.8s (validate job local) |
-| Longest stage | End-to-end smoke tests (~0.8s) |
-| Fastest stage | Repository structure / data (~0.0s) |
+| Total execution time | ~61s (wall clock) |
+| Longest job | Docker Foundation Validation (39s) |
+| Fastest job | Pipeline Report (6s) |
 | Failed retry count | 0 |
 
-_CI metrics recorded in `pipeline-performance.json` on each workflow run._
+| Job | Duration | Result |
+|-----|----------|--------|
+| Validation + Smoke Tests | 16s | success |
+| Docker Foundation Validation | 39s | success |
+| Pipeline Report | 6s | success |
 
 **Workflow reliability observations:**
 
 - Concurrency `cancel-in-progress` prevents stale runs from blocking merges
 - `validate` must pass before `docker` starts (serial dependency)
 - `pipeline-report` runs `if: always()` and fails the workflow if either gate failed
-- Docker build uses GHA cache; runtime validation uses `SKIP_DOCKER_BUILD` to avoid duplicate builds
+- Docker build uses GHA cache (`build_skipped` at runtime via `SKIP_DOCKER_BUILD`)
 - Artifacts retained 14–30 days for PAPEV evidence
+- First hardened pipeline run: **all three jobs success** on `main`
 
 ## GitHub Actions Results
 
-| Branch | Actions |
-|--------|---------|
-| `main` | _(pending push)_ |
-| `deployable` | _(pending push)_ |
+| Branch | Result |
+|--------|--------|
+| `main` | [Run 28308549570](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28308549570) — **success** |
+| `deployable` | **success** (commit `7d37080`) |
 
 ## Risks Discovered
 
@@ -118,7 +123,7 @@ Per approved AEP, ACI-010 is **Docker Hub Publish**:
 
 | Commit | Branch | Message |
 |--------|--------|---------|
-| _(pending)_ | `main`, `deployable` | ACI-009: CI/CD Hardening |
+| `7d37080` | `main`, `deployable` | ACI-009: CI/CD pipeline hardening with metadata, caching, and reports. |
 
 ## Governance Note
 
