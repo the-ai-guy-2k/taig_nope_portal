@@ -8,8 +8,14 @@ const path = require('path');
 const PORT = process.env.VALIDATE_PORT || 3099;
 const ROOT = path.join(__dirname, '..');
 
+const LEGACY_MARKERS = [
+  'Version: MVP Foundation',
+  'Repository foundation established',
+  '"version":"MVP Foundation"',
+];
+
 const ROUTES = [
-  { path: '/', expect: 'ACI-002 Data Model Foundation' },
+  { path: '/', expect: 'workspace-main' },
   { path: '/dashboard', expect: 'Local Preservation' },
   { path: '/job-orders', expect: 'Job Orders' },
   { path: '/job-orders/new', expect: 'Create Job Order' },
@@ -21,7 +27,7 @@ const ROUTES = [
   { path: '/aci-history', expect: 'ACI History' },
   { path: '/completion-reports', expect: 'Completion Reports' },
   { path: '/settings', expect: 'Settings' },
-  { path: '/health', expect: '"status":"ok"' },
+  { path: '/health', expect: '"status":"ok"', reject: '"version":"MVP Foundation"' },
 ];
 
 function request(pathname) {
@@ -85,6 +91,17 @@ async function validateRoutes() {
 
     if (!result.body.includes(route.expect)) {
       failures.push(`${route.path}: response missing expected content "${route.expect}"`);
+    }
+
+    if (route.reject && result.body.includes(route.reject)) {
+      failures.push(`${route.path}: response contains legacy content "${route.reject}"`);
+    }
+
+    for (const marker of LEGACY_MARKERS) {
+      if (route.path !== '/health' && result.body.includes(marker)) {
+        failures.push(`${route.path}: legacy ACI-001 landing page content detected`);
+        break;
+      }
     }
   }
 

@@ -23,7 +23,7 @@ app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
     service: 'taig-nope-portal',
-    version: 'Local Preservation (ACI-006)',
+    version: 'Validation + Smoke Tests (ACI-007)',
   });
 });
 

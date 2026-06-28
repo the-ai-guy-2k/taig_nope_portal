@@ -12,7 +12,7 @@ on:
 
 jobs:
   validate:
-    name: Validate Foundation
+    name: Validation + Smoke Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -31,41 +31,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate JavaScript syntax
-        run: npm run validate:syntax
-
-      - name: Validate data model
-        run: npm run validate:data
-
-      - name: Validate workflow persistence
-        run: npm run validate:workflow
-
-      - name: Validate operational workflows
-        run: npm run validate:operational
-
-      - name: Validate local preservation
-        run: npm run validate:preservation
-
-      - name: Start application and verify routes
-        run: npm run validate:routes
-
-      - name: Start application and verify health endpoint
-        run: |
-          npm start &
-          APP_PID=$!
-          trap "kill $APP_PID" EXIT
-
-          for i in $(seq 1 30); do
-            if curl -fsS http://localhost:3000/health > /tmp/health.json; then
-              echo "Health check response:"
-              cat /tmp/health.json
-              exit 0
-            fi
-            sleep 1
-          done
-
-          echo "Application failed to respond on /health within 30 seconds."
-          exit 1
+      - name: Run complete validation suite
+        run: npm run validate:all
 
   docker-build:
     name: Docker Build Validation

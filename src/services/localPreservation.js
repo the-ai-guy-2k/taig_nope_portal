@@ -18,7 +18,7 @@ const ARTIFACTS = {
   restoreStatus: 'restore_status.json',
 };
 
-const APPLICATION_VERSION = 'Operational Awareness (ACI-005+)';
+const APPLICATION_VERSION = 'Validation + Smoke Tests (ACI-007)';
 
 function getPreservationDir() {
   return process.env.PRESERVATION_DIR || DEFAULT_PRESERVATION_DIR;

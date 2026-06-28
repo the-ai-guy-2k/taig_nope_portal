@@ -37,7 +37,11 @@ const REQUIRED_PATHS = [
   'src/models/index.js',
   'docs/aci_history/README.md',
   'docs/reports',
-  'scripts',
+  'scripts/validate-preservation.js',
+  'scripts/validate-operator-visual.js',
+  'scripts/smoke-tests.js',
+  'scripts/validate-all.js',
+  'scripts/lib/test-server.js',
   '.github/workflows',
 ];
 
