@@ -72,7 +72,12 @@ npm run validate:data       — passed
 
 ## GitHub Actions Results
 
-_Will be updated after push._
+| Branch | Run | Status |
+|--------|-----|--------|
+| `main` | [Run](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28306652833) | **success** |
+| `deployable` | [Run](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28306653466) | **success** |
+
+Both runs completed on commit `f3a8a68` including data model validation.
 
 ## Risks Discovered
 
@@ -93,7 +98,9 @@ _Will be updated after push._
 
 ## Commit IDs
 
-_Will be updated after push._
+| Commit | Branch | Message |
+|--------|--------|---------|
+| `f3a8a68` | `main`, `deployable` | ACI-002: Establish JSON-backed execution data model. |
 
 ## Governance Note
 
