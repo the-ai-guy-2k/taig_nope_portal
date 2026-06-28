@@ -95,8 +95,8 @@ async function testApplicationStartup() {
   assert(health.statusCode === 200, `Health should return 200, got ${health.statusCode}`);
   assert(health.body.includes('"status":"ok"'), 'Health should report ok status');
   assert(
-    health.body.includes('Validation + Smoke Tests (ACI-007)'),
-    'Health version should reflect ACI-007',
+    health.body.includes('Docker Foundation (ACI-008)'),
+    'Health version should reflect ACI-008',
   );
 
   for (const marker of LEGACY_MARKERS) {

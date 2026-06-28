@@ -10,6 +10,8 @@ nebula_local
 .nebula
 aiw_local
 *.local.md
+.tmp-smoke-preservation
+.tmp-preservation-test
 coverage
 .env
 .env.*

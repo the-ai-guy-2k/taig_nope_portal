@@ -41,6 +41,7 @@ const REQUIRED_PATHS = [
   'scripts/validate-operator-visual.js',
   'scripts/smoke-tests.js',
   'scripts/validate-all.js',
+  'scripts/validate-docker.js',
   'scripts/lib/test-server.js',
   '.github/workflows',
 ];

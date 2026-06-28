@@ -17,6 +17,7 @@ Each ACI represents a discrete, governed change to the repository. Completion re
 | ACI-005 | Operator Actions + Minority Report | Complete | [ACI-005-completion-report.md](../reports/ACI-005-completion-report.md) |
 | ACI-006 | Local Preservation | Complete | [ACI-006-completion-report.md](../reports/ACI-006-completion-report.md) |
 | ACI-007 | Validation + Smoke Tests | Complete | [ACI-007-completion-report.md](../reports/ACI-007-completion-report.md) |
+| ACI-008 | Docker Foundation | Complete | [ACI-008-completion-report.md](../reports/ACI-008-completion-report.md) |
 
 ## Conventions
 

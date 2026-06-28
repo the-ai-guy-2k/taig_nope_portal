@@ -36,7 +36,7 @@ function runStep(step) {
 }
 
 function main() {
-  console.log('NOPE Lite — complete validation suite (ACI-007)');
+  console.log('NOPE Lite — complete validation suite');
   const startedAt = Date.now();
   const failures = [];
 

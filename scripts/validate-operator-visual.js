@@ -50,7 +50,7 @@ const CHECKS = [
   {
     name: 'No stale application instance',
     path: '/health',
-    required: ['"status":"ok"', 'Validation + Smoke Tests (ACI-007)'],
+    required: ['"status":"ok"', 'Docker Foundation (ACI-008)'],
     forbidden: LEGACY_MARKERS,
   },
 ];

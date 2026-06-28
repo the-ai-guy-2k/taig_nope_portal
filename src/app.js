@@ -23,7 +23,7 @@ app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
     service: 'taig-nope-portal',
-    version: 'Validation + Smoke Tests (ACI-007)',
+    version: 'Docker Foundation (ACI-008)',
   });
 });
 
