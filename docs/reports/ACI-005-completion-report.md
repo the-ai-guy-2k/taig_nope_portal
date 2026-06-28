@@ -51,7 +51,12 @@ npm run validate:routes       — passed (13 routes)
 
 ## GitHub Actions Results
 
-_Will be updated after push._
+| Branch | Run | Status |
+|--------|-----|--------|
+| `main` | [Run](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28307448195) | **success** |
+| `deployable` | [Run](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28307448937) | **success** |
+
+Both runs completed on commit `6f48be8` including operational workflow validation.
 
 ## Risks Discovered
 
@@ -71,7 +76,9 @@ _Will be updated after push._
 
 ## Commit IDs
 
-_Will be updated after push._
+| Commit | Branch | Message |
+|--------|--------|---------|
+| `6f48be8` | `main`, `deployable` | ACI-005: Add Operator Actions and Minority Report operational layer. |
 
 ## Governance Note
 
