@@ -1,0 +1,56 @@
+<main class="workspace-main">
+  <section class="jo-header">
+    <div class="jo-header-top">
+      <h1 class="jo-title"><%= view.jobOrder.title %></h1>
+      <span class="status-badge status-<%= view.jobOrder.status %>"><%= view.jobOrder.status %></span>
+    </div>
+    <p class="jo-id">Job Order: <%= view.jobOrder.id %></p>
+  </section>
+
+  <section class="panel-card">
+    <h2 class="panel-heading">Mission</h2>
+    <p class="panel-body"><%= view.jobOrder.mission %></p>
+  </section>
+
+  <section class="truth-grid">
+    <article class="panel-card truth-card">
+      <h2 class="panel-heading">Current Truth</h2>
+      <p class="panel-body"><%= view.jobOrder.current_truth.statement %></p>
+      <% if (view.jobOrder.current_truth.source) { %>
+        <p class="panel-meta">Source: <%= view.jobOrder.current_truth.source %></p>
+      <% } %>
+      <p class="panel-meta">Recorded: <%= view.formatted.current_truth_at %></p>
+    </article>
+
+    <article class="panel-card truth-card">
+      <h2 class="panel-heading">Next Truth</h2>
+      <p class="panel-body"><%= view.jobOrder.next_truth.statement %></p>
+      <% if (view.jobOrder.next_truth.rationale) { %>
+        <p class="panel-meta">Rationale: <%= view.jobOrder.next_truth.rationale %></p>
+      <% } %>
+      <p class="panel-meta">Recorded: <%= view.formatted.next_truth_at %></p>
+    </article>
+
+    <article class="panel-card truth-card">
+      <h2 class="panel-heading">Target Truth</h2>
+      <p class="panel-body"><%= view.jobOrder.target_truth.statement %></p>
+      <% if (view.jobOrder.target_truth.criteria && view.jobOrder.target_truth.criteria.length) { %>
+        <ul class="criteria-list">
+          <% view.jobOrder.target_truth.criteria.forEach(function(criterion) { %>
+            <li><%= criterion %></li>
+          <% }); %>
+        </ul>
+      <% } %>
+      <p class="panel-meta">Recorded: <%= view.formatted.target_truth_at %></p>
+    </article>
+  </section>
+
+  <section class="panel-card">
+    <h2 class="panel-heading">Human Summary</h2>
+    <p class="panel-body"><%= view.jobOrder.human_summary.summary %></p>
+    <p class="panel-meta">
+      <% if (view.jobOrder.human_summary.author) { %>Author: <%= view.jobOrder.human_summary.author %> · <% } %>
+      Updated: <%= view.formatted.human_summary_at %>
+    </p>
+  </section>
+</main>

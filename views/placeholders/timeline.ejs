@@ -1,0 +1,34 @@
+<%- include('../partials/head', { pageTitle }) %>
+<div class="app">
+  <%- include('../partials/header') %>
+  <div class="app-body">
+    <%- include('../partials/nav', { activeNav }) %>
+    <main class="workspace-main workspace-main--solo">
+      <section class="jo-header">
+        <h1 class="jo-title">Timeline</h1>
+        <p class="panel-meta">Read-only timeline events from loaded data.</p>
+      </section>
+
+      <% if (events.length) { %>
+        <ul class="timeline-list timeline-list--page">
+          <% events.forEach(function(event) { %>
+            <li class="timeline-item panel-card">
+              <span class="timeline-type"><%= event.event_type %></span>
+              <p class="timeline-desc"><%= event.description %></p>
+              <p class="panel-meta">
+                Job Order: <%= event.job_order_id %>
+                <% if (event.actor) { %> · Actor: <%= event.actor %><% } %>
+                · <%= formatDate(event.created_at) %>
+              </p>
+            </li>
+          <% }); %>
+        </ul>
+      <% } else { %>
+        <p class="panel-empty">No timeline events.</p>
+      <% } %>
+    </main>
+  </div>
+  <%- include('../partials/footer') %>
+</div>
+<script src="/js/dashboard.js"></script>
+<%- include('../partials/foot') %>

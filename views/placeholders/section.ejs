@@ -1,0 +1,19 @@
+<%- include('../partials/head', { pageTitle }) %>
+<div class="app">
+  <%- include('../partials/header') %>
+  <div class="app-body">
+    <%- include('../partials/nav', { activeNav }) %>
+    <main class="workspace-main workspace-main--solo">
+      <section class="jo-header">
+        <h1 class="jo-title"><%= title %></h1>
+        <p class="panel-body"><%= description %></p>
+      </section>
+      <section class="panel-card placeholder-card">
+        <p class="panel-meta">This section is a navigation placeholder for a future ACI.</p>
+      </section>
+    </main>
+  </div>
+  <%- include('../partials/footer') %>
+</div>
+<script src="/js/dashboard.js"></script>
+<%- include('../partials/foot') %>

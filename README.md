@@ -1,12 +1,12 @@
 # NOPE Lite — TAIG NOPE Portal
 
-Repository foundation and execution data model for the NOPE Lite Production Artifact. This project provides the development scaffold for the TAIG NOPE Portal — an Express-based web application with EJS templating, JSON storage, and Docker deployment support.
+Repository foundation, execution data model, and read-only UI shell for the NOPE Lite Production Artifact.
 
-**Version:** MVP Data Model (ACI-002)
+**Version:** MVP UI Shell (ACI-003)
 
 ## Repository Overview
 
-ACI-001 established the repository foundation. ACI-002 adds the JSON-backed execution data model with Job Order as the root object. Execution UI and workflow logic begin in ACI-003.
+ACI-001 established the repository foundation. ACI-002 added the JSON-backed data model. ACI-003 introduces the read-only execution cockpit UI. Write operations and workflow execution begin in ACI-004+.
 
 - **Repository:** https://github.com/the-ai-guy-2k/taig_nope_portal.git
 - **Branches:** `main`, `deployable`
@@ -30,118 +30,90 @@ ACI-001 established the repository foundation. ACI-002 adds the JSON-backed exec
 taig_nope_portal/
 ├── .github/workflows/   # CI pipelines
 ├── data/                # JSON execution storage
-│   ├── job_orders.json
-│   ├── aci_history.json
-│   ├── minority_reports.json
-│   ├── operator_actions.json
-│   ├── completion_reports.json
-│   └── timeline.json
 ├── docs/
-│   ├── aci_history/     # ACI execution history
-│   └── reports/         # Completion reports
+│   ├── aci_history/
+│   └── reports/
 ├── public/
-│   ├── css/
-│   └── js/
-├── scripts/             # Validation utilities
+│   ├── css/dashboard.css
+│   └── js/dashboard.js
+├── scripts/
 ├── src/
-│   ├── app.js           # Express application
-│   ├── server.js        # Entry point
-│   └── models/          # Data model schemas, loader, validator
-├── views/               # EJS templates
+│   ├── app.js
+│   ├── server.js
+│   ├── models/          # Data model schemas, loader, validator
+│   ├── routes/          # Express route modules
+│   └── services/        # View-model builders
+├── views/               # EJS templates (dashboard, partials)
 ├── Dockerfile
 ├── package.json
 └── README.md
 ```
 
-Local-only preservation folders (`nebula_local/`, `.nebula/`, `aiw_local/`) exist for operator continuity and are excluded from version control.
+## Execution Cockpit (UI)
+
+The MVP UI shell provides a responsive read-only dashboard:
+
+- **Header** — portal identity and read-only mode indicator
+- **Left navigation** — Dashboard, Job Orders, Timeline, ACI History, Completion Reports, Settings
+- **Main workspace** — Job Order title, mission, status, truth states, human summary
+- **Right panel** — minority report, operator actions, timeline, risks
+- **Footer** — cockpit metadata
+
+All displayed data is loaded via `src/models/loader.js` and `src/services/jobOrderService.js`. No execution data is hardcoded in templates.
+
+### Routes
+
+| Route | Purpose |
+|-------|---------|
+| `GET /` | Execution dashboard (primary Job Order) |
+| `GET /dashboard` | Execution dashboard |
+| `GET /job-orders` | Job Order list |
+| `GET /job-orders/:id` | Job Order detail workspace |
+| `GET /timeline` | Timeline events (read-only) |
+| `GET /aci-history` | ACI records (read-only) |
+| `GET /completion-reports` | Completion reports (read-only) |
+| `GET /settings` | Settings placeholder |
+| `GET /health` | Health check JSON |
 
 ## Data Model
 
-The **Job Order** is the root execution object. All other objects support the Job Order lifecycle.
-
-### Storage Files
-
-| File | Contents |
-|------|----------|
-| `data/job_orders.json` | Job Orders (root objects) |
-| `data/aci_history.json` | ACI records |
-| `data/minority_reports.json` | Minority Reports |
-| `data/operator_actions.json` | Operator Actions |
-| `data/completion_reports.json` | Completion Reports |
-| `data/timeline.json` | Timeline Events |
-
-### Job Order Fields
-
-`id`, `title`, `mission`, `status`, `current_truth`, `next_truth`, `target_truth`, `human_summary`, `minority_report_current`, `minority_report_previous`, `aep`, `acis`, `operator_actions`, `completion_reports`, `timeline`, `risks`, `artifacts`, `passdown`, `created_at`, `updated_at`
-
-### Supporting Objects
-
-Embedded in Job Order: Current Truth, Next Truth, Target Truth, Human Summary, Risk, Artifact Reference, Passdown.
-
-Referenced by ID in separate collections: Minority Report, Operator Action, ACI, Completion Report, Timeline Event.
-
-Model definitions and validation live in `src/models/`.
-
-### Seed Data
-
-A validation-only seed Job Order (`jo-aci-002-seed`) demonstrates mission, truth states, human summary, one operator action, one minority report, and one timeline event.
+The **Job Order** is the root execution object. See `src/models/` and `data/` for schemas and storage files. Seed Job Order: `jo-aci-002-seed`.
 
 ## Build Instructions
 
 ```bash
-# Clone the repository
 git clone https://github.com/the-ai-guy-2k/taig_nope_portal.git
 cd taig_nope_portal
-
-# Install dependencies
 npm ci
 ```
 
 ## Run Instructions
 
 ```bash
-# Start the application (default port 3000)
 npm start
-
 # Development mode with auto-reload (Node 20+)
 npm run dev
 ```
 
-Verify the application:
+Open the execution cockpit:
 
-- **Home:** http://localhost:3000/
+- **Dashboard:** http://localhost:3000/ or http://localhost:3000/dashboard
+- **Seed Job Order:** http://localhost:3000/job-orders/jo-aci-002-seed
 - **Health:** http://localhost:3000/health
-
-## Branch Strategy
-
-| Branch | Purpose |
-|--------|---------|
-| `main` | Primary development branch |
-| `deployable` | Deployment-ready branch |
-
-Both branches are validated by CI on every push and pull request.
 
 ## CI Overview
 
-GitHub Actions workflow (`.github/workflows/ci.yml`) runs on pushes and PRs to `main` and `deployable`:
-
-1. **Repository structure validation** — confirms required files and directories exist
-2. **npm ci** — clean dependency install
-3. **Syntax validation** — checks all JavaScript files under `src/` and `scripts/`
-4. **Data model validation** — JSON syntax, required fields, unique IDs, cross-reference integrity
-5. **Application startup** — starts the server and verifies `GET /health` returns HTTP 200
-6. **Docker build validation** — builds the Docker image (no container runtime test)
-
-Docker is validated in CI only; local Docker is not required.
+GitHub Actions validates structure, syntax, data model, routes (HTTP 200 + content), health endpoint, and Docker build.
 
 ## Validation Scripts
 
 ```bash
-npm run validate:structure   # Check required repository paths
-npm run validate:syntax      # Check JavaScript syntax
-npm run validate:data        # Validate JSON data model and seed Job Order
+npm run validate:structure
+npm run validate:syntax
+npm run validate:data
+npm run validate:routes
 ```
 
 ## Next Steps
 
-ACI-003 introduces execution UI: dashboard, Job Order screens, and operator workflow.
+ACI-004 introduces write operations, editing, and operator workflow capabilities.

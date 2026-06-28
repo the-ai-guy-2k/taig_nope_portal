@@ -1,0 +1,16 @@
+<%- include('../partials/head', { pageTitle }) %>
+<div class="app">
+  <%- include('../partials/header') %>
+  <div class="app-body">
+    <%- include('../partials/nav', { activeNav }) %>
+    <main class="workspace-main workspace-main--solo">
+      <section class="jo-header">
+        <h1 class="jo-title"><%= pageTitle %></h1>
+        <p class="panel-body"><%= message %></p>
+      </section>
+      <p><a href="/dashboard" class="text-link">Return to dashboard</a></p>
+    </main>
+  </div>
+  <%- include('../partials/footer') %>
+</div>
+<%- include('../partials/foot') %>

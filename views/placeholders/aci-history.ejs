@@ -1,0 +1,38 @@
+<%- include('../partials/head', { pageTitle }) %>
+<div class="app">
+  <%- include('../partials/header') %>
+  <div class="app-body">
+    <%- include('../partials/nav', { activeNav }) %>
+    <main class="workspace-main workspace-main--solo">
+      <section class="jo-header">
+        <h1 class="jo-title">ACI History</h1>
+        <p class="panel-meta">Read-only ACI records from loaded data.</p>
+      </section>
+
+      <% if (acis.length) { %>
+        <ul class="aci-list">
+          <% acis.forEach(function(aci) { %>
+            <li class="panel-card aci-item">
+              <div class="aci-item-header">
+                <h2 class="panel-subheading"><%= aci.number %> — <%= aci.title %></h2>
+                <span class="status-badge status-<%= aci.status === 'complete' ? 'complete' : 'active' %>"><%= aci.status %></span>
+              </div>
+              <% if (aci.job_order_id) { %>
+                <p class="panel-meta">Job Order: <%= aci.job_order_id %></p>
+              <% } %>
+              <p class="panel-meta">Created: <%= formatDate(aci.created_at) %></p>
+              <% if (aci.completed_at) { %>
+                <p class="panel-meta">Completed: <%= formatDate(aci.completed_at) %></p>
+              <% } %>
+            </li>
+          <% }); %>
+        </ul>
+      <% } else { %>
+        <p class="panel-empty">No ACI records.</p>
+      <% } %>
+    </main>
+  </div>
+  <%- include('../partials/footer') %>
+</div>
+<script src="/js/dashboard.js"></script>
+<%- include('../partials/foot') %>

@@ -37,6 +37,9 @@ jobs:
       - name: Validate data model
         run: npm run validate:data
 
+      - name: Start application and verify routes
+        run: npm run validate:routes
+
       - name: Start application and verify health endpoint
         run: |
           npm start &

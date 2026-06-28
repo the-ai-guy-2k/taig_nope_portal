@@ -1,0 +1,30 @@
+<%- include('../partials/head', { pageTitle }) %>
+<div class="app">
+  <%- include('../partials/header') %>
+  <div class="app-body">
+    <%- include('../partials/nav', { activeNav }) %>
+    <main class="workspace-main workspace-main--solo">
+      <section class="jo-header">
+        <h1 class="jo-title">Completion Reports</h1>
+        <p class="panel-meta">Read-only completion reports from loaded data.</p>
+      </section>
+
+      <% if (reports.length) { %>
+        <ul class="report-list">
+          <% reports.forEach(function(report) { %>
+            <li class="panel-card report-item">
+              <h2 class="panel-subheading"><%= report.title %></h2>
+              <p class="panel-meta">Job Order: <%= report.job_order_id %> · Status: <%= report.status %></p>
+              <p class="panel-meta">Created: <%= formatDate(report.created_at) %></p>
+            </li>
+          <% }); %>
+        </ul>
+      <% } else { %>
+        <p class="panel-empty">No completion reports on file.</p>
+      <% } %>
+    </main>
+  </div>
+  <%- include('../partials/footer') %>
+</div>
+<script src="/js/dashboard.js"></script>
+<%- include('../partials/foot') %>

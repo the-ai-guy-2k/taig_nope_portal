@@ -8,7 +8,8 @@
     "dev": "node --watch src/server.js",
     "validate:structure": "node scripts/validate-structure.js",
     "validate:syntax": "node scripts/validate-syntax.js",
-    "validate:data": "node scripts/validate-data.js"
+    "validate:data": "node scripts/validate-data.js",
+    "validate:routes": "node scripts/validate-routes.js"
   },
   "engines": {
     "node": ">=20.0.0"

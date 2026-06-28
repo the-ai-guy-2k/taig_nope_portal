@@ -1,0 +1,35 @@
+<%- include('../partials/head', { pageTitle }) %>
+<div class="app">
+  <%- include('../partials/header') %>
+  <div class="app-body">
+    <%- include('../partials/nav', { activeNav }) %>
+    <main class="workspace-main workspace-main--solo">
+      <section class="jo-header">
+        <h1 class="jo-title">Job Orders</h1>
+        <p class="panel-meta">Select a Job Order to view execution state.</p>
+      </section>
+
+      <% if (jobOrders.length) { %>
+        <ul class="job-order-list">
+          <% jobOrders.forEach(function(jobOrder) { %>
+            <li class="job-order-card">
+              <a href="/job-orders/<%= jobOrder.id %>" class="job-order-link">
+                <div class="job-order-card-header">
+                  <h2 class="job-order-card-title"><%= jobOrder.title %></h2>
+                  <span class="status-badge status-<%= jobOrder.status %>"><%= jobOrder.status %></span>
+                </div>
+                <p class="job-order-card-mission"><%= jobOrder.mission %></p>
+                <p class="panel-meta">Updated: <%= jobOrder.updated_at %></p>
+              </a>
+            </li>
+          <% }); %>
+        </ul>
+      <% } else { %>
+        <p class="panel-empty">No Job Orders available.</p>
+      <% } %>
+    </main>
+  </div>
+  <%- include('../partials/footer') %>
+</div>
+<script src="/js/dashboard.js"></script>
+<%- include('../partials/foot') %>

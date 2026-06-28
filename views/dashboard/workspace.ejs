@@ -1,0 +1,14 @@
+<%- include('../partials/head', { pageTitle }) %>
+<div class="app">
+  <%- include('../partials/header') %>
+  <div class="app-body">
+    <%- include('../partials/nav', { activeNav }) %>
+    <div class="content-area content-area--workspace">
+      <%- include('../partials/workspace-main', { view }) %>
+      <%- include('../partials/workspace-panel', { view }) %>
+    </div>
+  </div>
+  <%- include('../partials/footer') %>
+</div>
+<script src="/js/dashboard.js"></script>
+<%- include('../partials/foot') %>
