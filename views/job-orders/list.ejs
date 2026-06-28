@@ -5,7 +5,10 @@
     <%- include('../partials/nav', { activeNav }) %>
     <main class="workspace-main workspace-main--solo">
       <section class="jo-header">
-        <h1 class="jo-title">Job Orders</h1>
+        <div class="jo-header-top">
+          <h1 class="jo-title">Job Orders</h1>
+          <a href="/job-orders/new" class="btn btn-primary btn-sm">Create Job Order</a>
+        </div>
         <p class="panel-meta">Select a Job Order to view execution state.</p>
       </section>
 

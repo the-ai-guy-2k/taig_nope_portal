@@ -1,109 +1,48 @@
 # NOPE Lite — TAIG NOPE Portal
 
-Repository foundation, execution data model, and read-only UI shell for the NOPE Lite Production Artifact.
+Repository foundation, execution data model, and Job Order workflow for the NOPE Lite Production Artifact.
 
-**Version:** MVP UI Shell (ACI-003)
+**Version:** Job Order Workflow (ACI-004)
 
 ## Repository Overview
 
-ACI-001 established the repository foundation. ACI-002 added the JSON-backed data model. ACI-003 introduces the read-only execution cockpit UI. Write operations and workflow execution begin in ACI-004+.
+ACI-001–003 established foundation, data model, and read-only UI. ACI-004 adds Job Order create, edit, and save with JSON-backed persistence and validation.
 
 - **Repository:** https://github.com/the-ai-guy-2k/taig_nope_portal.git
 - **Branches:** `main`, `deployable`
 
-## Technology Stack
+## Job Order Workflow
 
-| Layer | Technology |
-|-------|------------|
-| Language | JavaScript |
-| Runtime | Node.js 20+ |
-| Framework | Express |
-| Templating | EJS |
-| Frontend | HTML, CSS, Vanilla JavaScript |
-| Storage | JSON files in `data/` |
-| Container | Docker |
-| CI/CD | GitHub Actions |
+Operators can create, edit, and save Job Orders through HTML forms. All writes pass through `src/services/jobOrderPersistence.js` and `src/models/writer.js` with full schema validation before persistence.
 
-## Project Structure
+### Editable Fields
 
-```
-taig_nope_portal/
-├── .github/workflows/   # CI pipelines
-├── data/                # JSON execution storage
-├── docs/
-│   ├── aci_history/
-│   └── reports/
-├── public/
-│   ├── css/dashboard.css
-│   └── js/dashboard.js
-├── scripts/
-├── src/
-│   ├── app.js
-│   ├── server.js
-│   ├── models/          # Data model schemas, loader, validator
-│   ├── routes/          # Express route modules
-│   └── services/        # View-model builders
-├── views/               # EJS templates (dashboard, partials)
-├── Dockerfile
-├── package.json
-└── README.md
-```
-
-## Execution Cockpit (UI)
-
-The MVP UI shell provides a responsive read-only dashboard:
-
-- **Header** — portal identity and read-only mode indicator
-- **Left navigation** — Dashboard, Job Orders, Timeline, ACI History, Completion Reports, Settings
-- **Main workspace** — Job Order title, mission, status, truth states, human summary
-- **Right panel** — minority report, operator actions, timeline, risks
-- **Footer** — cockpit metadata
-
-All displayed data is loaded via `src/models/loader.js` and `src/services/jobOrderService.js`. No execution data is hardcoded in templates.
+Mission, status, current/next/target truth, human summary, risks, and passdown.
 
 ### Routes
 
-| Route | Purpose |
-|-------|---------|
-| `GET /` | Execution dashboard (primary Job Order) |
-| `GET /dashboard` | Execution dashboard |
-| `GET /job-orders` | Job Order list |
-| `GET /job-orders/:id` | Job Order detail workspace |
-| `GET /timeline` | Timeline events (read-only) |
-| `GET /aci-history` | ACI records (read-only) |
-| `GET /completion-reports` | Completion reports (read-only) |
-| `GET /settings` | Settings placeholder |
-| `GET /health` | Health check JSON |
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/job-orders/new` | GET | Create form |
+| `/job-orders` | POST | Create Job Order |
+| `/job-orders/:id/edit` | GET | Edit form |
+| `/job-orders/:id` | POST | Update Job Order |
+| `/job-orders/:id` | GET | View Job Order (read-only workspace) |
 
-## Data Model
+Read routes (`/`, `/dashboard`, `/job-orders`, placeholders) continue to function.
 
-The **Job Order** is the root execution object. See `src/models/` and `data/` for schemas and storage files. Seed Job Order: `jo-aci-002-seed`.
-
-## Build Instructions
+## Run Instructions
 
 ```bash
 git clone https://github.com/the-ai-guy-2k/taig_nope_portal.git
 cd taig_nope_portal
 npm ci
-```
-
-## Run Instructions
-
-```bash
 npm start
-# Development mode with auto-reload (Node 20+)
-npm run dev
 ```
 
-Open the execution cockpit:
-
-- **Dashboard:** http://localhost:3000/ or http://localhost:3000/dashboard
+- **Dashboard:** http://localhost:3000/dashboard
+- **Create Job Order:** http://localhost:3000/job-orders/new
 - **Seed Job Order:** http://localhost:3000/job-orders/jo-aci-002-seed
-- **Health:** http://localhost:3000/health
-
-## CI Overview
-
-GitHub Actions validates structure, syntax, data model, routes (HTTP 200 + content), health endpoint, and Docker build.
 
 ## Validation Scripts
 
@@ -111,9 +50,14 @@ GitHub Actions validates structure, syntax, data model, routes (HTTP 200 + conte
 npm run validate:structure
 npm run validate:syntax
 npm run validate:data
+npm run validate:workflow   # Create, update, read-after-write, failure tests
 npm run validate:routes
 ```
 
+## CI Overview
+
+GitHub Actions runs all validation scripts including workflow persistence tests and route checks.
+
 ## Next Steps
 
-ACI-004 introduces write operations, editing, and operator workflow capabilities.
+ACI-005 may introduce operator action editing, minority report editing, and authentication.

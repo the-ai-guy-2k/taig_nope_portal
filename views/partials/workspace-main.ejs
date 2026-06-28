@@ -2,7 +2,10 @@
   <section class="jo-header">
     <div class="jo-header-top">
       <h1 class="jo-title"><%= view.jobOrder.title %></h1>
-      <span class="status-badge status-<%= view.jobOrder.status %>"><%= view.jobOrder.status %></span>
+      <div class="jo-header-actions">
+        <a href="/job-orders/<%= view.jobOrder.id %>/edit" class="btn btn-primary btn-sm">Edit Job Order</a>
+        <span class="status-badge status-<%= view.jobOrder.status %>"><%= view.jobOrder.status %></span>
+      </div>
     </div>
     <p class="jo-id">Job Order: <%= view.jobOrder.id %></p>
   </section>
@@ -53,4 +56,22 @@
       Updated: <%= view.formatted.human_summary_at %>
     </p>
   </section>
+
+  <% if (view.jobOrder.passdown) { %>
+    <section class="panel-card">
+      <h2 class="panel-heading">Passdown</h2>
+      <p class="panel-body"><%= view.jobOrder.passdown.summary %></p>
+      <% if (view.jobOrder.passdown.next_steps && view.jobOrder.passdown.next_steps.length) { %>
+        <ul class="criteria-list">
+          <% view.jobOrder.passdown.next_steps.forEach(function(step) { %>
+            <li><%= step %></li>
+          <% }); %>
+        </ul>
+      <% } %>
+      <p class="panel-meta">
+        <% if (view.jobOrder.passdown.handed_off_by) { %>Handed off by: <%= view.jobOrder.passdown.handed_off_by %> · <% } %>
+        Handed off: <%= view.formatted.passdown_at || view.jobOrder.passdown.handed_off_at %>
+      </p>
+    </section>
+  <% } %>
 </main>

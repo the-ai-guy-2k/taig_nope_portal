@@ -1,0 +1,177 @@
+<%- include('../partials/head', { pageTitle }) %>
+<div class="app">
+  <%- include('../partials/header', { executionMode: isEdit ? 'edit' : 'create' }) %>
+  <div class="app-body">
+    <%- include('../partials/nav', { activeNav }) %>
+    <main class="workspace-main workspace-main--solo">
+      <section class="jo-header">
+        <h1 class="jo-title"><%= isEdit ? 'Edit Job Order' : 'Create Job Order' %></h1>
+        <p class="panel-meta">
+          <a href="/job-orders" class="text-link">Back to Job Orders</a>
+          <% if (isEdit) { %>
+            · <a href="/job-orders/<%= values.id %>" class="text-link">View Job Order</a>
+          <% } %>
+        </p>
+      </section>
+
+      <% if (errors.length) { %>
+        <section class="panel-card form-errors" role="alert">
+          <h2 class="panel-heading">Validation Errors</h2>
+          <ul class="error-list">
+            <% errors.forEach(function(error) { %>
+              <li><%= error %></li>
+            <% }); %>
+          </ul>
+        </section>
+      <% } %>
+
+      <form class="job-order-form" method="<%= formMethod %>" action="<%= formAction %>">
+        <% if (!isEdit) { %>
+          <section class="panel-card form-section">
+            <h2 class="panel-heading">Identity</h2>
+            <div class="form-field">
+              <label for="id">Job Order ID</label>
+              <input type="text" id="id" name="id" value="<%= values.id %>" placeholder="jo-example-id" required>
+              <p class="field-hint">Lowercase letters, numbers, and hyphens only. Must start with jo-</p>
+            </div>
+          </section>
+        <% } %>
+
+        <section class="panel-card form-section">
+          <h2 class="panel-heading">Job Order</h2>
+          <div class="form-field">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" value="<%= values.title %>" required>
+          </div>
+          <div class="form-field">
+            <label for="mission">Mission</label>
+            <textarea id="mission" name="mission" rows="4" required><%= values.mission %></textarea>
+          </div>
+          <div class="form-field">
+            <label for="status">Status</label>
+            <select id="status" name="status" required>
+              <% statuses.forEach(function(status) { %>
+                <option value="<%= status %>"<%= values.status === status ? ' selected' : '' %>><%= status %></option>
+              <% }); %>
+            </select>
+          </div>
+        </section>
+
+        <section class="panel-card form-section">
+          <h2 class="panel-heading">Current Truth</h2>
+          <div class="form-field">
+            <label for="current_truth_statement">Statement</label>
+            <textarea id="current_truth_statement" name="current_truth_statement" rows="4" required><%= values.current_truth_statement %></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="current_truth_source">Source</label>
+              <input type="text" id="current_truth_source" name="current_truth_source" value="<%= values.current_truth_source %>">
+            </div>
+            <div class="form-field">
+              <label for="current_truth_recorded_by">Recorded By</label>
+              <input type="text" id="current_truth_recorded_by" name="current_truth_recorded_by" value="<%= values.current_truth_recorded_by %>">
+            </div>
+          </div>
+        </section>
+
+        <section class="panel-card form-section">
+          <h2 class="panel-heading">Next Truth</h2>
+          <div class="form-field">
+            <label for="next_truth_statement">Statement</label>
+            <textarea id="next_truth_statement" name="next_truth_statement" rows="4" required><%= values.next_truth_statement %></textarea>
+          </div>
+          <div class="form-field">
+            <label for="next_truth_rationale">Rationale</label>
+            <textarea id="next_truth_rationale" name="next_truth_rationale" rows="3"><%= values.next_truth_rationale %></textarea>
+          </div>
+        </section>
+
+        <section class="panel-card form-section">
+          <h2 class="panel-heading">Target Truth</h2>
+          <div class="form-field">
+            <label for="target_truth_statement">Statement</label>
+            <textarea id="target_truth_statement" name="target_truth_statement" rows="4" required><%= values.target_truth_statement %></textarea>
+          </div>
+          <div class="form-field">
+            <label for="target_truth_criteria">Criteria (one per line)</label>
+            <textarea id="target_truth_criteria" name="target_truth_criteria" rows="4"><%= values.target_truth_criteria %></textarea>
+          </div>
+        </section>
+
+        <section class="panel-card form-section">
+          <h2 class="panel-heading">Human Summary</h2>
+          <div class="form-field">
+            <label for="human_summary">Summary</label>
+            <textarea id="human_summary" name="human_summary" rows="4" required><%= values.human_summary %></textarea>
+          </div>
+          <div class="form-field">
+            <label for="human_summary_author">Author</label>
+            <input type="text" id="human_summary_author" name="human_summary_author" value="<%= values.human_summary_author %>">
+          </div>
+        </section>
+
+        <section class="panel-card form-section">
+          <h2 class="panel-heading">Risks</h2>
+          <% const riskSlots = values.risks && values.risks.length ? values.risks : [{ description: '', severity: 'low', status: 'open', id: '' }]; %>
+          <% for (let i = 0; i < Math.max(riskSlots.length, 3); i++) { %>
+            <% const risk = riskSlots[i] || { description: '', severity: 'low', status: 'open', id: '' }; %>
+            <fieldset class="risk-fieldset">
+              <legend>Risk <%= i + 1 %></legend>
+              <% if (risk.id) { %>
+                <input type="hidden" name="risks[<%= i %>][id]" value="<%= risk.id %>">
+              <% } %>
+              <div class="form-field">
+                <label for="risk_description_<%= i %>">Description</label>
+                <textarea id="risk_description_<%= i %>" name="risks[<%= i %>][description]" rows="2"><%= risk.description %></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="risk_severity_<%= i %>">Severity</label>
+                  <select id="risk_severity_<%= i %>" name="risks[<%= i %>][severity]">
+                    <% riskSeverities.forEach(function(severity) { %>
+                      <option value="<%= severity %>"<%= risk.severity === severity ? ' selected' : '' %>><%= severity %></option>
+                    <% }); %>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label for="risk_status_<%= i %>">Status</label>
+                  <select id="risk_status_<%= i %>" name="risks[<%= i %>][status]">
+                    <% riskStatuses.forEach(function(status) { %>
+                      <option value="<%= status %>"<%= risk.status === status ? ' selected' : '' %>><%= status %></option>
+                    <% }); %>
+                  </select>
+                </div>
+              </div>
+            </fieldset>
+          <% } %>
+        </section>
+
+        <section class="panel-card form-section">
+          <h2 class="panel-heading">Passdown</h2>
+          <div class="form-field">
+            <label for="passdown_summary">Summary</label>
+            <textarea id="passdown_summary" name="passdown_summary" rows="3"><%= values.passdown_summary %></textarea>
+            <p class="field-hint">Leave blank if no passdown is required.</p>
+          </div>
+          <div class="form-field">
+            <label for="passdown_next_steps">Next Steps (one per line)</label>
+            <textarea id="passdown_next_steps" name="passdown_next_steps" rows="3"><%= values.passdown_next_steps %></textarea>
+          </div>
+          <div class="form-field">
+            <label for="passdown_handed_off_by">Handed Off By</label>
+            <input type="text" id="passdown_handed_off_by" name="passdown_handed_off_by" value="<%= values.passdown_handed_off_by %>">
+          </div>
+        </section>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary"><%= isEdit ? 'Save Job Order' : 'Create Job Order' %></button>
+          <a href="<%= isEdit ? '/job-orders/' + values.id : '/job-orders' %>" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </main>
+  </div>
+  <%- include('../partials/footer') %>
+</div>
+<script src="/js/dashboard.js"></script>
+<%- include('../partials/foot') %>

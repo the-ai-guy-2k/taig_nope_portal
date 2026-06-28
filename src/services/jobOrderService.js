@@ -48,6 +48,7 @@ function buildJobOrderView(jobOrder, collections) {
       next_truth_at: formatDate(jobOrder.next_truth?.recorded_at),
       target_truth_at: formatDate(jobOrder.target_truth?.recorded_at),
       human_summary_at: formatDate(jobOrder.human_summary?.updated_at),
+      passdown_at: formatDate(jobOrder.passdown?.handed_off_at),
     },
   };
 }

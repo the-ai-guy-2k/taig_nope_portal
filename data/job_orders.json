@@ -34,10 +34,17 @@
       "minority_report_current": "mr-seed-001",
       "minority_report_previous": null,
       "aep": "AEP-001-NOPE-LITE-MVP",
-      "acis": ["aci-001", "aci-002"],
-      "operator_actions": ["oa-seed-001"],
+      "acis": [
+        "aci-001",
+        "aci-002"
+      ],
+      "operator_actions": [
+        "oa-seed-001"
+      ],
       "completion_reports": [],
-      "timeline": ["te-seed-001"],
+      "timeline": [
+        "te-seed-001"
+      ],
       "risks": [
         {
           "id": "risk-seed-001",

@@ -9,7 +9,8 @@
     "validate:structure": "node scripts/validate-structure.js",
     "validate:syntax": "node scripts/validate-syntax.js",
     "validate:data": "node scripts/validate-data.js",
-    "validate:routes": "node scripts/validate-routes.js"
+    "validate:routes": "node scripts/validate-routes.js",
+    "validate:workflow": "node scripts/validate-workflow.js"
   },
   "engines": {
     "node": ">=20.0.0"
