@@ -55,7 +55,12 @@ npm run validate:preservation — passed
 
 ## GitHub Actions Results
 
-_Will be updated after push._
+| Branch | Run | Status |
+|--------|-----|--------|
+| `main` | [Run](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28307670676) | **success** |
+| `deployable` | [Run](https://github.com/the-ai-guy-2k/taig_nope_portal/actions/runs/28307671219) | **success** |
+
+Both runs completed on commit `2c62e99` including preservation validation.
 
 ## Risks Discovered
 
@@ -76,7 +81,9 @@ Per approved AEP, ACI-007 is **Validation + Smoke Tests**:
 
 ## Commit IDs
 
-_Will be updated after push._
+| Commit | Branch | Message |
+|--------|--------|---------|
+| `2c62e99` | `main`, `deployable` | ACI-006: Implement Local Preservation subsystem. |
 
 ## Governance Note
 
