@@ -47,6 +47,8 @@ function main() {
   const metadata = readJson('build-metadata.json');
   const validate = readJson('validate-all.json');
   const docker = readJson('validate-docker.json');
+  const publish = readJson('docker-publish.json');
+  const artifact = readJson('docker-artifact.json');
   const pipeline = readJson('pipeline-performance.json');
 
   const lines = [
@@ -90,7 +92,7 @@ function main() {
 
   if (docker) {
     lines.push(
-      `**Docker Foundation Validation:** ${docker.status}`,
+      `**Docker Build Validation:** ${docker.status}`,
       '',
       `Total: ${formatSeconds(docker.total_ms)}`,
       `Image: \`${docker.image || 'n/a'}\``,
@@ -104,7 +106,40 @@ function main() {
       }
       lines.push('');
     }
-  } else {
+  }
+
+  if (publish) {
+    lines.push(
+      `**Docker Hub Publish:** ${publish.status}`,
+      '',
+      `Image: \`${publish.image_name}\``,
+      '',
+      '| Tag | Digest |',
+      '|-----|--------|',
+    );
+    for (const tag of publish.tags || []) {
+      lines.push(`| \`${tag.tag}\` | \`${tag.digest || 'n/a'}\` |`);
+    }
+    lines.push('');
+  }
+
+  if (artifact) {
+    lines.push(
+      `**Docker Pull Validation + Smoke:** ${artifact.status}`,
+      '',
+      `Image: \`${artifact.image_ref}\``,
+      `Digest: \`${artifact.digest || 'n/a'}\``,
+      `Size: ${artifact.compressed_size_display || 'n/a'}`,
+      `Pull: ${formatSeconds(artifact.pull_duration_ms)}`,
+      `Container startup + validation: ${formatSeconds(artifact.container_startup_ms)}`,
+      `Operator visual: ${artifact.operator_visual_verification}`,
+      '',
+    );
+  } else if (!publish) {
+    lines.push('_Docker Hub publish skipped (not deployable push)._', '');
+  }
+
+  if (!docker && !artifact) {
     lines.push('_Docker validation report not found._', '');
   }
 
@@ -130,6 +165,8 @@ function main() {
     '- Structure, syntax, data, workflow, operational, preservation',
     '- Routes, smoke tests, operator visual verification',
     '- Docker build, runtime, preservation, container smoke',
+    '- Docker Hub publish (deployable only)',
+    '- Docker pull validation, smoke, operator visual',
     '',
   );
 

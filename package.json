@@ -1,7 +1,7 @@
 {
   "name": "taig-nope-portal",
   "version": "0.1.0",
-  "description": "NOPE Lite — TAIG NOPE Portal (CI/CD Hardening)",
+  "description": "NOPE Lite — TAIG NOPE Portal (Docker Hub Publish)",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -19,6 +19,8 @@
     "smoke": "node scripts/smoke-tests.js",
     "validate:all": "node scripts/validate-all.js",
     "validate:docker": "node scripts/validate-docker.js",
+    "validate:docker-pull": "node scripts/validate-docker-pull.js",
+    "ci:docker-publish": "node scripts/ci-docker-publish.js",
     "ci:metadata": "node scripts/ci-metadata.js",
     "ci:summary": "node scripts/ci-pipeline-summary.js",
     "ci:performance": "node scripts/ci-pipeline-performance.js",

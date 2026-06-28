@@ -16,7 +16,8 @@ concurrency:
 
 env:
   NODE_VERSION: '20'
-  DOCKER_IMAGE: taig-nope-portal:ci
+  DOCKER_IMAGE_LOCAL: taig-nope-portal:ci
+  DOCKER_HUB_IMAGE_NAME: taig-nope-portal
   CI_REPORT_DIR: ci-reports
 
 permissions:
@@ -62,8 +63,8 @@ jobs:
         if: always()
         run: node scripts/ci-pipeline-summary.js
 
-  docker:
-    name: Docker Foundation Validation
+  docker-build:
+    name: Docker Build
     runs-on: ubuntu-latest
     needs: validate
     timeout-minutes: 20
@@ -79,7 +80,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          tags: ${{ env.DOCKER_IMAGE }}
+          tags: ${{ env.DOCKER_IMAGE_LOCAL }}
           load: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -97,16 +98,119 @@ jobs:
 
       - name: Validate container runtime
         env:
+          DOCKER_IMAGE: ${{ env.DOCKER_IMAGE_LOCAL }}
           SKIP_DOCKER_BUILD: 'true'
         run: npm run validate:docker
 
-      - name: Upload Docker validation reports
+      - name: Upload Docker build reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ci-reports-docker
+          name: ci-reports-docker-build
           path: ci-reports/
           retention-days: 14
+
+      - name: Write job summary
+        if: always()
+        run: node scripts/ci-pipeline-summary.js
+
+  publish:
+    name: Docker Hub Publish
+    runs-on: ubuntu-latest
+    needs: docker-build
+    if: github.ref == 'refs/heads/deployable' && github.event_name == 'push'
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify Docker Hub secrets
+        run: |
+          if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ] || [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
+            echo "DOCKERHUB_USERNAME and DOCKERHUB_TOKEN secrets are required to publish from deployable."
+            exit 1
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Publish image to Docker Hub
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_HUB_IMAGE_NAME }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_HUB_IMAGE_NAME }}:deployable
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_HUB_IMAGE_NAME }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          labels: |
+            org.opencontainers.image.title=taig-nope-portal
+            org.opencontainers.image.description=NOPE Lite TAIG NOPE Portal
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
+
+      - name: Verify published image manifests
+        env:
+          DOCKER_HUB_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_HUB_IMAGE_NAME }}
+        run: node scripts/ci-docker-publish.js
+
+      - name: Upload publish reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-reports-publish
+          path: ci-reports/
+          retention-days: 30
+
+      - name: Write job summary
+        if: always()
+        run: node scripts/ci-pipeline-summary.js
+
+  docker-pull-validation:
+    name: Docker Pull Validation + Smoke
+    runs-on: ubuntu-latest
+    needs: publish
+    if: github.ref == 'refs/heads/deployable' && github.event_name == 'push'
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download publish reports
+        uses: actions/download-artifact@v4
+        with:
+          name: ci-reports-publish
+          path: ci-reports
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Pull and validate published image
+        env:
+          DOCKER_HUB_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_HUB_IMAGE_NAME }}
+          DOCKER_PULL_TAG: deployable
+        run: npm run validate:docker-pull
+
+      - name: Upload pull validation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-reports-docker-pull
+          path: ci-reports/
+          retention-days: 30
 
       - name: Write job summary
         if: always()
@@ -117,11 +221,13 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - validate
-      - docker
+      - docker-build
+      - publish
+      - docker-pull-validation
     if: always()
 
     steps:
-      - name: Download validation reports
+      - name: Download CI reports
         uses: actions/download-artifact@v4
         with:
           pattern: ci-reports-*
@@ -147,9 +253,15 @@ jobs:
         run: node scripts/ci-pipeline-summary.js
 
       - name: Fail pipeline if required jobs failed
-        if: needs.validate.result != 'success' || needs.docker.result != 'success'
+        if: |
+          needs.validate.result != 'success' ||
+          needs.docker-build.result != 'success' ||
+          needs.publish.result == 'failure' ||
+          needs.docker-pull-validation.result == 'failure'
         run: |
           echo "Pipeline failed."
           echo "  validate: ${{ needs.validate.result }}"
-          echo "  docker: ${{ needs.docker.result }}"
+          echo "  docker-build: ${{ needs.docker-build.result }}"
+          echo "  publish: ${{ needs.publish.result }}"
+          echo "  docker-pull-validation: ${{ needs.docker-pull-validation.result }}"
           exit 1

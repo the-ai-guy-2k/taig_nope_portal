@@ -37,6 +37,8 @@ function readJson(name) {
 function main() {
   const validate = readJson('validate-all.json');
   const docker = readJson('validate-docker.json');
+  const artifact = readJson('docker-artifact.json');
+  const publish = readJson('docker-publish.json');
   const runAttempt = Number(process.env.GITHUB_RUN_ATTEMPT || 1);
   const failedRetryCount = Math.max(0, runAttempt - 1);
 
@@ -45,21 +47,35 @@ function main() {
     jobs.push({ name: 'Validation + Smoke Tests', ms: validate.total_ms || 0 });
   }
   if (docker) {
-    jobs.push({ name: 'Docker Foundation Validation', ms: docker.total_ms || 0 });
+    jobs.push({ name: 'Docker Build', ms: docker.total_ms || 0 });
+  }
+  if (publish) {
+    jobs.push({ name: 'Docker Hub Publish', ms: 0 });
+  }
+  if (artifact) {
+    jobs.push({ name: 'Docker Pull Validation + Smoke', ms: artifact.total_ms || 0 });
   }
 
-  const totalMs = jobs.reduce((sum, job) => sum + job.ms, 0);
-  const sorted = [...jobs].sort((a, b) => b.ms - a.ms);
+  const timedJobs = jobs.filter((job) => job.ms > 0);
+  const totalMs = timedJobs.reduce((sum, job) => sum + job.ms, 0);
+  const sorted = [...timedJobs].sort((a, b) => b.ms - a.ms);
   const longest = sorted[0] || { name: 'n/a', ms: 0 };
   const fastest = sorted[sorted.length - 1] || { name: 'n/a', ms: 0 };
 
-  const validateOk = validate?.status === 'passed';
-  const dockerOk = !docker || docker?.status === 'passed';
+  const validateOk = !validate || validate.status === 'passed';
+  const dockerOk = !docker || docker.status === 'passed';
+  const publishOk = !publish || publish.status === 'published';
+  const pullOk = !artifact || artifact.status === 'passed';
+
   let reliabilityNote = 'All pipeline gates passed.';
-  if (validate && !validateOk) {
+  if (!validateOk) {
     reliabilityNote = 'Validation + Smoke Tests failed. Review validate-all.json and job logs.';
-  } else if (docker && !dockerOk) {
-    reliabilityNote = 'Docker Foundation Validation failed. Review validate-docker.json and container logs.';
+  } else if (!dockerOk) {
+    reliabilityNote = 'Docker Build validation failed. Review validate-docker.json and container logs.';
+  } else if (!publishOk) {
+    reliabilityNote = 'Docker Hub publish verification failed. Review docker-publish.json.';
+  } else if (!pullOk) {
+    reliabilityNote = 'Docker pull validation failed. Review docker-artifact.json and pull logs.';
   } else if (!validate && !docker) {
     reliabilityNote = 'Pipeline reports incomplete. Review artifact uploads.';
   } else if (failedRetryCount > 0) {
@@ -86,7 +102,7 @@ function main() {
   );
 
   console.log('Pipeline performance recorded:');
-  console.log(`  Total: ${(totalMs / 1000).toFixed(1)}s`);
+  console.log(`  Total (script timings): ${(totalMs / 1000).toFixed(1)}s`);
   console.log(`  Longest: ${longest.name} (${(longest.ms / 1000).toFixed(1)}s)`);
   console.log(`  Fastest: ${fastest.name} (${(fastest.ms / 1000).toFixed(1)}s)`);
   console.log(`  Failed retry count: ${failedRetryCount}`);

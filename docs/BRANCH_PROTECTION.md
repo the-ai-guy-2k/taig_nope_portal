@@ -9,10 +9,25 @@ Enable **Require status checks to pass before merging** with:
 | Check | Job |
 |-------|-----|
 | Validation + Smoke Tests | `validate` |
-| Docker Foundation Validation | `docker` |
+| Docker Build | `docker-build` |
+| Docker Hub Publish | `publish` (deployable only) |
+| Docker Pull Validation + Smoke | `docker-pull-validation` (deployable only) |
 | Pipeline Report | `pipeline-report` |
 
-The workflow file is `.github/workflows/ci.yml` (workflow name: **CI/CD Pipeline**).
+Workflow file: `.github/workflows/ci.yml` (name: **CI/CD Pipeline**).
+
+On `main`, `publish` and `docker-pull-validation` are skipped — only require `validate`, `docker-build`, and `pipeline-report`.
+
+On `deployable`, require all five checks (publish runs only when Docker Hub secrets are configured).
+
+## Docker Hub Secrets
+
+Before merging to `deployable`, configure repository secrets:
+
+- `DOCKERHUB_USERNAME`
+- `DOCKERHUB_TOKEN`
+
+See [DOCKER_HUB.md](DOCKER_HUB.md).
 
 ## Recommended Settings
 
@@ -22,25 +37,17 @@ The workflow file is `.github/workflows/ci.yml` (workflow name: **CI/CD Pipeline
 | Require status checks | Yes | Yes |
 | Require branches up to date | Yes | Yes |
 | Do not allow bypassing | Yes | Yes |
-| Restrict pushes (optional) | Admins only | Admins only |
 
 ## Deployable Branch Policy
 
-`deployable` should only receive merges from `main` after CI passes on both branches. Every push to `deployable` runs the full pipeline:
-
-1. Validation + Smoke Tests (`validate:all`)
-2. Docker build (cached) + container validation
-3. Pipeline performance report and workflow summary
+`deployable` receives merges from `main` after CI passes, then publishes to Docker Hub on push. Every publish is followed by pull validation against the `:deployable` tag.
 
 ## Evidence Artifacts
 
-Failed or successful runs upload `ci-reports-*` artifacts (14–30 day retention) containing:
-
-- `build-metadata.json`
-- `validate-all.json` (per-stage timing)
-- `validate-docker.json` (container check timing)
-- `pipeline-performance.json` (total/longest/fastest job metrics)
-
-## Concurrency
-
-The pipeline uses `concurrency: cancel-in-progress` so only the latest commit per branch is validated, reducing queue time and stale failures.
+| Artifact | Retention | Contents |
+|----------|-----------|----------|
+| `ci-reports-validate` | 14 days | `validate-all.json` |
+| `ci-reports-docker-build` | 14 days | `validate-docker.json` |
+| `ci-reports-publish` | 30 days | `docker-publish.json` |
+| `ci-reports-docker-pull` | 30 days | `docker-artifact.json` |
+| `ci-reports-pipeline` | 30 days | `pipeline-performance.json` |

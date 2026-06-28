@@ -37,6 +37,7 @@ const REQUIRED_PATHS = [
   'src/models/index.js',
   'docs/aci_history/README.md',
   'docs/BRANCH_PROTECTION.md',
+  'docs/DOCKER_HUB.md',
   'docs/reports',
   '.github/workflows/ci.yml',
   'scripts/validate-preservation.js',
@@ -47,6 +48,9 @@ const REQUIRED_PATHS = [
   'scripts/ci-metadata.js',
   'scripts/ci-pipeline-summary.js',
   'scripts/ci-pipeline-performance.js',
+  'scripts/ci-docker-publish.js',
+  'scripts/validate-docker-pull.js',
+  'scripts/lib/docker-container-validation.js',
   'scripts/lib/test-server.js',
 ];
 

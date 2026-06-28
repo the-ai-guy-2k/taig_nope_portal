@@ -1,8 +1,8 @@
 # NOPE Lite — TAIG NOPE Portal
 
-NOPE Lite proves the TAIG execution framework. **Version:** Docker Foundation (ACI-008) · **Pipeline:** CI/CD Hardening (ACI-009)
+NOPE Lite proves the TAIG execution framework. **Version:** Docker Foundation (ACI-008) · **Publish:** Docker Hub (ACI-010)
 
-The **Docker image** is the canonical deployment artifact. Every push to `main` and `deployable` runs the full CI/CD pipeline.
+The **Docker Hub image** is the canonical deployment artifact for PE and PAPEV missions.
 
 ## CI/CD Architecture
 
@@ -12,38 +12,72 @@ push / pull_request (main, deployable)
         ▼
 ┌───────────────────────────┐
 │  validate                 │  npm run validate:all
-│  Validation + Smoke Tests │  → ci-reports/validate-all.json
 └─────────────┬─────────────┘
-              │ needs
               ▼
 ┌───────────────────────────┐
-│  docker                   │  buildx + GHA cache
-│  Docker Foundation        │  SKIP_DOCKER_BUILD validate:docker
-└─────────────┬─────────────┘  → ci-reports/validate-docker.json
-              │ needs (always)
+│  docker-build             │  buildx + GHA cache + validate:docker
+└─────────────┬─────────────┘
+              ▼ (deployable push only)
+┌───────────────────────────┐
+│  publish                  │  Docker Hub: latest, deployable, SHA
+└─────────────┬─────────────┘
               ▼
 ┌───────────────────────────┐
-│  pipeline-report          │  timing + workflow summary
-│  Pipeline Report          │  → ci-reports/pipeline-performance.json
+│  docker-pull-validation   │  pull + smoke + operator visual
+└─────────────┬─────────────┘
+              ▼
+┌───────────────────────────┐
+│  pipeline-report          │  performance + workflow summary
 └───────────────────────────┘
 ```
 
 | Feature | Implementation |
 |---------|----------------|
-| Concurrency | Cancel in-progress runs per branch |
-| Build metadata | `scripts/ci-metadata.js` → `build-metadata.json` |
-| Per-stage timing | `validate-all.json`, `validate-docker.json` |
-| Docker cache | `docker/build-push-action` with `type=gha` |
-| OCI labels | `image.revision`, `image.source`, `image.created` |
-| Artifacts | `ci-reports-*` retained 14–30 days |
-| Workflow summary | `scripts/ci-pipeline-summary.js` |
-| Branch protection | See [docs/BRANCH_PROTECTION.md](docs/BRANCH_PROTECTION.md) |
+| Publish scope | `deployable` branch pushes only |
+| Docker Hub secrets | `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` |
+| Published tags | `latest`, `deployable`, `<commit-sha>` |
+| Pull validation | `npm run validate:docker-pull` in CI |
+| Artifact evidence | `docker-publish.json`, `docker-artifact.json` |
+| Setup guide | [docs/DOCKER_HUB.md](docs/DOCKER_HUB.md) |
 
-### Pipeline gates (every push)
+### Pipeline gates
 
-Structure · syntax · data · workflow · operational · preservation · routes · smoke · operator visual · Docker build · Docker runtime
+**All branches:** structure · syntax · data · workflow · operational · preservation · routes · smoke · operator visual · Docker build · Docker runtime
 
-## Docker
+**deployable only:** Docker Hub publish · pull validation · container smoke · operator visual on published image
+
+## Docker Hub (Published Image)
+
+Replace `<username>` with your Docker Hub namespace (repository secret `DOCKERHUB_USERNAME`).
+
+### Pull
+
+```bash
+docker pull <username>/taig-nope-portal:deployable
+```
+
+### Published tags
+
+| Tag | When updated |
+|-----|----------------|
+| `latest` | Every successful `deployable` publish |
+| `deployable` | Every successful `deployable` publish |
+| `<commit-sha>` | Immutable tag for that build |
+
+### Run
+
+```bash
+docker run --rm -p 3000:3000 \
+  -v nope-nebula-local:/app/nebula_local \
+  <username>/taig-nope-portal:deployable
+```
+
+- **Dashboard:** http://localhost:3000/dashboard
+- **Health:** http://localhost:3000/health
+
+See [docs/DOCKER_HUB.md](docs/DOCKER_HUB.md) for GitHub Secrets setup.
+
+## Docker (Local Build)
 
 ### Container architecture
 
@@ -115,6 +149,7 @@ Nine stages: structure, syntax, data, workflow, operational, preservation, route
 |--------|---------|
 | `npm run validate:all` | Complete validation suite (CI gate) |
 | `npm run validate:docker` | Docker build + container validation (CI gate) |
+| `npm run validate:docker-pull` | Pull published image + validate (CI gate) |
 | `npm run validate:structure` | Required repository paths |
 | `npm run validate:syntax` | JavaScript syntax check |
 | `npm run validate:data` | JSON integrity and schema validation |
@@ -174,10 +209,9 @@ taskkill /PID <pid> /F
 
 | ACI | Title |
 |-----|-------|
-| ACI-010 | Docker Hub Publish |
 | ACI-011 | PA Documentation |
 | ACI-012 | PA Certification |
 
 ## Next Steps
 
-ACI-010 — Docker Hub Publish.
+ACI-011 — PA Documentation.
