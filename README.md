@@ -1,39 +1,45 @@
 # NOPE Lite — TAIG NOPE Portal
 
-Repository foundation, execution data model, Job Order workflow, and operational awareness layer for NOPE Lite.
+NOPE Lite proves the TAIG execution framework. **Version:** Local Preservation (ACI-006)
 
-**Version:** Operational Awareness (ACI-005)
+## Local Preservation
 
-## Operational Workflow
+Execution continuity is preserved outside Git in `nebula_local/`. The Local Preservation service (`src/services/localPreservation.js`) automatically snapshots execution context on application startup.
 
-ACI-005 adds editable **Operator Actions** and **Minority Reports** with automatic current/previous rotation.
+### Preserved Artifacts
 
-### Operator Actions
+| File | Contents |
+|------|----------|
+| `current_job_order.json` | Active Job Order snapshot |
+| `minority_report_current.md` | Current Minority Report |
+| `minority_report_previous.md` | Previous Minority Report |
+| `current_aci.json` | Current ACI summary |
+| `completion_summary.json` | Latest completion report summary |
+| `restore_status.json` | Preservation and restoration metadata |
 
-| Route | Method | Purpose |
-|-------|--------|---------|
-| `/job-orders/:id/operator-actions` | GET | List and create actions |
-| `/job-orders/:id/operator-actions` | POST | Create action |
-| `/job-orders/:id/operator-actions/:actionId` | POST | Update, complete, or archive |
+### Ignored Folders (never commit)
 
-Statuses: `open`, `completed`, `archived`. Includes owner, checklist, created/completed dates.
+- `nebula_local/`
+- `.nebula/`
+- `aiw_local/`
+- `*.local.md`
 
-### Minority Reports
+### Restoration
 
-| Route | Method | Purpose |
-|-------|--------|---------|
-| `/job-orders/:id/minority-report/edit` | GET | New report form |
-| `/job-orders/:id/minority-report` | POST | Save with rotation |
+On startup the application:
 
-Saving a new report moves the current report to **Previous**, marks it superseded, and preserves history in `data/minority_reports.json`.
+1. Detects local preservation artifacts
+2. Loads restoration metadata (does **not** overwrite repository `data/` files)
+3. Displays Last Preserved, Current Job Order, Current ACI, and Restoration Status on the dashboard
 
-### Dashboard Panels
+Manual snapshot: `npm run preserve:snapshot`
 
-The execution cockpit right panel displays:
+### Operator Responsibilities
 
-- Current and Previous Minority Reports (mission, phase, truth states, risk, next action, target)
-- Open Operator Actions Required (status, owner, checklist, dates)
-- Timeline and Risks
+- Do not commit `nebula_local/` or other ignored preservation paths
+- After cloning, run `npm start` to initialize or restore local context
+- Use the dashboard preservation banner to confirm execution continuity
+- Update local minority reports through normal application workflow; preservation captures them automatically
 
 ## Run Instructions
 
@@ -45,27 +51,22 @@ npm start
 ```
 
 - **Dashboard:** http://localhost:3000/dashboard
-- **Operator Actions:** http://localhost:3000/job-orders/jo-aci-002-seed/operator-actions
-- **Minority Report:** http://localhost:3000/job-orders/jo-aci-002-seed/minority-report/edit
+- **Health:** http://localhost:3000/health
 
 ## Validation Scripts
 
 ```bash
-npm run validate:structure
-npm run validate:syntax
-npm run validate:data
-npm run validate:workflow
+npm run validate:preservation
 npm run validate:operational
+npm run validate:workflow
+npm run validate:data
 npm run validate:routes
 ```
 
 ## Approved AEP — Remaining ACIs
 
-The approved NOPE Lite AEP governs all future work. Remaining sequence:
-
 | ACI | Title |
 |-----|-------|
-| ACI-006 | Local Preservation |
 | ACI-007 | Validation + Smoke Tests |
 | ACI-008 | Docker Foundation |
 | ACI-009 | CI/CD Hardening |
@@ -73,8 +74,6 @@ The approved NOPE Lite AEP governs all future work. Remaining sequence:
 | ACI-011 | PA Documentation |
 | ACI-012 | PA Certification |
 
-NOPE Lite proves the execution framework. Authentication, authorization, notifications, and cloud sync are **out of scope** for the PA.
-
 ## Next Steps
 
-ACI-006 — Local Preservation.
+ACI-007 — Validation + Smoke Tests.

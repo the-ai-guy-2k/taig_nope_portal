@@ -3,9 +3,14 @@
   <%- include('../partials/header') %>
   <div class="app-body">
     <%- include('../partials/nav', { activeNav }) %>
-    <div class="content-area content-area--workspace">
-      <%- include('../partials/workspace-main', { view }) %>
-      <%- include('../partials/workspace-panel', { view }) %>
+    <div class="main-column">
+      <% if (typeof preservation !== 'undefined' && preservation) { %>
+        <%- include('../partials/preservation-banner', { preservation }) %>
+      <% } %>
+      <div class="content-area content-area--workspace">
+        <%- include('../partials/workspace-main', { view }) %>
+        <%- include('../partials/workspace-panel', { view }) %>
+      </div>
     </div>
   </div>
   <%- include('../partials/footer') %>

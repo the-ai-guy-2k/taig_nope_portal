@@ -43,6 +43,9 @@ jobs:
       - name: Validate operational workflows
         run: npm run validate:operational
 
+      - name: Validate local preservation
+        run: npm run validate:preservation
+
       - name: Start application and verify routes
         run: npm run validate:routes
 

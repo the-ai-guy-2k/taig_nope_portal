@@ -10,6 +10,7 @@ nebula_local/
 .nebula/
 aiw_local/
 *.local.md
+.tmp-preservation-test/
 
 # Logs
 logs/

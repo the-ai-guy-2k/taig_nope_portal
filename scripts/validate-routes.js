@@ -10,7 +10,7 @@ const ROOT = path.join(__dirname, '..');
 
 const ROUTES = [
   { path: '/', expect: 'ACI-002 Data Model Foundation' },
-  { path: '/dashboard', expect: 'ACI-002 Data Model Foundation' },
+  { path: '/dashboard', expect: 'Local Preservation' },
   { path: '/job-orders', expect: 'Job Orders' },
   { path: '/job-orders/new', expect: 'Create Job Order' },
   { path: '/job-orders/jo-aci-002-seed', expect: 'ACI-002 Data Model Foundation' },

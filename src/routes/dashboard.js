@@ -20,6 +20,7 @@ function renderDashboard(req, res) {
     pageTitle: 'Dashboard',
     activeNav: 'dashboard',
     view,
+    preservation: req.app.locals.preservation,
   });
 }
 

@@ -15,6 +15,7 @@ Each ACI represents a discrete, governed change to the repository. Completion re
 | ACI-003 | MVP UI Shell | Complete | [ACI-003-completion-report.md](../reports/ACI-003-completion-report.md) |
 | ACI-004 | Job Order Execution Workflow | Complete | [ACI-004-completion-report.md](../reports/ACI-004-completion-report.md) |
 | ACI-005 | Operator Actions + Minority Report | Complete | [ACI-005-completion-report.md](../reports/ACI-005-completion-report.md) |
+| ACI-006 | Local Preservation | Complete | [ACI-006-completion-report.md](../reports/ACI-006-completion-report.md) |
 
 ## Conventions
 

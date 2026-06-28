@@ -1,0 +1,44 @@
+<% if (preservation && preservation.available) { %>
+<section class="preservation-banner" aria-label="Local preservation status">
+  <div class="preservation-banner-inner">
+    <h2 class="preservation-heading">Local Preservation</h2>
+    <dl class="preservation-fields">
+      <div class="preservation-field">
+        <dt>Restoration Status</dt>
+        <dd><%= preservation.restoration_status %></dd>
+      </div>
+      <div class="preservation-field">
+        <dt>Last Preserved</dt>
+        <dd><%= preservation.last_preserved || '—' %></dd>
+      </div>
+      <% if (preservation.last_restored) { %>
+        <div class="preservation-field">
+          <dt>Last Restored</dt>
+          <dd><%= preservation.last_restored %></dd>
+        </div>
+      <% } %>
+      <div class="preservation-field">
+        <dt>Current Job Order</dt>
+        <dd>
+          <% if (preservation.current_job_order_id) { %>
+            <a href="/job-orders/<%= preservation.current_job_order_id %>" class="text-link">
+              <%= preservation.current_job_order_title || preservation.current_job_order_id %>
+            </a>
+          <% } else { %>
+            —
+          <% } %>
+        </dd>
+      </div>
+      <div class="preservation-field">
+        <dt>Current ACI</dt>
+        <dd><%= preservation.current_aci || '—' %></dd>
+      </div>
+      <div class="preservation-field">
+        <dt>Application Version</dt>
+        <dd><%= preservation.application_version %></dd>
+      </div>
+    </dl>
+    <p class="preservation-note"><%= preservation.message %></p>
+  </div>
+</section>
+<% } %>

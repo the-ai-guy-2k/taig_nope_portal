@@ -11,7 +11,9 @@
     "validate:data": "node scripts/validate-data.js",
     "validate:routes": "node scripts/validate-routes.js",
     "validate:workflow": "node scripts/validate-workflow.js",
-    "validate:operational": "node scripts/validate-operational.js"
+    "validate:operational": "node scripts/validate-operational.js",
+    "validate:preservation": "node scripts/validate-preservation.js",
+    "preserve:snapshot": "node -e \"require('./src/services/localPreservation').savePreservationSnapshot(); console.log('Preservation snapshot saved.');\""
   },
   "engines": {
     "node": ">=20.0.0"

@@ -21,6 +21,7 @@ const REQUIRED_PATHS = [
   'src/services/operatorActionPersistence.js',
   'src/services/minorityReportPersistence.js',
   'src/services/operationalHelpers.js',
+  'src/services/localPreservation.js',
   'views/job-orders/operator-actions.ejs',
   'views/job-orders/minority-report-form.ejs',
   'src/models/writer.js',
