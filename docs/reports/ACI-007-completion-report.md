@@ -80,7 +80,7 @@ ACI-007 hardened the NOPE Lite Production Artifact with a repeatable validation 
 ### Local
 
 ```
-npm run validate:all — passed (9 stages, ~7s)
+npm run validate:all — passed (9 stages, ~4s)
   - Repository structure
   - JavaScript syntax (29 files)
   - Data integrity (6 JSON files, seed Job Order)
@@ -128,11 +128,22 @@ Per approved AEP, ACI-008 is **Docker Foundation**:
 3. Align Dockerfile with validation suite entry points
 4. Document container startup and operator access URLs
 
+## GitHub Actions Results
+
+CI triggered on push of commit `e7cff81` to `main` and `deployable`.
+
+| Branch | Workflow | Status |
+|--------|----------|--------|
+| `main` | [Actions](https://github.com/the-ai-guy-2k/taig_nope_portal/actions?query=branch%3Amain) | Triggered on push |
+| `deployable` | [Actions](https://github.com/the-ai-guy-2k/taig_nope_portal/actions?query=branch%3Adeployable) | Triggered on push |
+
+Gate: `npm run validate:all` (9 stages including smoke tests and operator visual verification).
+
 ## Commit IDs
 
 | Commit | Branch | Message |
 |--------|--------|---------|
-| _(pending)_ | `main`, `deployable` | ACI-007: Validation + Smoke Tests |
+| `e7cff81` | `main`, `deployable` | ACI-007: Validation + Smoke Tests and route audit hardening. |
 
 ## Governance Note
 
