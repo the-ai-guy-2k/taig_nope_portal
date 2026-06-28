@@ -17,7 +17,7 @@ concurrency:
 env:
   NODE_VERSION: '20'
   DOCKER_IMAGE_LOCAL: taig-nope-portal:ci
-  DOCKER_HUB_IMAGE_NAME: taig-nope-portal
+  DOCKER_HUB_IMAGE_NAME: taig_nope_portal
   CI_REPORT_DIR: ci-reports
 
 permissions:

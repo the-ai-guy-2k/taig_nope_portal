@@ -20,6 +20,7 @@ Each ACI represents a discrete, governed change to the repository. Completion re
 | ACI-008 | Docker Foundation | Complete | [ACI-008-completion-report.md](../reports/ACI-008-completion-report.md) |
 | ACI-009 | CI/CD Hardening | Complete | [ACI-009-completion-report.md](../reports/ACI-009-completion-report.md) |
 | ACI-010 | Docker Hub Publish | Complete | [ACI-010-completion-report.md](../reports/ACI-010-completion-report.md) |
+| ACI-011 | PA Documentation | Complete | [ACI-011-completion-report.md](../reports/ACI-011-completion-report.md) |
 
 ## Conventions
 

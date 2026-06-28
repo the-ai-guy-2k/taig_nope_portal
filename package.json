@@ -1,7 +1,7 @@
 {
   "name": "taig-nope-portal",
   "version": "0.1.0",
-  "description": "NOPE Lite — TAIG NOPE Portal (Docker Hub Publish)",
+  "description": "NOPE Lite — TAIG NOPE Portal (PA Documentation)",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -26,6 +26,8 @@
     "ci:performance": "node scripts/ci-pipeline-performance.js",
     "docker:build": "docker build -t taig-nope-portal:local .",
     "docker:run": "docker run --rm -p 3000:3000 -v nope-nebula-local:/app/nebula_local taig-nope-portal:local",
+    "docker:pull": "docker pull taig2k/taig_nope_portal:deployable",
+    "docker:run:published": "docker run --rm -p 3000:3000 -v nope-nebula-local:/app/nebula_local taig2k/taig_nope_portal:deployable",
     "preserve:snapshot": "node -e \"require('./src/services/localPreservation').savePreservationSnapshot(); console.log('Preservation snapshot saved.');\""
   },
   "engines": {

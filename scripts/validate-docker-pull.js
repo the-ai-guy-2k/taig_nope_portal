@@ -12,7 +12,7 @@ const { createDockerContainerValidation } = require('./lib/docker-container-vali
 
 const ROOT = path.join(__dirname, '..');
 const REPORT_DIR = process.env.CI_REPORT_DIR || path.join(ROOT, 'ci-reports');
-const IMAGE = process.env.DOCKER_HUB_IMAGE;
+const IMAGE = process.env.DOCKER_HUB_IMAGE || 'taig2k/taig_nope_portal';
 const PULL_TAG = process.env.DOCKER_PULL_TAG || 'deployable';
 const CONTAINER = process.env.DOCKER_CONTAINER || 'taig-nope-portal-pull-test';
 const HOST_PORT = Number(process.env.DOCKER_VALIDATE_PORT || 3011);
