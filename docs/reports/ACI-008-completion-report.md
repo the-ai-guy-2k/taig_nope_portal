@@ -139,7 +139,7 @@ Per approved AEP, ACI-009 is **CI/CD Hardening**:
 
 | Commit | Branch | Message |
 |--------|--------|---------|
-| _(pending)_ | `main`, `deployable` | ACI-008: Docker Foundation |
+| `b39f206` | `main`, `deployable` | ACI-008: Docker Foundation for production container deployment. |
 
 ## Governance Note
 
