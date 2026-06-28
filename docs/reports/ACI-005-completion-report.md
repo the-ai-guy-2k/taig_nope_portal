@@ -62,23 +62,42 @@ Both runs completed on commit `6f48be8` including operational workflow validatio
 
 | Risk | Severity | Mitigation |
 |------|----------|------------|
-| No auth on operational routes | Expected | ACI-006 recommendation |
+| No auth on operational routes | Expected | Intentionally out of PA scope per approved AEP |
 | Report history grows unbounded | Low | Archive status tracks retired reports |
-| Concurrent writes to JSON files | Medium | Document single-operator constraint |
+| Concurrent writes to JSON files | Medium | Single-operator MVP; local preservation in ACI-006 |
 
 ## Recommendations for ACI-006
 
-1. Add authentication for write operations
-2. Operator action edit form (currently create/complete/archive)
-3. Minority report history browser
-4. Optional notifications on new operator actions
-5. File locking for write safety
+Per the approved NOPE Lite AEP, ACI-006 is **Local Preservation** — not authentication or enterprise application features.
+
+1. Formalize `nebula_local/`, `.nebula/`, and `aiw_local/` preservation conventions
+2. Document operator continuity artifacts (e.g. `minority_report_previous.md`) and update procedures
+3. Ensure local-only paths remain gitignored and never committed
+4. Define preservation triggers at each ACI completion boundary
+
+## Approved AEP Sequence (remaining)
+
+| ACI | Title |
+|-----|-------|
+| ACI-006 | Local Preservation |
+| ACI-007 | Validation + Smoke Tests |
+| ACI-008 | Docker Foundation |
+| ACI-009 | CI/CD Hardening |
+| ACI-010 | Docker Hub Publish |
+| ACI-011 | PA Documentation |
+| ACI-012 | PA Certification |
+
+Authentication, authorization, notifications, and cloud synchronization remain **out of scope** for the PA.
 
 ## Commit IDs
 
 | Commit | Branch | Message |
 |--------|--------|---------|
 | `6f48be8` | `main`, `deployable` | ACI-005: Add Operator Actions and Minority Report operational layer. |
+
+## Governance Alignment Note (2026-06-28)
+
+Initial recommendations for ACI-006 incorrectly suggested authentication and enterprise features. The approved AEP designates ACI-006 as **Local Preservation**. This report has been corrected accordingly. ACI-005 implementation is accepted.
 
 ## Governance Note
 

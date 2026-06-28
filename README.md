@@ -59,6 +59,22 @@ npm run validate:operational
 npm run validate:routes
 ```
 
+## Approved AEP — Remaining ACIs
+
+The approved NOPE Lite AEP governs all future work. Remaining sequence:
+
+| ACI | Title |
+|-----|-------|
+| ACI-006 | Local Preservation |
+| ACI-007 | Validation + Smoke Tests |
+| ACI-008 | Docker Foundation |
+| ACI-009 | CI/CD Hardening |
+| ACI-010 | Docker Hub Publish |
+| ACI-011 | PA Documentation |
+| ACI-012 | PA Certification |
+
+NOPE Lite proves the execution framework. Authentication, authorization, notifications, and cloud sync are **out of scope** for the PA.
+
 ## Next Steps
 
-ACI-006 may introduce authentication, notifications, or execution engine capabilities.
+ACI-006 — Local Preservation.
