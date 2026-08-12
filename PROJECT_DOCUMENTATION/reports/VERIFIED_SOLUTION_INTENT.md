@@ -5,7 +5,7 @@
 **QEN:** Zepline · **AIW:** CAE  
 **Recorded:** 2026-08-11  
 **Working branch:** `docs/repo-current-truth`  
-**Discovery source used:** `docs/nebula/reports/REPO_CURRENT_TRUTH_DISCOVERY.md` (ACI-ZEP-001)
+**Discovery source used:** `PROJECT_DOCUMENTATION/reports/REPO_CURRENT_TRUTH_DISCOVERY.md` (ACI-ZEP-001; relocated from `docs/nebula/reports/` under ACI-ZEP-005)
 
 Truth classification used below:
 
