@@ -72,7 +72,7 @@ Documented operator surfaces **[R]**:
 | `/job-orders/:id/operator-actions` | Operator Actions |
 | `/job-orders/:id/minority-report/edit` | Minority Report edit |
 
-Placeholder routes expose ACI history, timeline, and completion-report sections **[R]**.
+Placeholder-module routes expose ACI history, timeline, and completion-report **read-only list views** (from JSON); `/settings` remains a stub **[R]**.
 
 ---
 
@@ -126,7 +126,7 @@ Also: `validate:docker`, `validate:docker-pull`, `audit:routes`.
 ## Known implementation limitations
 
 **[R]** JSON concurrency / single-operator MVP (risk register).  
-**[R]** Placeholder UI for some history/report sections.  
+**[R]** History/report surfaces under placeholder routes are read-only (not full edit workflows); `/settings` is a stub.  
 **[R]** Seed ACI history lags documented ACI-001…012 markdown history.  
 **[R]** Container `data/` writes ephemeral without volume (docs emphasize `nebula_local` volume).  
 **[R]** No authentication; public image surface accepted for PA scope.
@@ -145,7 +145,7 @@ Based only on project evidence:
 
 - Server-rendered Node/Express application design with clear layering  
 - Schema-validated JSON domain modeling for governed execution objects  
-- Operator-facing CRUD/workflow UI (EJS + static assets)  
+- Operator-facing create/edit/list workflow UI (EJS + static assets; no Job Order delete route evidenced)  
 - Scripted multi-stage validation without a separate unit-test framework  
 - Incremental, ACI-governed feature delivery with completion evidence  
 

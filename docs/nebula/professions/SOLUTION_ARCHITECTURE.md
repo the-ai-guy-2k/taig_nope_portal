@@ -50,7 +50,7 @@ NOPE Lite (Node/Express + EJS)  ── JSON files (data/)
 
 **[R]** Browser → Express routes → services → models → JSON files.  
 **[R]** Job Order is the architectural root; other entities link by id.  
-**[R]** Placeholder routes provide additional observation surfaces with lighter workflow depth than Job Order / Operator Action / Minority Report paths.
+**[R]** Placeholder-module routes provide additional observation surfaces (ACI history, timeline, completion reports as read-only lists; `/settings` stub) with lighter depth than Job Order / Operator Action / Minority Report edit paths.
 
 ---
 
@@ -109,7 +109,7 @@ NOPE Lite (Node/Express + EJS)  ── JSON files (data/)
 
 ## Current architecture limitations
 
-**[R]** Placeholder depth for some history/report views.  
+**[R]** History/report observation views are read-only; settings stub; edit depth concentrated on Job Orders / actions / minority reports.  
 **[R]** Seed portal ACI history incomplete vs markdown ACI docs.  
 **[R]** Ephemeral container filesystem for `data/` without additional volume.  
 **[R]** JSON concurrency limits.  
@@ -140,7 +140,7 @@ NOPE Lite (Node/Express + EJS)  ── JSON files (data/)
 
 ## Professional capabilities demonstrated
 
-- Bounded-context style Job Order aggregate design in a small monolith  
+- Job Order as root aggregate in a small server-rendered monolith  
 - Explicit system boundaries and intentional non-scope  
 - Persistence and packaging choices matched to MVP proof goals  
 - Separation of runtime app, validation tooling, and container artifact  

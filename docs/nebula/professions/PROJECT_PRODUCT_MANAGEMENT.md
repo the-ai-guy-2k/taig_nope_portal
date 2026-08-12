@@ -124,7 +124,7 @@ These were **not** deferred accidental omissions for this version’s success cr
 From ACI-ZEP-002 **[O]/[R]** comparison:
 
 1. Portal seed ACI history incomplete vs markdown ACI-001…012  
-2. Uneven manage/observe depth (placeholders for some history views)  
+2. Uneven manage/observe depth (Job Orders/actions/minority reports editable; ACI history/timeline/completion reports read-only list views; settings stub)  
 3. Final product evolution explicitly out of this version  
 4. Nebula/QEN role narrative stronger in Operator intent than repo prose  
 5. Certifying-commit tip currency (`a0edd22` vs `9048e2f`) — operational verification  
