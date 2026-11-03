@@ -1,0 +1,241 @@
+<%- include('partials/head', { pageTitle: 'Tree Map' }) %>
+<div class="app">
+  <%- include('partials/header') %>
+  <div class="app-body">
+    <%- include('partials/nav', { activeNav: 'tree-map' }) %>
+    <main class="workspace-main workspace-main--solo">
+      <section class="jo-header">
+        <h1 class="jo-title">Tree Map</h1>
+      </section>
+      <section class="panel-card">
+<p><strong>Tree map v3 — the data model for the tree map in the Nope App (Tee, Nov 2, 2026).</strong> Accepted as &#8220;correctish&#8221; — Tee will fix remaining details later, no further corrections until his word. Live tree / CTF is still v2 — migrating the live artifact to v3 is a separate step on his word. This page renders the v3 file as-is, tree lines preserved.</p>
+<p>Nope App intent (locked Nov 3, 2026): TAIG Business Dashboard with the tree map as a feature, hosted on a Droplet (2 vCPU / 2 GB / 60 GB, $18/mo bundled, IP 138.68.226.24).</p>
+<pre style="white-space: pre-wrap; font-family: inherit;"># TAIG Tree Map — v3 format (built Nov 2, 2026)
+
+**Data model (Tee, Nov 2, 2026): this v3 format IS the data model for
+the tree map, and that tree map will be part of the Nope App.**
+
+**Status (Tee, Nov 2, 2026): data model accepted as correctish. Tee will
+fix remaining details later — no further corrections until his word.**
+
+**Data model (Tee, Nov 2, 2026): this v3 format IS the data model for
+the tree map, and that tree map will be part of the Nope App.**
+
+Format rule going forward, from Tee&#x27;s two hand-drawn diagrams (Nov 2, 2026):
+Nebula → Operator on the side, then the business branch, then its children.
+No Projects layer. Each client/project carries Intent, Path to intent, and
+Current truth directly, in that order. &quot;How to measure this?&quot; hangs off
+Intent where the drawing shows a ? bubble. V2 info is carried over, not
+dropped — see the mapping notes at the bottom.
+
+## Promo — v3
+
+Nebula — Operator
+└── TAIG Promo
+    └── Clients
+        ├── Jay — Album release
+        │   ├── Intent
+        │   │   └── Get enough interest to justify getting a professional
+        │   │       band + tour. Increase the fan base around the album
+        │   │       release. (Drawing shorthand: &quot;Get enough of a fan base
+        │   │       to start a band.&quot;)
+        │   │       How to measure this? — External validation count:
+        │   │       press, radio, playlists, stacked until bookers say yes.
+        │   │       No industry benchmark number on record; only real
+        │   │       number is draw/ticket sales.
+        │   ├── Path to intent
+        │   │   ├── Free-only promo until Tee has a new job — no paid ads.
+        │   │   ├── Radio release — Jax Country (drawing label), Eagle
+        │   │   │   Country (Dave Krieger / WEAG), plus PA radio under
+        │   │   │   Current truth TO #2. Nothing sent without Tee&#x27;s go.
+        │   │   ├── Publications — Folio Weekly pitch sent Oct 19, 2026
+        │   │   │   (mail@folioweekly.com), awaiting reply; reback is an
+        │   │   │   open action item.
+        │   │   ├── Free playlist and internet-radio submissions, gig
+        │   │   │   conversion, posts from pages he already owns.
+        │   │   └── Open: FHR sent vs drafts only, Wild Country songwriter
+        │   │       credits / show dates / $25-if-approved fee, what Jay&#x27;s
+        │   │       &quot;make the changes&quot; meant. Band name is Ruckus, not
+        │   │       Southern Rukus.
+        │   └── Current truth
+        │       ├── Album &quot;Still Chasing the Sunset&quot;, Jay Garrett Band,
+        │       │   released Oct 19, 2026, 12 songs, 45:59. Live on Spotify,
+        │       │   Apple Music, Amazon Music, YouTube Music. Pandora is
+        │       │   the only gap.
+        │       ├── Cover art prints &quot;STILL CHASING THE SUNDOWN&quot; — Tee&#x27;s
+        │       │   decision Oct 27: change it once Jay notices it himself,
+        │       │   do not raise it proactively.
+        │       ├── TO #1 — CDs at Tiger Records, Jacksonville. $7 sale
+        │       │   price, $1 Tiger fee ($6 back). Count conflict flagged:
+        │       │   5 CDs consigned Oct 16 vs diagram&#x27;s 7 CDs — do not
+        │       │   silently resolve.
+        │       └── TO #2 — Jay agreed with a PA radio release idea. End
+        │           state for now: List of radio stations id&#x27;ed —
+        │           1. Willie 97.5/95.1, 2. K105 WQXK 105.1 Youngstown,
+        │           3. Froggy WOGI 104.3 Pittsburgh — DO NOT pitch Froggy
+        │           as country (Oct 2026 sale reports: now Family Life),
+        │           4. and 5. below Jay&#x27;s Oct 29 screenshot crop, not sent
+        │           yet. After-trimming waits on real station info.
+        │       Contact info: Jay Garrett, +1 904-234-1434, no email.
+        │       Social info: TAIG Promotions front door (FB Page +
+        │       @taigpromotions); Jay&#x27;s own handles not listed — do not
+        │       invent. Junk Drawer: v2 catch-all items (see v2 tree).
+        └── Josh — Album release
+            ├── Intent
+            │   └── Increase fan base. (Drawing shorthand: Exposure.)
+            │       How to measure this? — Open. Rockville lane is the
+            │       pending measure: play at Welcome to Rockville vs.
+            │       attend, asked Oct 29, 4:59 PM ET, holding until Joshua
+            │       replies. No booking or entry claimed.
+            ├── Path to intent
+            │   ├── Nothing right now — held until Joshua replies.
+            │   ├── Continue creating — Suno album is a blueprint for
+            │   │   eventually recording with real instruments.
+            │   └── Held 7-step plan (Oct 29): close loop + confirm live /
+            │       band willingness; make live-ready (3–4 strongest
+            │       tracks incl. the Rockville anthem, transposed to real
+            │       instruments); live proof + orbit gigs first (Qball,
+            │       Jacksonville/Daytona); promo pack (EPK, bio, photos,
+            │       Suno link, live video); Battle for the Big Stage lane
+            │       (no 2027 entry deadline/form found published); mobilize
+            │       vote from the live crowd; logistics ahead of May 6–9,
+            │       2027 if he lands it.
+            └── Current truth
+                ├── Phone-made Suno album &quot;Loki: God Of Mischief&quot;, 13
+                │   songs, released Oct 19, 2026, heavy metal / System of
+                │   a Down lane; by his own description a blueprint for
+                │   eventually recording with real instruments.
+                ├── New TAIG Promo client per Tee, Oct 29, 2026. No signed
+                │   promo agreement on record as of Oct 29, 2026.
+                └── Contact info: Messenger only, no phone/email on file,
+                    Suno handle @pholishous. Junk Drawer: v2 catch-all.
+
+## TAIG ITS — v3
+
+Nebula — Operator
+└── TAIG IT Solutions
+    ├── Business Shit
+    │   ├── Marketing
+    │   │   └── FB content image for schedule posts; FB paid ads targeting
+    │   │       home/library business owners; sharpen the trust model —
+    │   │       why choose TAIG IT over other MSPs?
+    │   ├── C³ Reports
+    │   │   └── Jay reports; 8 O&#x27;clock Reports (Promo / Nebs / Miscs).
+    │   └── Client facing shit — as drawn (corrected Nov 2 from the
+    │       clearer photo; was misread as &quot;Client During shit&quot;). No v2
+    │       bubble by that name — the client-facing side of Business
+    │       Shit (Services page, front-door posts) is the nearest v2
+    │       material, do not merge on assumption.
+    ├── Clients
+    │   └── Gave cards to — corrected Nov 2 by Tee (was misread as
+    │       &quot;Crave cards&quot;). Each client below connects DIRECTLY to
+    │       the &quot;Gave cards to&quot; bubble with its own connector (Tee,
+    │       Nov 2, 2026) — they are children of Gave cards to, not
+    │       siblings of it under Clients.
+    │       ├── Paula account
+    │       ├── Paula Senn — tax accountant, possible client. Report
+    │       │   sent Oct 20, 2026. ASCIF first client profile. Demo
+    │       │   options, custom accounting software, other opportunities
+    │       │   — all exploratory, no reply on record.
+    │       ├── AIM Printing / Narek — active client opportunity.
+    │       ├── Art — cybersecurity, team owns a tech business, met
+    │       │   Oct 18, 2026.
+    │       ├── Eagle Country website — redo their web presence, same
+    │       │   functions. Dave Krieger / WEAG-FM. Upcoming, not built.
+    │       └── Future Clients (v2 list) — see v2 tree for the full list.
+    │   └── Closed — its own bubble (Tee, Nov 2, 2026), hanging DIRECTLY
+    │       off Clients, alongside Gave cards to — NOT under Gave cards
+    │       to (corrected Nov 2 from Tee&#x27;s cropped photo). Closed clients
+    │       hang off Closed.
+    │       ├── Roger — left his card; PSU died ~2 weeks later, Roger
+    │       │   called, Tee came out, fixed it, got paid. Front-door
+    │       │   mechanism example ONLY — Roger is an OLD client Tee
+    │       │   told to go fuck himself and is NEVER a friendly
+    │       │   proof/reference client.
+    │       └── G&amp;H Tires — name only, no details on file yet.
+    └── TAIG 2K — &quot;my other business — I make software there&quot;
+        ├── Back log — A2L (Audio to Lyrics, in build), Cisco Command
+        │   Assistance App (9 timed micro-builds, ACI-001→009), Purchase
+        │   Intelligence App, TAIG Speed (Inventory Management, $800/mo,
+        │   live revenue), Gina&#x27;s Cozy Travels (shipped), Store front
+        │   site, StreamWatch (FM stream monitor), Nmap web GUI, ASCIF
+        │   (dynamic client intake), TAIG Online Music, iptables Web
+        │   GUI, AnyPort (switch-outage recovery).
+        ├── TAIG Speed — back-end inventory management system for
+        │   brick-and-mortar store owners. $800/mo live revenue on record.
+        │   UX principle (Tee, Nov 3, 2026): NO manual required — intuitive
+        │   out of the box, as if the software already read the manual.
+        │   Ships with smart default questions for that industry, then
+        │   leads to more questions from the answers. Manual-first
+        │   software is the competitor flaw this beats.
+        │   ├── Current truth
+        │   │   └── Back-end system only — the client&#x27;s e-commerce
+        │   │       storefront is a separate lane.
+        │   └── New offerings — added Nov 3, 2026, Tee&#x27;s call, NOT built
+        │       yet, pricing NOT set. Rick (vape-store manager) is the
+        │       example client only, NOT a signed client; no outreach
+        │       authorized.
+        │       ├── 1. Industry Trend + Legislation Signal — track trends
+        │       │   in the client&#x27;s actual industry, cut the noise, run
+        │       │   the trend against legislation, and deliver an
+        │       │   actionable 100-foot-level answer with deeper depth
+        │       │   underneath, ending in a concrete do-this
+        │       │   recommendation. Proof case: hemp — podcasts gave the
+        │       │   2,000-foot &quot;a ban is coming&quot;; the actionable stages
+        │       │   were law passed Nov 2025, synthetic cannabinoids
+        │       │   Nov 12, 2026, most other intoxicating hemp products
+        │       │   Dec 11, 2026, with delay-to-2028 / regulate bills
+        │       │   still pending.
+        │       └── 2. After-the-Fact Simulation — once accurate data
+        │           exists, simulate what would have happened if the
+        │           client had followed the old trends / bought the
+        │           unregulated product, using their actual old trends,
+        │           so they see the counterfactual outcome and learn
+        │           for next time.
+        ├── Pass GVCA ACICE — update the GVCA-ACICE artifact and turn it
+        │   into a dashboard (notebook step 4; &quot;GNCA-ACCE&quot; = GVCA-ACICE).
+        ├── MVP — Nope App MVP v2 (v1 is in the remote repo; plan the
+        │   first build as v2, review planning with Nebs/Tim first).
+        │   Intent (Tee, Nov 3, 2026): TAIG Business Dashboard with the
+        │   tree map as a feature, hosted on a Droplet.
+        ├── V2 — version node, as drawn.
+        ├── V3 — version node, as drawn.
+        └── Nebula Maintenance — as drawn (corrected Nov 2 from the
+            clearer photo; was misread as &quot;Nebula Mount&quot;). No v2 bubble
+            by that name — nearest v2 item is Nebula / OVA Visual Display
+            central map, do not merge on assumption.
+
+## Mapping notes — v2 → v3, read before editing
+
+- Promo v3 drops the Projects layer. Jay&#x27;s Album Release and Josh&#x27;s project
+  sit directly under the client, as drawn.
+- Josh v3 label change, flagged: v2 project was &quot;Increase fan base&quot;, the
+  drawing labels Josh&#x27;s node &quot;Album release&quot;. V2 Increase-fan-base info is
+  carried under the drawing&#x27;s Album release label. If Album release is a
+  separate new project, say so and it gets split out.
+- Promo v2 extras NOT in the drawings are kept here as Contact info,
+  Social info, and Junk Drawer lines, and in the v2 tree — not deleted.
+- Jay&#x27;s older v2 branch (&quot;New album release&quot;, Action Items, old Current
+  truth / Path) is not in v3. It stays in the v2 tree until Tee says to
+  fold it in or drop it.
+- ITS v3 &quot;TAIG IT Solutions&quot; is the drawing&#x27;s label for the ITS branch
+  (v2 root label: TAIG ITS).
+- Uncertain handwriting, Tee to confirm: ITS &quot;Paula account&quot;, &quot;Crave
+  &quot;Gave cards to&quot; (corrected Nov 2 by Tee, was misread as
+  &quot;Crave cards&quot;), &quot;Paula account&quot;, &quot;Client facing shit&quot; and
+  &quot;Nebula Maintenance&quot; (both corrected Nov 2), &quot;C³ Reports&quot;,
+  Promo &quot;Jax Country&quot;. Nothing above invents an expansion for
+  those labels.
+- Live tree / CTF are still v2 as of Nov 2, 2026. This file is the v3
+  working format; migrating the live artifact to v3 (addnode for new
+  nodes — the live actions cannot reparent existing bubbles) is a
+  separate step, on Tee&#x27;s word.
+</pre>
+
+      </section>
+    </main>
+  </div>
+  <%- include('partials/footer') %>
+</div>
+<script src="/js/dashboard.js"></script>
+<%- include('partials/foot') %>

@@ -4,6 +4,7 @@ const {
   dashboardRoutes,
   jobOrderRoutes,
   placeholderRoutes,
+  planningRoutes,
 } = require('./routes');
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/', dashboardRoutes);
 app.use('/job-orders', jobOrderRoutes);
 app.use('/', placeholderRoutes);
+app.use('/', planningRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({
