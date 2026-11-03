@@ -18,8 +18,9 @@
 | Business Dashboard snapshot (Oct 21, 2026) | /business-dashboard/ | static file, see note below |
 | Jay Garrett EPK | /jay-epk/ | static file, see note below |
 
-## Static files — known gap (Nov 3, 2026)
-The Business Dashboard snapshot (32 KB) and Jay Garrett EPK (87 MB, inlined assets) in `/var/www` are NOT yet in GitHub, so the Droplet is not yet fully pull-only compliant for those two pages. The EPK in particular cannot go through Muse's snapshot-push tool (16 MiB snapshot cap) — it needs slimming into separate audio/artwork files, or a direct git push with GitHub auth, before it can live in GitHub. Do not hide this gap: until those files are in GitHub, they are the exception, not the rule.
+## Static files — status (Nov 3, 2026)
+- Jay Garrett EPK: pushed as-is to GitHub in this repo at `public/jay-epk/index.html` (87,390,683 bytes, inlined assets, MD5 6cc22a01b2d88f38614cbc491204c340 — same file as the Muse artifact export). It is served by the Nope app's Express static middleware from the pulled repo, not from a manual `/var/www` copy. Slimming into separate audio/artwork files is still a future option for load speed, not a GitHub requirement.
+- Business Dashboard snapshot (32 KB) in `/var/www/business-dashboard/` is still NOT in GitHub — it remains the one pull-only exception. Do not hide this gap.
 
 ## Deploy steps (pull-only)
 1. Change code in GitHub (branch + review as normal).
