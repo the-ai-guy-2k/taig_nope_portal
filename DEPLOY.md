@@ -17,9 +17,11 @@
 | Tree Map (v3 data model, as-is) | /tree-map | this repo, views/tree-map.ejs |
 | Business Dashboard snapshot (Oct 21, 2026) | /business-dashboard/ | static file, see note below |
 | Jay Garrett EPK | /jay-epk/ | static file, see note below |
+| Mo's PC Repairs and Sales | /mo-pc-repairs/ | static file, see note below |
 
 ## Static files — status (Nov 3, 2026)
 - Jay Garrett EPK: pushed as-is to GitHub in this repo at `public/jay-epk/index.html` (87,390,683 bytes, inlined assets, MD5 6cc22a01b2d88f38614cbc491204c340 — same file as the Muse artifact export). It is served by the Nope app's Express static middleware from the pulled repo, not from a manual `/var/www` copy. Slimming into separate audio/artwork files is still a future option for load speed, not a GitHub requirement.
+- Mo's PC Repairs and Sales: pushed as-is to GitHub in this repo at `public/mo-pc-repairs/index.html` (single self-contained file, exported from the Muse web artifact `mo-s-pc-repairs-and-sales`). Served by the Nope app's Express static middleware from the pulled repo, same pattern as the Jay Garrett EPK.
 - Business Dashboard snapshot (32 KB) in `/var/www/business-dashboard/` is still NOT in GitHub — it remains the one pull-only exception. Do not hide this gap.
 
 ## Deploy steps (pull-only)
@@ -27,7 +29,7 @@
 2. On the Droplet: `cd /root/taig_nope_portal && git pull --ff-only`
 3. Rebuild from pulled code: `docker build -t taig-nope-portal:local .`
 4. Restart: `docker rm -f nope-portal && docker run -d --name nope-portal --restart unless-stopped -p 3000:3000 -v nope-nebula-local:/app/nebula_local taig-nope-portal:local`
-5. Verify on the box: `/health` ok, `/dashboard`, `/work-week-plan`, `/daily-work-log`, `/tree-map` all HTTP 200, Nginx routes for `/business-dashboard/` and `/jay-epk/` still 200.
+5. Verify on the box: `/health` ok, `/dashboard`, `/work-week-plan`, `/daily-work-log`, `/tree-map` all HTTP 200, Nginx routes for `/business-dashboard/`, `/jay-epk/` and `/mo-pc-repairs/` still 200.
 
 ## Backups
 Own backups, not DigitalOcean paid backups: nightly data + config dump copied OFF the box (a backup that only lives on the Droplet is not a backup). Code is already safe in GitHub.
