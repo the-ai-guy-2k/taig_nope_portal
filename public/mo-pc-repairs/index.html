@@ -10,6 +10,30 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Mo's PC Repairs and Sales",
+  "description": "Laptop sales, laptop buying, and PC repairs in Jacksonville, FL. Contact Mo through Facebook Marketplace.",
+  "url": "https://www.facebook.com/marketplace/profile/100004631644910/?ref=share_attachment",
+  "sameAs": ["https://www.facebook.com/marketplace/profile/100004631644910/?ref=share_attachment"],
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Fort Caroline Rd",
+    "addressLocality": "Jacksonville",
+    "addressRegion": "FL",
+    "postalCode": "32277",
+    "addressCountry": "US"
+  },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "sales",
+    "url": "https://www.facebook.com/marketplace/profile/100004631644910/?ref=share_attachment",
+    "availableLanguage": ["English"]
+  }
+}
+</script>
 <style>
   :root{
     --bg:#f7f5f1;
@@ -165,6 +189,23 @@
   .meet h3{margin:0 0 6px;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
   .meet p{margin:0;font-weight:700;font-size:17px;line-height:1.35}
   .meet small{display:block;margin-top:6px;color:var(--ink-2);font-weight:500;font-size:14px;line-height:1.45}
+  /* contact */
+  #contact{padding:56px 0}
+  .contact-card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:grid;grid-template-columns:1.05fr .95fr;box-shadow:var(--shadow)}
+  .contact-main{padding:28px;background:var(--navy);color:#fff}
+  .contact-main h3{font-family:"Archivo",sans-serif;font-size:26px;line-height:1.1;margin:0 0 10px;letter-spacing:-.02em}
+  .contact-main p{color:#c4d6e6;margin:0 0 20px;font-size:15.5px;line-height:1.55}
+  .contact-main .btn{width:100%}
+  .contact-main small{display:block;margin-top:12px;color:#9fb6c9;font-size:13.5px;line-height:1.45;text-align:center}
+  .contact-details{padding:28px;display:grid;gap:0}
+  .contact-row{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
+  .contact-row:first-child{padding-top:2px}
+  .contact-row:last-child{border-bottom:0;padding-bottom:2px}
+  .contact-row .label{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);width:108px;flex:0 0 auto;padding-top:3px}
+  .contact-row .value{font-weight:700;font-size:16px;line-height:1.4}
+  .contact-row .value span{display:block;font-weight:500;color:var(--ink-2);font-size:14px;margin-top:2px}
+  .contact-row .value a{color:#1877f2;text-decoration:none;word-break:break-word}
+  .contact-row .value a:hover{text-decoration:underline}
   footer{padding:34px 0 44px}
   .footer-inner{display:flex;flex-wrap:wrap;justify-content:space-between;gap:18px;align-items:flex-start}
   footer p{color:var(--ink-2);font-size:14px;margin:6px 0 0;max-width:46em}
@@ -176,7 +217,9 @@
     .hero-grid,.why-grid{grid-template-columns:1fr}
     .hero{padding-top:28px}
     .hero-photo img{height:340px}
-    .services,.laptop-grid,.steps,.meet-grid{grid-template-columns:1fr}
+    .services,.laptop-grid,.steps,.meet-grid,.contact-card{grid-template-columns:1fr}
+    .contact-row{flex-direction:column;gap:4px}
+    .contact-row .label{width:auto}
     .navlinks{display:none;position:absolute;top:68px;left:16px;right:16px;background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:10px;flex-direction:column;align-items:stretch;box-shadow:var(--shadow)}
     .navlinks.open{display:flex}
     .navlinks a{justify-content:center}
@@ -199,6 +242,7 @@
       <a href="#services">Services</a>
       <a href="#laptops">Laptops for sale</a>
       <a href="#why">Why buy from Mo</a>
+      <a href="#contact">Contact</a>
       <a href="#how" class="cta">How to buy</a>
     </nav>
   </div>
@@ -441,6 +485,42 @@
     </div>
   </section>
 
+  <!-- CONTACT -->
+  <section id="contact" aria-labelledby="contact-heading">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="contact-heading">Contact Mo</h2>
+        <p>Mo does all his buying, selling, and repair inquiries through Facebook Marketplace. Message him there — that's the fastest way to reach him.</p>
+      </div>
+      <div class="contact-card">
+        <div class="contact-main">
+          <h3>Message Mo on Facebook Marketplace</h3>
+          <p>Open Mo's Marketplace profile or tap any laptop listing above, then send a message in that listing thread on Marketplace / Messenger. Ask about a laptop, make an offer, offer one for sale, or ask about a repair.</p>
+          <a class="btn btn-primary" href="https://www.facebook.com/marketplace/profile/100004631644910/?ref=share_attachment" target="_blank" rel="noopener">Message Mo →</a>
+          <small>facebook.com/marketplace — Mo's seller profile</small>
+        </div>
+        <div class="contact-details">
+          <div class="contact-row">
+            <div class="label">Message</div>
+            <div class="value"><a href="https://www.facebook.com/marketplace/profile/100004631644910/?ref=share_attachment" target="_blank" rel="noopener">Mo on Facebook Marketplace</a><span>Message via Marketplace / Messenger in the listing thread</span></div>
+          </div>
+          <div class="contact-row">
+            <div class="label">Pickup</div>
+            <div class="value">Fort Caroline Rd<span>Jacksonville, FL 32277 — arrange a time with Mo on Marketplace first</span></div>
+          </div>
+          <div class="contact-row">
+            <div class="label">Public meetup</div>
+            <div class="value">Sam's Club — Beach Blvd<span>Jacksonville, FL</span></div>
+          </div>
+          <div class="contact-row">
+            <div class="label">Payment</div>
+            <div class="value">Cash preferred<span>Prices are OBO — reasonable offers welcome</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <footer>
@@ -453,7 +533,7 @@
       <p>Laptop sales, laptop buying, and PC repairs — locally in Jacksonville, FL. Contact Mo through any Facebook Marketplace listing above to buy, sell, or ask about a repair.</p>
     </div>
     <div>
-      <p style="margin:0"><strong style="color:var(--ink)">Pickup:</strong> Fort Caroline Rd, Jacksonville, FL 32277<br><strong style="color:var(--ink)">Meetup:</strong> Sam's Club, Beach Blvd, Jacksonville<br><strong style="color:var(--ink)">Payment:</strong> Cash preferred · Prices OBO</p>
+      <p style="margin:0"><strong style="color:var(--ink)">Contact:</strong> <a href="https://www.facebook.com/marketplace/profile/100004631644910/?ref=share_attachment" target="_blank" rel="noopener" style="color:#1877f2;font-weight:700">Message Mo on Facebook Marketplace</a><br><strong style="color:var(--ink)">Pickup:</strong> Fort Caroline Rd, Jacksonville, FL 32277<br><strong style="color:var(--ink)">Meetup:</strong> Sam's Club, Beach Blvd, Jacksonville<br><strong style="color:var(--ink)">Payment:</strong> Cash preferred · Prices OBO</p>
     </div>
   </div>
 </footer>
