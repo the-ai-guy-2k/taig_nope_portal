@@ -149,6 +149,22 @@ section { margin-top: 40px; }
 section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 .section-sub { margin: 0 0 16px; }
 
+/* Genre browse/filter */
+.genre-filter { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+.genre-chip {
+  background: transparent;
+  border: 1px solid #6b645b;
+  color: #f5f0e8;
+  border-radius: 999px;
+  padding: 7px 15px;
+  font: inherit;
+  font-size: .92rem;
+  cursor: pointer;
+}
+.genre-chip:hover { border-color: #e8a33d; }
+.genre-chip.active { background: #e8a33d; border-color: #e8a33d; color: #1a1409; font-weight: 700; }
+[data-genre][hidden] { display: none; }
+
 /* Catalog cards */
 .cards {
   display: grid;

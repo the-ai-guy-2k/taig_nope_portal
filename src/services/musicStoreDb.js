@@ -41,12 +41,43 @@ async function openDb() {
   let db;
   if (fs.existsSync(DB_PATH)) {
     db = new SQL.Database(fs.readFileSync(DB_PATH));
+    if (migrate(db)) persist(db);
   } else {
     db = new SQL.Database();
     seed(db);
     persist(db);
   }
   return db;
+}
+
+/**
+ * Migrate an existing database forward. The MVP shipped the artists table
+ * without a genre column and with Jay as the only artist; this adds the
+ * column, backfills Jay's genre, and adds any roster artists present in the
+ * seed file but missing from the DB. Idempotent — a no-op once applied.
+ */
+function migrate(db) {
+  const seed = JSON.parse(fs.readFileSync(SEED_PATH, 'utf8'));
+  let changed = false;
+  const cols = rows(db, 'PRAGMA table_info(artists)').map((c) => c.name);
+  if (!cols.includes('genre')) {
+    db.run('ALTER TABLE artists ADD COLUMN genre TEXT');
+    changed = true;
+  }
+  const jay = rows(db, "SELECT genre FROM artists WHERE slug='jay-garrett-band'")[0];
+  if (jay && (jay.genre === null || jay.genre === '')) {
+    db.run("UPDATE artists SET genre='Country' WHERE slug='jay-garrett-band'");
+    changed = true;
+  }
+  const before = rows(db, 'SELECT COUNT(*) AS n FROM artists')[0].n;
+  for (const a of seed.artists) {
+    db.run(`INSERT OR IGNORE INTO artists (id, name, slug, roster_position, blurb, genre)
+      VALUES (${a.id}, '${esc(a.name)}', '${esc(a.slug)}', ${a.roster_position},
+        '${esc(a.blurb)}', '${esc(a.genre || '')}')`);
+  }
+  const after = rows(db, 'SELECT COUNT(*) AS n FROM artists')[0].n;
+  if (after > before) changed = true;
+  return changed;
 }
 
 function seed(db) {
@@ -57,7 +88,8 @@ function seed(db) {
     name TEXT NOT NULL,
     slug TEXT NOT NULL UNIQUE,
     roster_position INTEGER,
-    blurb TEXT
+    blurb TEXT,
+    genre TEXT
   )`);
   db.run(`CREATE TABLE albums (
     id INTEGER PRIMARY KEY,
@@ -116,8 +148,9 @@ function seed(db) {
   )`);
 
   for (const a of seed.artists) {
-    db.run(`INSERT INTO artists (id, name, slug, roster_position, blurb)
-      VALUES (${a.id}, '${esc(a.name)}', '${esc(a.slug)}', ${a.roster_position}, '${esc(a.blurb)}')`);
+    db.run(`INSERT INTO artists (id, name, slug, roster_position, blurb, genre)
+      VALUES (${a.id}, '${esc(a.name)}', '${esc(a.slug)}', ${a.roster_position},
+        '${esc(a.blurb)}', '${esc(a.genre || '')}')`);
   }
   for (const al of seed.albums) {
     db.run(`INSERT INTO albums (id, artist_id, title, slug, release_date, label, cover,

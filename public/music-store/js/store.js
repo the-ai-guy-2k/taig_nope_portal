@@ -13,6 +13,7 @@
   var cart = loadCart();
   var audio = new Audio();
   var playingTrackId = null;
+  var activeGenre = 'All';
 
   function $(sel, root) { return (root || document).querySelector(sel); }
   function money(cents) { return '$' + (cents / 100).toFixed(2); }
@@ -34,6 +35,64 @@
   function trackById(id) {
     if (!catalog) return null;
     return catalog.tracks.find(function (t) { return t.id === id; }) || null;
+  }
+  function albumForArtist(artistId) {
+    if (!catalog) return null;
+    return catalog.albums.find(function (a) { return a.artist_id === artistId; }) || null;
+  }
+
+  /* ---- genre browse/filter ---- */
+  function genres() {
+    var seen = [];
+    catalog.artists.forEach(function (a) {
+      if (a.genre && seen.indexOf(a.genre) === -1) seen.push(a.genre);
+    });
+    return seen;
+  }
+  function renderGenreFilter() {
+    var bar = $('#genre-filter');
+    if (!bar) return;
+    var html = '<button class="genre-chip' + (activeGenre === 'All' ? ' active' : '')
+      + '" data-filter-genre="All" type="button">All genres</button>';
+    genres().forEach(function (g) {
+      html += '<button class="genre-chip' + (activeGenre === g ? ' active' : '')
+        + '" data-filter-genre="' + esc(g) + '" type="button">' + esc(g) + '</button>';
+    });
+    bar.innerHTML = html;
+  }
+  function applyGenreFilter() {
+    document.querySelectorAll('[data-genre]').forEach(function (el) {
+      el.hidden = activeGenre !== 'All' && el.getAttribute('data-genre') !== activeGenre;
+    });
+    document.querySelectorAll('.genre-chip').forEach(function (chip) {
+      chip.classList.toggle('active', chip.getAttribute('data-filter-genre') === activeGenre);
+    });
+  }
+  function setGenre(g) {
+    activeGenre = g;
+    applyGenreFilter();
+  }
+
+  function renderRoster() {
+    var box = $('#roster');
+    if (!box) return;
+    var html = '';
+    catalog.artists.forEach(function (a) {
+      var album = albumForArtist(a.id);
+      var num = String(a.roster_position || a.id).padStart(2, '0');
+      html += '<div class="roster-slot" data-genre="' + esc(a.genre || '') + '">'
+        + '<div class="num">' + num + '</div>'
+        + '<h3>' + (album
+          ? '<a href="/music-store/album/">' + esc(a.name) + '</a>'
+          : esc(a.name)) + '</h3>'
+        + '<p><span class="tag">' + esc(a.genre || '') + '</span></p>'
+        + '<p class="muted">' + esc(a.blurb || '') + '</p>'
+        + (album
+          ? '<p><a href="/music-store/album/">' + esc(album.title) + ' — out now</a></p>'
+          : '<p class="muted">Debut release coming soon</p>')
+        + '</div>';
+    });
+    box.innerHTML = html;
   }
 
   function cartCount() {
@@ -165,40 +224,11 @@
 
   /* ---- rendering ---- */
   function renderLanding() {
-    var album = catalog.albums[0];
-    var artist = catalog.artists[0];
-    var digital = productById('album-digital');
-    var cd = productById('album-cd');
-    var banner = $('#featured-banner');
-    if (banner && album && artist) {
-      banner.innerHTML =
-        '<img class="cover" src="' + esc(album.cover) + '" alt="Album cover — ' + esc(album.title) + '">'
-        + '<div><p class="muted small" style="margin:0 0 4px">Featured release · Out now</p>'
-        + '<h2>' + esc(album.title) + '</h2>'
-        + '<p class="artist">' + esc(artist.name) + '</p>'
-        + '<p class="meta muted">' + album.track_count + ' songs · ' + esc(album.total_time)
-        + ' · Label: ' + esc(album.label) + '</p>'
-        + '<div class="btn-row">'
-        + '<a class="btn" href="/music-store/album/">Shop the album</a>'
-        + '<button class="btn btn-ghost" data-add="album" data-id="album-digital">Add album — '
-        + money(digital.price_cents) + '</button>'
-        + '</div></div>';
-    }
-    var cards = $('#store-cards');
-    if (cards && album && digital && cd) {
-      cards.innerHTML =
-        '<div class="card"><img class="thumb" src="' + esc(album.cover) + '" alt="Album cover — ' + esc(album.title) + '">'
-        + '<h3>Digital album</h3><p class="muted">' + esc(album.title) + ' · ' + album.track_count + ' songs</p>'
-        + '<p class="price">' + money(digital.price_cents) + '</p>'
-        + '<button class="btn" data-add="album" data-id="album-digital">Add album — ' + money(digital.price_cents) + '</button></div>'
-        + '<div class="card"><h3>CD</h3><p class="muted">' + esc(album.title) + ' on disc.</p>'
-        + '<p>' + esc(cd.detail) + '</p>'
-        + '<p class="price">' + money(cd.price_cents) + '</p>'
-        + '<button class="btn" data-add="cd" data-id="album-cd">Add CD — ' + money(cd.price_cents) + '</button></div>'
-        + '<div class="card"><h3>More music coming soon</h3>'
-        + '<p class="muted">New artists from the TAIG roster are on the way. Jay is Artist #1 — the store grows from here.</p>'
-        + '<p class="price muted">—</p></div>';
-    }
+    /* Landing = the artist catalog. Pick an artist; the artist's page
+       (Jay's album page) is where the music and buying live. */
+    renderGenreFilter();
+    renderRoster();
+    applyGenreFilter();
   }
 
   function renderAlbum() {
@@ -253,6 +283,11 @@
 
   function bindEvents() {
     document.addEventListener('click', function (ev) {
+      var chip = ev.target.closest('[data-filter-genre]');
+      if (chip) {
+        setGenre(chip.getAttribute('data-filter-genre'));
+        return;
+      }
       var addBtn = ev.target.closest('[data-add]');
       if (addBtn) {
         var kind = addBtn.getAttribute('data-add');
