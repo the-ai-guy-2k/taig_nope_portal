@@ -69,14 +69,39 @@ function migrate(db) {
     db.run("UPDATE artists SET genre='Country' WHERE slug='jay-garrett-band'");
     changed = true;
   }
+  /* Artists: cover column FIRST (the upsert below inserts into it), then upsert. */
+  const artistCols = rows(db, 'PRAGMA table_info(artists)').map((c) => c.name);
+  if (!artistCols.includes('cover')) { db.run('ALTER TABLE artists ADD COLUMN cover TEXT'); changed = true; }
   const before = rows(db, 'SELECT COUNT(*) AS n FROM artists')[0].n;
   for (const a of seed.artists) {
-    db.run(`INSERT OR IGNORE INTO artists (id, name, slug, roster_position, blurb, genre)
+    db.run(`INSERT OR IGNORE INTO artists (id, name, slug, roster_position, blurb, genre, cover)
       VALUES (${a.id}, '${esc(a.name)}', '${esc(a.slug)}', ${a.roster_position},
-        '${esc(a.blurb)}', '${esc(a.genre || '')}')`);
+        '${esc(a.blurb)}', '${esc(a.genre || '')}', '${esc(a.cover || '')}')`);
   }
   const after = rows(db, 'SELECT COUNT(*) AS n FROM artists')[0].n;
   if (after > before) changed = true;
+
+  /* Artists: backfill cover from the seed (roster-card art for artists with no album). */
+  for (const a of seed.artists) {
+    if (!a.cover) continue;
+    const cur = rows(db, `SELECT cover FROM artists WHERE id=${a.id}`)[0];
+    if (cur && (cur.cover === null || cur.cover === '')) {
+      db.run(`UPDATE artists SET cover='${esc(a.cover)}' WHERE id=${a.id}`);
+      changed = true;
+    }
+  }
+
+  /* Roster-only cleanup (Tee, Nov 15): the fictional artists have no albums, tracks
+     or products — remove any rows an earlier build left behind. Idempotent. */
+  const ficAlbums = rows(db, 'SELECT COUNT(*) AS n FROM albums WHERE id IN (2,3,4)')[0].n;
+  const ficTracks = rows(db, 'SELECT COUNT(*) AS n FROM tracks WHERE album_id IN (2,3,4)')[0].n;
+  const ficProducts = rows(db, "SELECT COUNT(*) AS n FROM products WHERE id IN ('kairo-vale-digital','kairo-vale-cd','marlowe-grey-digital','marlowe-grey-cd','static-bloom-digital','static-bloom-cd')")[0].n;
+  if (ficAlbums + ficTracks + ficProducts > 0) {
+    db.run("DELETE FROM products WHERE id IN ('kairo-vale-digital','kairo-vale-cd','marlowe-grey-digital','marlowe-grey-cd','static-bloom-digital','static-bloom-cd')");
+    db.run('DELETE FROM tracks WHERE album_id IN (2,3,4)');
+    db.run('DELETE FROM albums WHERE id IN (2,3,4)');
+    changed = true;
+  }
 
   /* Albums: genre + page columns, backfill Jay's album, upsert seed albums. */
   const albumCols = rows(db, 'PRAGMA table_info(albums)').map((c) => c.name);
@@ -138,7 +163,8 @@ function seed(db) {
     slug TEXT NOT NULL UNIQUE,
     roster_position INTEGER,
     blurb TEXT,
-    genre TEXT
+    genre TEXT,
+    cover TEXT
   )`);
   db.run(`CREATE TABLE albums (
     id INTEGER PRIMARY KEY,
@@ -200,9 +226,9 @@ function seed(db) {
   )`);
 
   for (const a of seed.artists) {
-    db.run(`INSERT INTO artists (id, name, slug, roster_position, blurb, genre)
+    db.run(`INSERT INTO artists (id, name, slug, roster_position, blurb, genre, cover)
       VALUES (${a.id}, '${esc(a.name)}', '${esc(a.slug)}', ${a.roster_position},
-        '${esc(a.blurb)}', '${esc(a.genre || '')}')`);
+        '${esc(a.blurb)}', '${esc(a.genre || '')}', '${esc(a.cover || '')}')`);
   }
   for (const al of seed.albums) {
     db.run(`INSERT INTO albums (id, artist_id, title, slug, release_date, label, cover,

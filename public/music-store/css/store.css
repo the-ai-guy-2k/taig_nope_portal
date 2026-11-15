@@ -184,6 +184,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 .roster { display: flex; gap: 16px; flex-wrap: wrap; }
 .roster-slot {
   flex: 1 1 200px;
+  max-width: 340px;
   background: #1c1917;
   border: 1px solid #2e2a26;
   border-radius: 14px;

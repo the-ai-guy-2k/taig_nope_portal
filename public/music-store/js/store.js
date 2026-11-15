@@ -79,10 +79,13 @@
     var html = '';
     catalog.artists.forEach(function (a) {
       var album = albumForArtist(a.id);
+      var cover = a.cover || (album && album.cover);
       var num = String(a.roster_position || a.id).padStart(2, '0');
       html += '<div class="roster-slot" data-genre="' + esc(a.genre || '') + '">'
-        + (album
-          ? '<a href="' + esc(album.page || '/music-store/') + '"><img class="cover" src="' + esc(album.cover) + '" alt="Album cover — ' + esc(album.title) + '"></a>'
+        + (cover
+          ? (album
+            ? '<a href="' + esc(album.page || '/music-store/') + '"><img class="cover" src="' + esc(cover) + '" alt="Album cover — ' + esc(album.title) + '"></a>'
+            : '<img class="cover" src="' + esc(cover) + '" alt="Cover art — ' + esc(a.name) + '">')
           : '')
         + '<div class="num">' + num + '</div>'
         + '<h3>' + (album
@@ -255,11 +258,11 @@
         + '<br>Label: ' + esc(album.label) + ' · Released ' + esc(album.release_date) + '</p>'
         + '<div class="formats">'
         + '<div class="format"><div class="price">' + money(digital.price_cents) + '</div>'
-        + '<p>Digital album · 12 songs, MP3 download</p>'
-        + '<button class="btn" data-add="album" data-id="album-digital">Add album</button></div>'
+        + '<p>Digital album · ' + esc(digital.detail) + '</p>'
+        + '<button class="btn" data-add="album" data-id="' + digital.id + '">Add album</button></div>'
         + '<div class="format"><div class="price">' + money(cd.price_cents) + '</div>'
         + '<p>CD · ' + esc(cd.detail) + '</p>'
-        + '<button class="btn" data-add="cd" data-id="album-cd">Add CD</button></div>'
+        + '<button class="btn" data-add="cd" data-id="' + cd.id + '">Add CD</button></div>'
         + '</div></div>';
     }
     var sub = $('#tracks-sub');
