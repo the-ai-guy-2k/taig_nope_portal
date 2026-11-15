@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * TAIG Online Music — store API routes (MVP).
+ * TAIG Online Music Store — store API routes (MVP).
  *
  * GET /music-store/api/catalog — the store catalog (artists, albums, tracks,
  * products) from SQLite. The storefront pages render from this endpoint.

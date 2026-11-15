@@ -1,4 +1,4 @@
-/* TAIG Online Music — storefront styles.
+/* TAIG Online Music Store — storefront styles.
    Dark premium record-store feel: deep charcoal, sunset amber, serif display.
    Mobile-first; no horizontal overflow at any width. */
 * { box-sizing: border-box; }
@@ -410,4 +410,6 @@ footer .fineprint { font-size: .8rem; margin-top: 8px; }
   .album-hero .cover { max-width: 300px; }
   .cards, .why { grid-template-columns: 1fr; }
   .wordmark { font-size: .95rem; }
+  /* Long wordmark ("TAIG ONLINE MUSIC STORE") + cart must fit a phone bar. */
+  .demo-mark { display: none; }
 }

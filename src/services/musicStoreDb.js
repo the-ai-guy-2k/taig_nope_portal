@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * TAIG Online Music — catalog database (SQLite via sql.js, pure JS).
+ * TAIG Online Music Store — catalog database (SQLite via sql.js, pure JS).
  *
  * The database file lives on the persistent volume (/app/nebula_local) so it
  * survives container rebuilds. On first start it is created and seeded from

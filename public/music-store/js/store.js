@@ -1,4 +1,4 @@
-/* TAIG Online Music — storefront behavior (MVP demo).
+/* TAIG Online Music Store — storefront behavior (MVP demo).
    Catalog renders from /music-store/api/catalog (SQLite).
    Cart is client-side only (localStorage). No checkout, no payment:
    the checkout button shows the payment-coming-soon notice. */
