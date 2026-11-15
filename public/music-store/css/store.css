@@ -198,6 +198,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 }
 .roster-slot h3 { margin: 8px 0 2px; }
 .roster-slot p { margin: 0; }
+.roster-slot .cover { margin-bottom: 10px; }
 
 /* Why buy direct */
 .why {

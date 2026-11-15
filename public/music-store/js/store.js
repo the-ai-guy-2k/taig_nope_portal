@@ -81,6 +81,9 @@
       var album = albumForArtist(a.id);
       var num = String(a.roster_position || a.id).padStart(2, '0');
       html += '<div class="roster-slot" data-genre="' + esc(a.genre || '') + '">'
+        + (album
+          ? '<a href="' + esc(album.page || '/music-store/') + '"><img class="cover" src="' + esc(album.cover) + '" alt="Album cover — ' + esc(album.title) + '"></a>'
+          : '')
         + '<div class="num">' + num + '</div>'
         + '<h3>' + (album
           ? '<a href="' + esc(album.page || '/music-store/') + '">' + esc(a.name) + '</a>'
