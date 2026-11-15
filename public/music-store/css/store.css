@@ -1,0 +1,413 @@
+/* TAIG Online Music — storefront styles.
+   Dark premium record-store feel: deep charcoal, sunset amber, serif display.
+   Mobile-first; no horizontal overflow at any width. */
+* { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+body {
+  margin: 0;
+  background: #12100e;
+  color: #f5f0e8;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+img { max-width: 100%; display: block; }
+a { color: #e8a33d; }
+h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+.muted { color: #a8a29a; }
+.small { font-size: .85rem; }
+.demo-mark {
+  display: inline-block;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #e8a33d;
+  border: 1px solid #e8a33d;
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+/* Top bar */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(18, 16, 14, .94);
+  border-bottom: 1px solid #2e2a26;
+}
+.topbar-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.wordmark {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: #f5f0e8;
+  text-decoration: none;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+.wordmark span { color: #e8a33d; }
+.topbar-spacer { flex: 1; }
+.cart-btn {
+  position: relative;
+  background: #e8a33d;
+  color: #1a1409;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #f5f0e8;
+  color: #1a1409;
+  font-size: .75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+.cart-badge[hidden] { display: none; }
+
+/* Masthead */
+.masthead { padding: 44px 0 8px; }
+.masthead h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 8vw, 4.2rem);
+  line-height: 1.02;
+  letter-spacing: .01em;
+}
+.masthead h1 span { color: #e8a33d; }
+.tagline {
+  margin: 12px 0 0;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: #d6cfc4;
+  max-width: 34em;
+}
+
+/* Featured banner */
+.banner {
+  margin-top: 28px;
+  background: #1c1917;
+  border: 1px solid #2e2a26;
+  border-radius: 16px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  align-items: center;
+}
+.cover {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #2e2a26;
+}
+.banner h2 { margin: 0 0 4px; font-size: 1.7rem; line-height: 1.15; }
+.banner .artist { color: #e8a33d; font-weight: 600; margin: 0 0 8px; }
+.banner .meta { margin: 0 0 16px; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn {
+  display: inline-block;
+  background: #e8a33d;
+  color: #1a1409;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: 700;
+  font-size: .95rem;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-ghost {
+  background: transparent;
+  color: #f5f0e8;
+  border: 1px solid #6b645b;
+}
+.btn-small { padding: 7px 12px; font-size: .85rem; }
+.btn[disabled] { opacity: .55; cursor: default; }
+
+/* Sections */
+section { margin-top: 40px; }
+section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
+.section-sub { margin: 0 0 16px; }
+
+/* Catalog cards */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.card {
+  background: #1c1917;
+  border: 1px solid #2e2a26;
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.card h3 { margin: 0; font-size: 1.15rem; }
+.card p { margin: 0; }
+.card .price { font-weight: 700; font-size: 1.1rem; }
+.card .btn { margin-top: auto; align-self: flex-start; }
+.card .thumb {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #2e2a26;
+}
+
+/* Roster */
+.roster { display: flex; gap: 16px; flex-wrap: wrap; }
+.roster-slot {
+  flex: 1 1 200px;
+  background: #1c1917;
+  border: 1px solid #2e2a26;
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+}
+.roster-slot .num {
+  font-family: Georgia, serif;
+  font-size: 2rem;
+  color: #e8a33d;
+  line-height: 1;
+}
+.roster-slot h3 { margin: 8px 0 2px; }
+.roster-slot p { margin: 0; }
+
+/* Why buy direct */
+.why {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.why div {
+  background: #1c1917;
+  border: 1px solid #2e2a26;
+  border-radius: 14px;
+  padding: 18px;
+}
+.why h3 { margin: 0 0 6px; font-size: 1.05rem; }
+.why p { margin: 0; }
+
+/* Signup */
+.signup {
+  background: #1c1917;
+  border: 1px solid #2e2a26;
+  border-radius: 14px;
+  padding: 20px;
+}
+.signup form { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.signup input[type="email"] {
+  flex: 1 1 220px;
+  background: #12100e;
+  border: 1px solid #6b645b;
+  border-radius: 999px;
+  color: #f5f0e8;
+  padding: 10px 16px;
+  font-size: 1rem;
+}
+.notice {
+  margin-top: 12px;
+  background: rgba(232, 163, 61, .14);
+  border: 1px solid #e8a33d;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.notice[hidden] { display: none; }
+
+/* Album hero */
+.album-hero {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+.album-hero h1 { margin: 0 0 4px; font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.1; }
+.album-hero .artist { color: #e8a33d; font-weight: 600; margin: 0 0 10px; font-size: 1.1rem; }
+.formats { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+.format {
+  background: #1c1917;
+  border: 1px solid #2e2a26;
+  border-radius: 12px;
+  padding: 14px 16px;
+  min-width: 180px;
+}
+.format .price { font-size: 1.25rem; font-weight: 700; }
+.format p { margin: 4px 0 10px; }
+
+/* Tracklist */
+.tracklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #2e2a26;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #1c1917;
+}
+.track {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid #2e2a26;
+  flex-wrap: wrap;
+}
+.track:first-child { border-top: none; }
+.track-num { color: #a8a29a; width: 2ch; text-align: right; font-size: .95rem; }
+.track-play {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 1px solid #6b645b;
+  background: transparent;
+  color: #f5f0e8;
+  cursor: pointer;
+  font-size: .85rem;
+  line-height: 1;
+}
+.track-play:hover { background: rgba(232, 163, 61, .14); }
+.track.is-playing { background: rgba(232, 163, 61, .14); }
+.track-title { font-weight: 600; flex: 1 1 160px; min-width: 0; }
+.track-dur { color: #a8a29a; font-size: .95rem; }
+.preview-readout { color: #e8a33d; font-size: .85rem; white-space: nowrap; }
+.preview-readout[hidden] { display: none; }
+.tag {
+  display: inline-block;
+  font-size: .7rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #e8a33d;
+  border: 1px solid #e8a33d;
+  border-radius: 999px;
+  padding: 1px 7px;
+  margin-left: 8px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.tag.soon { color: #a8a29a; border-color: #6b645b; }
+.track.coming-soon { opacity: .6; }
+.track-note { color: #a8a29a; font-size: .92rem; margin: 14px 2px 0; }
+
+/* Cart drawer */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .55);
+  z-index: 50;
+}
+.overlay[hidden] { display: none; }
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(380px, 92vw);
+  background: #1c1917;
+  border-left: 1px solid #2e2a26;
+  z-index: 51;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(102%);
+  transition: transform .2s ease;
+}
+.drawer.open { transform: translateX(0); }
+.drawer header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #2e2a26;
+}
+.drawer header h2 { margin: 0; font-size: 1.25rem; }
+.drawer-close {
+  background: transparent;
+  border: 1px solid #6b645b;
+  color: #f5f0e8;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+.drawer-body { flex: 1; overflow-y: auto; padding: 16px; }
+.cart-empty { color: #a8a29a; }
+.cart-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #2e2a26;
+}
+.cart-item .name { flex: 1; min-width: 0; }
+.cart-item .name small { display: block; color: #a8a29a; }
+.qty { display: flex; align-items: center; gap: 8px; }
+.qty button {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid #6b645b;
+  background: transparent;
+  color: #f5f0e8;
+  cursor: pointer;
+}
+.cart-remove {
+  background: transparent;
+  border: none;
+  color: #a8a29a;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: .85rem;
+}
+.drawer footer { padding: 16px; border-top: 1px solid #2e2a26; }
+.cart-total {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+}
+.drawer footer .btn { width: 100%; text-align: center; }
+
+/* Footer */
+footer {
+  margin-top: 56px;
+  border-top: 1px solid #2e2a26;
+  padding: 24px 0 40px;
+  color: #a8a29a;
+  font-size: .9rem;
+}
+footer .fineprint { font-size: .8rem; margin-top: 8px; }
+
+.loading { color: #a8a29a; padding: 24px 0; }
+
+@media (max-width: 720px) {
+  .banner { grid-template-columns: 1fr; }
+  .banner .cover { max-width: 280px; }
+  .album-hero { grid-template-columns: 1fr; }
+  .album-hero .cover { max-width: 300px; }
+  .cards, .why { grid-template-columns: 1fr; }
+  .wordmark { font-size: .95rem; }
+}

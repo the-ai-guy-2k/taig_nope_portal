@@ -3,6 +3,7 @@ const express = require('express');
 const {
   dashboardRoutes,
   jobOrderRoutes,
+  musicStoreRoutes,
   placeholderRoutes,
   planningRoutes,
 } = require('./routes');
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/', dashboardRoutes);
 app.use('/job-orders', jobOrderRoutes);
+app.use('/', musicStoreRoutes);
 app.use('/', placeholderRoutes);
 app.use('/', planningRoutes);
 
