@@ -83,12 +83,12 @@
       html += '<div class="roster-slot" data-genre="' + esc(a.genre || '') + '">'
         + '<div class="num">' + num + '</div>'
         + '<h3>' + (album
-          ? '<a href="/music-store/album/">' + esc(a.name) + '</a>'
+          ? '<a href="' + esc(album.page || '/music-store/') + '">' + esc(a.name) + '</a>'
           : esc(a.name)) + '</h3>'
         + '<p><span class="tag">' + esc(a.genre || '') + '</span></p>'
         + '<p class="muted">' + esc(a.blurb || '') + '</p>'
         + (album
-          ? '<p><a href="/music-store/album/">' + esc(album.title) + ' — out now</a></p>'
+          ? '<p><a href="' + esc(album.page || '/music-store/') + '">' + esc(album.title) + ' — out now</a></p>'
           : '<p class="muted">Debut release coming soon</p>')
         + '</div>';
     });
@@ -232,12 +232,18 @@
   }
 
   function renderAlbum() {
-    var album = catalog.albums[0];
-    var artist = catalog.artists[0];
-    var digital = productById('album-digital');
-    var cd = productById('album-cd');
+    /* The album page is the album whose page URL matches this page's path,
+       so one template serves every artist. Jay's page is /music-store/album/;
+       the other artists live under /music-store/artist/<slug>/. */
+    var path = window.location.pathname.replace(/\/$/, '');
+    var album = catalog.albums.find(function (a) { return (a.page || '').replace(/\/$/, '') === path; })
+      || catalog.albums[0];
+    var artist = catalog.artists.find(function (a) { return a.id === album.artist_id; })
+      || catalog.artists[0];
+    var digital = catalog.products.find(function (p) { return p.album_id === album.id && p.kind === 'album'; });
+    var cd = catalog.products.find(function (p) { return p.album_id === album.id && p.kind === 'cd'; });
     var hero = $('#album-hero');
-    if (hero && album && artist) {
+    if (hero && album && artist && digital && cd) {
       hero.innerHTML =
         '<img class="cover" src="' + esc(album.cover) + '" alt="Album cover — ' + esc(album.title) + '">'
         + '<div><h1>' + esc(album.title) + '</h1>'
@@ -253,10 +259,18 @@
         + '<button class="btn" data-add="cd" data-id="album-cd">Add CD</button></div>'
         + '</div></div>';
     }
+    var sub = $('#tracks-sub');
+    if (sub) {
+      var albumTracks = catalog.tracks.filter(function (t) { return t.album_id === album.id; });
+      var playable = albumTracks.filter(function (t) { return t.demo_available; }).length;
+      sub.textContent = playable === albumTracks.length
+        ? 'Tap play for a 30-second preview of any track.'
+        : playable + ' songs are live — tap play for a 30-second preview. The rest of the album is coming soon.';
+    }
     var list = $('#tracklist');
     if (list) {
       var html = '';
-      catalog.tracks.forEach(function (t) {
+      catalog.tracks.filter(function (t) { return t.album_id === album.id; }).forEach(function (t) {
         if (t.demo_available) {
           html += '<li class="track" data-track-id="' + t.id + '">'
             + '<span class="track-num">' + String(t.num).padStart(2, '0') + '</span>'

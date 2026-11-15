@@ -16,18 +16,6 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
 .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
 .muted { color: #a8a29a; }
 .small { font-size: .85rem; }
-.demo-mark {
-  display: inline-block;
-  font-size: .72rem;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: #e8a33d;
-  border: 1px solid #e8a33d;
-  border-radius: 999px;
-  padding: 2px 8px;
-  white-space: nowrap;
-}
-
 /* Top bar */
 .topbar {
   position: sticky;
@@ -426,6 +414,4 @@ footer .fineprint { font-size: .8rem; margin-top: 8px; }
   .album-hero .cover { max-width: 300px; }
   .cards, .why { grid-template-columns: 1fr; }
   .wordmark { font-size: .95rem; }
-  /* Long wordmark ("TAIG ONLINE MUSIC STORE") + cart must fit a phone bar. */
-  .demo-mark { display: none; }
 }

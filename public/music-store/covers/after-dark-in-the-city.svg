@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+  <rect width="1000" height="1000" fill="#1c1917"/>
+  <circle cx="720" cy="260" r="150" fill="#e8a33d"/>
+  <rect x="120" y="640" width="60" height="240" fill="#2e2a26"/>
+  <rect x="220" y="560" width="60" height="320" fill="#2e2a26"/>
+  <rect x="320" y="690" width="60" height="190" fill="#2e2a26"/>
+  <rect x="420" y="600" width="60" height="280" fill="#2e2a26"/>
+  <rect x="120" y="880" width="760" height="6" fill="#e8a33d"/>
+  <text x="120" y="420" font-family="Georgia, serif" font-size="72" fill="#f5f0e8">After Dark</text>
+  <text x="120" y="500" font-family="Georgia, serif" font-size="72" fill="#f5f0e8">in the City</text>
+  <text x="120" y="570" font-family="Georgia, serif" font-size="34" fill="#e8a33d">KAIRO VALE</text>
+  <text x="120" y="950" font-family="Georgia, serif" font-size="24" letter-spacing="4" fill="#a8a29a">HIP-HOP</text>
+</svg>

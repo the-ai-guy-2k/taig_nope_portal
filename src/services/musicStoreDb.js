@@ -77,6 +77,55 @@ function migrate(db) {
   }
   const after = rows(db, 'SELECT COUNT(*) AS n FROM artists')[0].n;
   if (after > before) changed = true;
+
+  /* Albums: genre + page columns, backfill Jay's album, upsert seed albums. */
+  const albumCols = rows(db, 'PRAGMA table_info(albums)').map((c) => c.name);
+  if (!albumCols.includes('genre')) { db.run('ALTER TABLE albums ADD COLUMN genre TEXT'); changed = true; }
+  if (!albumCols.includes('page')) { db.run('ALTER TABLE albums ADD COLUMN page TEXT'); changed = true; }
+  const jayAlbum = rows(db, "SELECT genre, page FROM albums WHERE slug='still-chasing-the-sunset'")[0];
+  if (jayAlbum && (jayAlbum.genre === null || jayAlbum.genre === '')) {
+    db.run("UPDATE albums SET genre='Country' WHERE slug='still-chasing-the-sunset'");
+    changed = true;
+  }
+  if (jayAlbum && (jayAlbum.page === null || jayAlbum.page === '')) {
+    db.run("UPDATE albums SET page='/music-store/album/' WHERE slug='still-chasing-the-sunset'");
+    changed = true;
+  }
+  const albBefore = rows(db, 'SELECT COUNT(*) AS n FROM albums')[0].n;
+  for (const al of seed.albums) {
+    db.run(`INSERT OR IGNORE INTO albums (id, artist_id, title, slug, release_date, label,
+        cover, price_cents, cd_price_cents, status, total_time, track_count, genre, page)
+      VALUES (${al.id}, ${al.artist_id}, '${esc(al.title)}', '${esc(al.slug)}',
+        '${esc(al.release_date)}', '${esc(al.label)}', '${esc(al.cover)}',
+        ${al.price_cents}, ${al.cd_price_cents}, '${esc(al.status)}',
+        '${esc(al.total_time)}', ${al.track_count}, '${esc(al.genre || '')}', '${esc(al.page || '')}')`);
+  }
+  if (rows(db, 'SELECT COUNT(*) AS n FROM albums')[0].n > albBefore) changed = true;
+
+  /* Tracks: genre column, backfill from the album, upsert seed tracks. */
+  const trackCols = rows(db, 'PRAGMA table_info(tracks)').map((c) => c.name);
+  if (!trackCols.includes('genre')) { db.run('ALTER TABLE tracks ADD COLUMN genre TEXT'); changed = true; }
+  db.run(`UPDATE tracks SET genre = (SELECT genre FROM albums WHERE albums.id = tracks.album_id)
+    WHERE genre IS NULL OR genre = ''`);
+  const trkBefore = rows(db, 'SELECT COUNT(*) AS n FROM tracks')[0].n;
+  for (const t of seed.tracks) {
+    db.run(`INSERT OR IGNORE INTO tracks (id, album_id, num, title, duration, duration_seconds,
+        preview, demo_available, is_single, price_cents, genre)
+      VALUES (${t.id}, ${t.album_id}, ${t.num}, '${esc(t.title)}', '${esc(t.duration)}',
+        ${t.duration_seconds}, ${t.preview ? `'${esc(t.preview)}'` : 'NULL'},
+        ${t.demo_available ? 1 : 0}, ${t.is_single ? 1 : 0}, ${t.price_cents}, '${esc(t.genre || '')}')`);
+  }
+  if (rows(db, 'SELECT COUNT(*) AS n FROM tracks')[0].n > trkBefore) changed = true;
+
+  /* Products: upsert seed products. */
+  const prodBefore = rows(db, 'SELECT COUNT(*) AS n FROM products')[0].n;
+  for (const p of seed.products) {
+    db.run(`INSERT OR IGNORE INTO products (id, album_id, kind, name, detail, price_cents)
+      VALUES ('${esc(p.id)}', ${p.album_id}, '${esc(p.kind)}', '${esc(p.name)}',
+        '${esc(p.detail)}', ${p.price_cents})`);
+  }
+  if (rows(db, 'SELECT COUNT(*) AS n FROM products')[0].n > prodBefore) changed = true;
+
   return changed;
 }
 
@@ -103,7 +152,9 @@ function seed(db) {
     cd_price_cents INTEGER NOT NULL,
     status TEXT,
     total_time TEXT,
-    track_count INTEGER
+    track_count INTEGER,
+    genre TEXT,
+    page TEXT
   )`);
   db.run(`CREATE TABLE tracks (
     id INTEGER PRIMARY KEY,
@@ -115,7 +166,8 @@ function seed(db) {
     preview TEXT,
     demo_available INTEGER NOT NULL DEFAULT 0,
     is_single INTEGER NOT NULL DEFAULT 0,
-    price_cents INTEGER NOT NULL
+    price_cents INTEGER NOT NULL,
+    genre TEXT
   )`);
   db.run(`CREATE TABLE products (
     id TEXT PRIMARY KEY,
@@ -154,18 +206,18 @@ function seed(db) {
   }
   for (const al of seed.albums) {
     db.run(`INSERT INTO albums (id, artist_id, title, slug, release_date, label, cover,
-        price_cents, cd_price_cents, status, total_time, track_count)
+        price_cents, cd_price_cents, status, total_time, track_count, genre, page)
       VALUES (${al.id}, ${al.artist_id}, '${esc(al.title)}', '${esc(al.slug)}',
         '${esc(al.release_date)}', '${esc(al.label)}', '${esc(al.cover)}',
         ${al.price_cents}, ${al.cd_price_cents}, '${esc(al.status)}',
-        '${esc(al.total_time)}', ${al.track_count})`);
+        '${esc(al.total_time)}', ${al.track_count}, '${esc(al.genre || '')}', '${esc(al.page || '')}')`);
   }
   for (const t of seed.tracks) {
     db.run(`INSERT INTO tracks (id, album_id, num, title, duration, duration_seconds,
-        preview, demo_available, is_single, price_cents)
+        preview, demo_available, is_single, price_cents, genre)
       VALUES (${t.id}, ${t.album_id}, ${t.num}, '${esc(t.title)}', '${esc(t.duration)}',
         ${t.duration_seconds}, ${t.preview ? `'${esc(t.preview)}'` : 'NULL'},
-        ${t.demo_available ? 1 : 0}, ${t.is_single ? 1 : 0}, ${t.price_cents})`);
+        ${t.demo_available ? 1 : 0}, ${t.is_single ? 1 : 0}, ${t.price_cents}, '${esc(t.genre || '')}')`);
   }
   for (const p of seed.products) {
     db.run(`INSERT INTO products (id, album_id, kind, name, detail, price_cents)
