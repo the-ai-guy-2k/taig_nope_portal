@@ -11,7 +11,10 @@
 <header class="topbar">
   <div class="topbar-inner">
     <a class="wordmark" href="/music-store/"><img class="brand-mark" src="/music-store/logo-mark.svg" alt="" aria-hidden="true">TAIG <span>ONLINE MUSIC STORE</span></a>
-    <span class="topbar-spacer"></span>
+    <div class="search-wrap" id="search-wrap">
+      <input type="search" id="search-input" placeholder="Search artists, albums, songs" aria-label="Search the store" autocomplete="off">
+      <div class="search-results" id="search-results" hidden></div>
+    </div>
     <button class="cart-btn" id="cart-open" type="button">Cart <span class="cart-badge" id="cart-badge" hidden>0</span></button>
   </div>
 </header>
@@ -58,6 +61,14 @@
     <p class="notice" id="checkout-notice" hidden>Payment coming soon — this store takes no payment yet. Your cart is saved on this device only.</p>
   </footer>
 </aside>
+
+<div class="player-bar" id="player-bar" hidden>
+  <button class="player-toggle" id="player-toggle" type="button" aria-label="Pause preview">❚❚</button>
+  <div class="player-info"><span class="player-title" id="player-title"></span><span class="player-artist" id="player-artist"></span></div>
+  <div class="player-progress"><div class="player-fill" id="player-fill"></div></div>
+  <span class="player-time" id="player-time">0:00 / 0:30</span>
+  <button class="player-stop" id="player-stop" type="button" aria-label="Stop preview">✕</button>
+</div>
 
 <script src="/music-store/js/store.js"></script>
 </body>

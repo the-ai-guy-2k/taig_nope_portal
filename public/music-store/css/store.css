@@ -34,7 +34,66 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
+/* Search — the store's search bar lives in the topbar (Apple Music /
+   Amazon pattern: search on every page). On narrow screens it drops
+   to its own row below the wordmark + Cart. */
+.search-wrap {
+  position: relative;
+  flex: 1 1 280px;
+  max-width: 380px;
+  min-width: 0;
+}
+.search-wrap input[type="search"] {
+  width: 100%;
+  background: #182941;
+  border: 1px solid #2a3f5f;
+  border-radius: 999px;
+  color: #f5f0e8;
+  padding: 8px 14px;
+  font-size: .95rem;
+  font-family: inherit;
+}
+.search-wrap input[type="search"]::placeholder { color: #a8a29a; }
+.search-wrap input[type="search"]:focus { outline: 2px solid #CDA140; outline-offset: 0; border-color: #CDA140; }
+.search-results {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #22385c;
+  border: 1px solid #2a3f5f;
+  border-radius: 12px;
+  max-height: 60vh;
+  overflow-y: auto;
+  z-index: 60;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .45);
+  padding: 6px 0;
+}
+.search-results[hidden] { display: none; }
+.search-group {
+  padding: 8px 14px 2px;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #a8a29a;
+  font-weight: 700;
+}
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  color: #f5f0e8;
+  text-decoration: none;
+  cursor: pointer;
+}
+.search-row:hover { background: rgba(205, 161, 64, .14); }
+.search-row .sr-name { font-weight: 600; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.search-row .sr-sub { color: #a8a29a; font-size: .85rem; white-space: nowrap; }
+.search-row .sr-price { color: #CDA140; font-weight: 700; font-size: .9rem; white-space: nowrap; }
+.search-empty { padding: 12px 14px; color: #a8a29a; }
 .wordmark {
   font-family: Georgia, "Times New Roman", serif;
   font-weight: 700;
@@ -53,7 +112,6 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
   width: auto;
   display: block;
 }
-.topbar-spacer { flex: 1; }
 .cart-btn {
   position: relative;
   background: #CDA140;
@@ -164,6 +222,18 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 
 /* Genre browse/filter */
 .genre-filter { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+.genre-status { margin: 0 0 16px; color: #a8a29a; font-size: .92rem; }
+.genre-status[hidden] { display: none; }
+.genre-status button {
+  background: transparent;
+  border: none;
+  color: #CDA140;
+  cursor: pointer;
+  text-decoration: underline;
+  font: inherit;
+  font-size: inherit;
+  padding: 0;
+}
 .genre-chip {
   background: transparent;
   border: 1px solid #6b645b;
@@ -283,6 +353,19 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 .artist-hero .blurb { color: #d6cfc4; margin: 12px 0 0; max-width: 34em; }
 .artist-hero .tag { margin-left: 0; }
 .artist-hero .coming { color: #a8a29a; margin: 16px 0 0; }
+
+/* Album layout — desktop: cover + info left, tracklist right
+   (the iTunes/Apple Music album page). Stacks on phone width. */
+.album-layout {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+.album-layout .album-hero { margin-top: 0; grid-template-columns: 1fr; }
+.album-layout .album-hero .cover { max-width: 340px; }
+.album-layout section { margin-top: 0; }
 
 /* Album hero */
 .album-hero {
@@ -411,6 +494,14 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   border-bottom: 1px solid #2a3f5f;
 }
 .cart-item .name { flex: 1; min-width: 0; }
+.cart-thumb {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #2a3f5f;
+}
 .cart-item .name small { display: block; color: #a8a29a; }
 .qty { display: flex; align-items: center; gap: 8px; }
 .qty button {
@@ -440,6 +531,74 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 }
 .drawer footer .btn { width: 100%; text-align: center; }
 
+/* Persistent player bar — the mini-player (Apple Music pattern):
+   fixed to the bottom while a preview plays. Sits below the cart
+   drawer/overlay so the cart stays on top. */
+.player-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 45;
+  background: #22385c;
+  border-top: 1px solid #2a3f5f;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.player-bar[hidden] { display: none; }
+body.player-open { padding-bottom: 60px; }
+.player-toggle {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 1px solid #6b645b;
+  background: #CDA140;
+  color: #1a1409;
+  cursor: pointer;
+  font-size: .85rem;
+  line-height: 1;
+  font-weight: 700;
+}
+.player-info { flex: 0 1 220px; min-width: 0; }
+.player-title {
+  display: block;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.player-artist {
+  display: block;
+  color: #a8a29a;
+  font-size: .85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.player-progress {
+  flex: 1;
+  height: 6px;
+  background: #2a3f5f;
+  border-radius: 999px;
+  overflow: hidden;
+  min-width: 40px;
+}
+.player-fill { height: 100%; width: 0; background: #CDA140; }
+.player-time { color: #CDA140; font-size: .85rem; white-space: nowrap; }
+.player-stop {
+  background: transparent;
+  border: 1px solid #6b645b;
+  color: #f5f0e8;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+
 /* Footer */
 /* Footer — navy panel, matching the masthead and signup bookends. */
 footer {
@@ -456,14 +615,17 @@ footer .fineprint { font-size: .8rem; margin-top: 8px; }
 .loading { color: #a8a29a; padding: 24px 0; }
 
 @media (max-width: 720px) {
+  .topbar-inner { display: grid; grid-template-columns: 1fr auto; gap: 10px 12px; }
+  .search-wrap { grid-column: 1 / -1; grid-row: 2; flex: none; max-width: none; }
   .hero { grid-template-columns: 1fr; }
   .hero .cover { max-width: 280px; }
   .artist-hero { grid-template-columns: 1fr; }
   .artist-hero .cover { max-width: 280px; }
+  .album-layout { grid-template-columns: 1fr; }
   .album-hero { grid-template-columns: 1fr; }
   .album-hero .cover { max-width: 300px; }
   .cards, .why { grid-template-columns: 1fr; }
-  .wordmark { font-size: .95rem; gap: 8px; }
+  .wordmark { font-size: .9rem; gap: 8px; }
   .brand-mark { height: 26px; }
   .masthead { padding: 24px 16px 20px; margin-top: 16px; }
   .masthead-logo { width: min(300px, 82vw); }
