@@ -73,6 +73,7 @@
         display: flex; align-items: baseline; gap: 10px;
       }
       h2.section-title::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
+      .section-note { font-size: 14.5px; color: var(--ink-2); margin: -4px 0 12px; max-width: 74ch; }
 
       /* ---------- headline cards ---------- */
       .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 18px; }
@@ -82,6 +83,7 @@
       }
       .card .big { font-size: 40px; font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
       .card .label { font-size: 13.5px; font-weight: 600; margin-top: 6px; }
+      .card .kind { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-top: 2px; }
       .card .splits { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; display: grid; gap: 3px; }
       .split-row { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink-2); transition: opacity .15s; }
       .split-row b { margin-left: auto; color: var(--ink); font-weight: 700; }
@@ -124,6 +126,7 @@
       .seg { height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12.5px; font-weight: 700; min-width: 0; overflow: hidden; }
       @media (prefers-color-scheme: dark) { .seg { color: #14161a; } }
       .seg-its { background: var(--its); } .seg-taig2k { background: var(--taig2k); } .seg-hive { background: var(--hive); }
+      .seg-opened { background: var(--its); } .seg-closed { background: var(--hive); }
       .bar-row .gtotal { font-size: 16px; font-weight: 700; text-align: right; }
       @media (max-width: 520px) { .bar-row { grid-template-columns: 96px 1fr 30px; } .bar-row .gname { font-size: 12.5px; } }
 
@@ -143,6 +146,33 @@
       .donut-legend .dl-row b { margin-left: auto; }
       .donut-legend .dl-row .pct { color: var(--ink-3); font-size: 13px; width: 44px; text-align: right; }
       .donut-note { font-size: 12.5px; color: var(--ink-2); margin: 2px 0 0; }
+
+      /* ---------- history / trends ---------- */
+      .trend-day { margin-bottom: 18px; }
+      .trend-day:last-child { margin-bottom: 2px; }
+      .trend-date { font-weight: 700; font-size: 14.5px; margin-bottom: 7px; }
+      .trend-day .bar-row { margin-bottom: 7px; }
+      .trend-day .bar-track { height: 24px; }
+
+      table.hist { width: 100%; border-collapse: collapse; font-size: 14px; }
+      table.hist th, table.hist td { padding: 8px; border-top: 1px solid var(--line); text-align: right; vertical-align: top; }
+      table.hist th:first-child, table.hist td:first-child { text-align: left; }
+      table.hist thead th { border-top: none; color: var(--ink-2); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+      .hnum { font-size: 19px; font-weight: 700; display: block; line-height: 1.15; }
+      .hsplit { display: block; font-size: 12px; color: var(--ink-2); margin-top: 2px; line-height: 1.35; }
+      .hdate { font-weight: 700; white-space: nowrap; font-size: 14.5px; }
+      @media (max-width: 680px) {
+        table.hist thead { display: none; }
+        table.hist, table.hist tbody, table.hist tr, table.hist td { display: block; width: 100%; }
+        table.hist tr { border-top: 1px solid var(--line); padding: 10px 0 6px; }
+        table.hist tbody tr:first-child { border-top: none; }
+        table.hist td { border-top: none; text-align: left; padding: 3px 8px; display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+        table.hist td::before { content: attr(data-label); font-weight: 600; color: var(--ink-2); font-size: 13px; flex: none; }
+        table.hist td.hcell-date { display: block; }
+        table.hist td.hcell-date::before { content: none; }
+        .hnum { display: inline; font-size: 16px; }
+        .hsplit { text-align: right; }
+      }
 
       /* ---------- reconciliation ---------- */
       .recon { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
@@ -169,7 +199,7 @@
       .bucket li:first-child { border-top: none; }
       .bucket .empty { color: var(--ink-3); font-size: 14px; padding: 4px 0 8px; }
 
-      /* ---------- tonight's new loops ---------- */
+      /* ---------- movements ---------- */
       .newloops-note { font-size: 14.5px; color: var(--ink-2); margin: 0 0 12px; max-width: 74ch; }
       .totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 12px; }
       .total-cell { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
@@ -183,13 +213,10 @@
       }
       .tag-closed { color: var(--hive); border: 1px solid var(--hive); }
       .tag-prog { color: var(--st-close); border: 1px solid var(--st-close); }
+      .tag-touched { color: var(--st-touched); border: 1px solid var(--st-touched); }
 
       /* ---------- music store stats ---------- */
       .store-panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
-      .store-panel .soon {
-        display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-        color: var(--taig2k); border: 1px solid var(--taig2k); border-radius: 999px; padding: 2px 10px; margin-bottom: 8px;
-      }
       .store-panel p { margin: 0; font-size: 15px; color: var(--ink-2); max-width: 74ch; }
       .store-panel p + p { margin-top: 8px; }
       .store-panel .live-badge {
@@ -231,7 +258,7 @@
       <div class="screen-only">
         <header class="report-head">
           <h1>Loop Report</h1>
-          <p>Sunday, November 15, 2026 <span class="sep">·</span> Live totals, updated as loops move (last movement Nov 16, 1:23 AM) <span class="sep">·</span> Split by TAIG ITS / TAIG2K / The Hive</p>
+          <p><span id="headDate">Monday, November 16, 2026</span> <span class="sep">·</span> Counters reset every day — computed from the dated event log, no manual reset <span class="sep">·</span> Last movement <span id="lastMove">Nov 16, 7:24 AM</span> <span class="sep">·</span> Split by TAIG ITS / TAIG2K / The Hive</p>
         </header>
 
         <section class="cards" id="cards" aria-label="Headline numbers"></section>
@@ -244,11 +271,11 @@
           <button class="fbtn" data-set-filter="hive" aria-pressed="false"><span class="dot dot-hive"></span>The Hive</button>
         </div>
 
-        <h2 class="section-title">The five groups</h2>
+        <h2 class="section-title" id="groupsTitle">The five groups — today</h2>
         <div class="charts">
           <div class="panel">
             <h3>Groups × bucket</h3>
-            <p class="sub">Each bar is one group, stacked by bucket. Bar length is to scale; the number at the end is the group total.</p>
+            <p class="sub">Each bar is one group, stacked by bucket. Opened / Closed / Created + closed count today only and reset each morning; Close to closing and Untouched are the carried-over state. Bar length is to scale; the number at the end is the group total.</p>
             <div class="legend">
               <span><span class="dot dot-its"></span>TAIG ITS</span>
               <span><span class="dot dot-taig2k"></span>TAIG2K</span>
@@ -259,40 +286,60 @@
           </div>
 
           <div class="panel">
-            <h3 id="donutTitle">The open pile — 81</h3>
-            <p class="sub" id="donutSub">Open loops by where they stand.</p>
+            <h3 id="donutTitle">The open pile</h3>
+            <p class="sub" id="donutSub">Open loops by where they stand. Open is state — it carries over day to day and does not reset.</p>
             <div class="donut-wrap">
-              <svg class="donut-svg" id="donut" viewBox="0 0 200 200" role="img" aria-label="Donut chart of the 81 open loops"></svg>
+              <svg class="donut-svg" id="donut" viewBox="0 0 200 200" role="img" aria-label="Donut chart of the open loops"></svg>
               <div class="donut-legend" id="donutLegend"></div>
             </div>
             <p class="donut-note" id="donutNote"></p>
           </div>
         </div>
 
+        <h2 class="section-title">History — day by day</h2>
+        <p class="section-note">Two kinds of numbers. <strong>Flow</strong> — opened, closed, created + closed — is counted per day and resets to zero every morning; that is the trend line. <strong>State</strong> — open, untouched, close to closing — carries over; each day's row records where the levels stood at the end of that day, and the day-to-day movement of the levels is the other half of the trend. The Nov 15 row is day one: the baseline snapshot day.</p>
+        <div class="charts" style="grid-template-columns: 1fr;">
+          <div class="panel">
+            <h3>Opened vs. closed, per day</h3>
+            <p class="sub">Gross openings against closings for each day in the log.</p>
+            <div class="legend">
+              <span><span class="dot" style="background:var(--its)"></span>Opened (gross)</span>
+              <span><span class="dot" style="background:var(--hive)"></span>Closed</span>
+            </div>
+            <div id="trend"></div>
+          </div>
+          <div class="panel">
+            <h3>Daily record</h3>
+            <p class="sub">One row per day. Flow columns carry the bucket split (ITS · TAIG2K · Hive); state columns are end-of-day levels.</p>
+            <table class="hist" id="histTable" aria-label="Daily loop history"></table>
+          </div>
+        </div>
+
         <h2 class="section-title">How the numbers reconcile</h2>
         <div class="recon">
-          <p><span class="eq">Open 81</span> = untouched 54 + touched 27. The touched 27 = close to closing 15 + touched but not close 12.</p>
-          <p><span class="eq">Closed today 38</span> = created + closed today 35 + 3 that started earlier:</p>
+          <p><strong>The daily model:</strong> every loop sits in a dated event log — name, bucket, the date it opened, the date it closed, the date it was last touched. Opened today, Closed today, and Created + closed today are computed from the log for the current date (America/New_York), so they start at zero each morning on their own. Open, Untouched, and Close to closing are state, not daily counters — they carry over, and Open does <em>not</em> reset.</p>
+          <p><span class="eq">Open 82</span> = untouched 53 + touched 29. The touched 29 = close to closing 15 + touched but not close 14. The DJ mixtape loop (The Hive) moved from untouched to touched-but-not-close on Nov 16: Tee asked Josh for a DJ at 7:00 PM Nov 15, and Josh replied at 12:58 AM Nov 16 that he knows someone into DJ stuff and will message him — the DJ still has to be messaged and found, so it is touched, not close. The other new touched loop is today's opening, below.</p>
+          <p><strong>Today (Nov 16) so far:</strong> <span class="eq">Opened 1</span> = 6 gross openings − 5 closed the same day. The 5 are the music-store loops that opened and closed after midnight; the 1 still open is the daily-resetting counters loop, opened 7:24 AM. Nov 15 runs the same way: <span class="eq">Opened 42</span> = 72 gross openings − 30 created + closed.</p>
+          <p><strong>Correction to the draft “Nov 15 final”:</strong> the draft figures (Open 84, Opened 46, Closed 38, Created + closed 35) mixed Nov 15 and Nov 16 work into one day and counted the 3 same-day-closed loops as open. Split by day, the same work reads: Nov 15 — Open 81, Opened 42, Closed 33, Created + closed 30; Nov 16 so far — Closed 5, Created + closed 5. The days add up: <span class="eq">Closed 33 + 5 = 38</span> and <span class="eq">Created + closed 30 + 5 = 35</span> across both days.</p>
+          <p><strong>Baseline trail:</strong> the Nov 15 snapshot baseline was Open 60, Closed 31, Opened 21, Created + closed 28, Close to closing 15, Untouched 33 — that snapshot is day one of the trend. The Nov 15 history row is that day's finished state after all of Nov 15's movements (21 map loops opened untouched; 2 store loops opened and closed): Open 81, Opened 42, Closed 33, Created + closed 30, Close 15, Untouched 54.</p>
+          <p>Nov 15's Closed 33 = created + closed 30 + 3 that started earlier:</p>
           <ul>
             <li>ISRC verified (The Hive)</li>
             <li>Veteran fair reminder (TAIG2K)</li>
             <li>Clerge tree-cutting draft (TAIG ITS)</li>
           </ul>
-          <p><strong>Baseline trail:</strong> the Nov 15 baseline was Open 60, Closed 31, Opened 21, Created + closed 28, Close to closing 15, Untouched 33. Since then: 21 map loops opened (all untouched), and 7 TAIG2K music-store loops opened — all 7 have since closed the same day; the fifth, Full-store palette, opened at 12:05 AM and closed at ~12:10 AM; the sixth, Entire background navy, opened at 12:15 AM and closed at ~12:20 AM; the seventh, Store redesign, opened at 12:58 AM and closed at ~1:23 AM.</p>
-          <p><strong>Why Opened today is 42, not 46:</strong> the baseline's “Opened today 21” counts only loops opened today that are still open — that's why baseline Created + closed (28) can be bigger than Opened (21). The 7 store loops that opened and closed add to Closed and Created + closed but not to Opened-still-open: 21 + 21 maps + 7 opened − 7 closed = <span class="eq">42</span>. Cross-check: Opened 42 + Created + closed 35 = 77 gross openings today (baseline 49 + maps 21 + new 7).</p>
-          <p><strong>Why Open is 81, not 85:</strong> same reason — the 7 closed store loops net zero on Open. 60 baseline + 21 maps + 7 opened − 7 closed = <span class="eq">81</span>.</p>
-          <p>One loop was created today and died today: the Josh plan PDF — built, stopped, on disk undelivered. It is counted in Opened today (parked), not in any closed count.</p>
+          <p>One loop was created Nov 15 and died Nov 15: the Josh plan PDF — built, stopped, on disk undelivered. It is counted in Nov 15's Opened (parked), not in Open and not in any closed count.</p>
         </div>
 
         <h2 class="section-title">Movements since the baseline — the audit list</h2>
-        <p class="newloops-note">28 movements since the baseline snapshot: the 21 loops from the three notebook maps sent at 10:17 PM (The Hive, TAIG IT Solutions, TAIG2K), plus 7 TAIG2K music-store loops after that — all 7 closed. The headline numbers above are the live totals with all 28 folded in; the baseline figures stay in the reconciliation as the trail. The 21 map loops are all untouched: just opened, nothing done yet.</p>
+        <p class="newloops-note">29 movements since the baseline snapshot: the 21 loops from the three notebook maps sent Nov 15 at 10:17 PM (The Hive, TAIG IT Solutions, TAIG2K), 7 TAIG2K music-store loops (2 late Nov 15, 5 on Nov 16 — all 7 have since closed), and 1 new loop on Nov 16, the daily-resetting counters loop. Plus one touch: the DJ mixtape loop moved out of untouched on Nov 16 (see its entry below). The headline numbers are computed from the dated log with all of it folded in; the baseline figures stay in the reconciliation as the trail.</p>
         <div class="totals">
-          <div class="total-cell"><div class="tbig num">81</div><div class="tlab">Open now</div><div class="teq num">Baseline 60 + 21 maps + 0 net store (7 opened − 7 closed)</div></div>
-          <div class="total-cell"><div class="tbig num">54</div><div class="tlab">Untouched now</div><div class="teq num">Baseline 33 + 21 maps</div></div>
-          <div class="total-cell"><div class="tbig num">27</div><div class="tlab">Touched now</div><div class="teq num">Close 15 + touched, not close 12</div></div>
-          <div class="total-cell"><div class="tbig num">28</div><div class="tlab">Movements since baseline</div><div class="teq num">21 maps + 7 store loops (7 closed)</div></div>
+          <div class="total-cell"><div class="tbig num">82</div><div class="tlab">Open now</div><div class="teq num">Baseline 60 + 21 maps + 6 opened Nov 16 − 5 closed Nov 16 (the 2 Nov 15 store loops net zero)</div></div>
+          <div class="total-cell"><div class="tbig num">53</div><div class="tlab">Untouched now</div><div class="teq num">Baseline 33 + 21 maps − 1 moved to touched (DJ mixtape, Nov 16)</div></div>
+          <div class="total-cell"><div class="tbig num">29</div><div class="tlab">Touched now</div><div class="teq num">Close to closing 15 + touched, not close 14</div></div>
+          <div class="total-cell"><div class="tbig num">29</div><div class="tlab">Movements since baseline</div><div class="teq num">21 maps + 7 store loops + 1 new loop, plus the DJ mixtape touch</div></div>
         </div>
-        <p class="newloops-note">Check: <span class="num">81 open = 54 untouched + 27 touched</span> (the touched 27 is 15 close to closing + 12 touched, not close).</p>
+        <p class="newloops-note">Check: <span class="num">82 open = 53 untouched + 29 touched</span> (the touched 29 is 15 close to closing + 14 touched, not close).</p>
         <p class="newloops-note">Two different 21s: the baseline's “Opened today” is 21, and the map loops also happen to be 21. They are separate counts. Already in the baseline and <strong>not</strong> counted again here: Food Truck Menus, Clerge (he appears below only as a sub-item of the Service Industry loop), PIA, Diamond IQ / PSIS, and the TAIG Online Music Store MVP.</p>
         <div class="bucket-grid">
           <div class="bucket">
@@ -325,7 +372,7 @@
           <div class="bucket">
             <h4 class="h-hive"><span class="dot dot-hive"></span>The Hive<span class="bcount num">4</span></h4>
             <ul>
-              <li>Tiesto DJ mix tape<span class="detail">Find a good DJ to mix and make a Tiesto version mix tape</span></li>
+              <li>Tiesto DJ mix tape<span class="tag tag-touched">Touched</span><span class="detail">Find a good DJ to mix and make a Tiesto version mix tape. Opened Nov 15 (map loop); moved out of untouched Nov 16: Tee asked Josh for a DJ at 7:00 PM Nov 15; Josh replied at 12:58 AM Nov 16 that he knows someone into DJ stuff and will message him. The DJ still has to be messaged and found — touched, not close to closing.</span></li>
               <li>Fun givings drives<span class="detail">Turkey drives, Toy drives, Holiday Decoration Drive</span></li>
               <li>Performing Opportunities<span class="detail">Open mic nights</span></li>
               <li>e Bike Repair shop</li>
@@ -336,18 +383,25 @@
           <div class="bucket">
             <h4 class="h-taig2k"><span class="dot dot-taig2k"></span>TAIG2K — music store loops<span class="bcount num">7</span></h4>
             <ul>
-              <li>Logo on storefront<span class="tag tag-closed">Closed</span><span class="detail">Opened 11:48 PM, closed 11:59 PM — live on the storefront, desktop + phone-width verified, gold #CDA140 pixel-confirmed. Created + closed today.</span></li>
-              <li>Store-palette shirt recolor<span class="tag tag-closed">Closed</span><span class="detail">Opened 11:48 PM, closed 11:50 PM — dark-amber + all-amber print PNGs and SVGs delivered. Created + closed today.</span></li>
-              <li>Blue palette shirt (navy/gold)<span class="tag tag-closed">Closed</span><span class="detail">Opened 12:00 AM, closed 12:01 AM — print file + vector delivered. Created + closed today.</span></li>
-              <li>Blue palette store<span class="tag tag-closed">Closed</span><span class="detail">Opened 12:00 AM, closed ~12:04 AM — verified live: navy panels #182941 behind the masthead lockup and the “Hear it first” signup panel, logo untouched white/gold #CDA140, desktop + 390px phone width clean, stats intact. Created + closed today.</span></li>
-              <li>Full-store palette<span class="tag tag-closed">Closed</span><span class="detail">Opened 12:05 AM, closed ~12:10 AM — verified live: navy/gold across every surface (topbar, masthead, cards, cart drawer, signup, footer), gold #CDA140 as the accent everywhere the old amber was, zero old amber left in the site's own chrome, desktop + 390px clean, stats intact (47 visits, 28 unique), commit 2d31051. A follow-on to the closed Blue palette store loop — a separate loop, not the same one. Created + closed today.</span></li>
-              <li>Entire background navy<span class="tag tag-closed">Closed</span><span class="detail">Opened 12:15 AM, closed ~12:20 AM — verified live: page background navy #182941 throughout, zero charcoal left in the stylesheet; panels stepped up to lighter navy #22385c so sections still read; desktop pixel-sampled — background exactly #182941, panels exactly #22385c — and 390px clean; stats intact (53 visits, 29 unique); commit 3577457. A follow-on to the closed Full-store palette loop — a separate loop, not the same one. Created + closed today.</span></li>
-              <li>Store redesign — iTunes/Amazon Music pattern, TAIG style<span class="tag tag-closed">Closed</span><span class="detail">Opened 12:58 AM, closed ~1:23 AM — verified live: search in the topbar grouped Artists/Albums/Songs; bottom player bar with real pause/resume + progress; iTunes-style album page — cover + prices left, tracklist right; genre filter line with Clear; cover thumbnails on cart lines; previews play/pause/resume; cart math $10.00 + $1.29 = $11.29; all four artist pages right; stats 71 visits / 29 unique; three bugs found in checking and fixed — cart badge one high, phone-width track row clip, cart drawer wrap. Created + closed today.</span></li>
+              <li>Logo on storefront<span class="tag tag-closed">Closed</span><span class="detail">Opened Nov 15, 11:48 PM, closed 11:59 PM — live on the storefront, desktop + phone-width verified, gold #CDA140 pixel-confirmed. Created + closed Nov 15.</span></li>
+              <li>Store-palette shirt recolor<span class="tag tag-closed">Closed</span><span class="detail">Opened Nov 15, 11:48 PM, closed 11:50 PM — dark-amber + all-amber print PNGs and SVGs delivered. Created + closed Nov 15.</span></li>
+              <li>Blue palette shirt (navy/gold)<span class="tag tag-closed">Closed</span><span class="detail">Opened Nov 16, 12:00 AM, closed 12:01 AM — print file + vector delivered. Created + closed Nov 16.</span></li>
+              <li>Blue palette store<span class="tag tag-closed">Closed</span><span class="detail">Opened Nov 16, 12:00 AM, closed ~12:04 AM — verified live: navy panels #182941 behind the masthead lockup and the “Hear it first” signup panel, logo untouched white/gold #CDA140, desktop + 390px phone width clean, stats intact. Created + closed Nov 16.</span></li>
+              <li>Full-store palette<span class="tag tag-closed">Closed</span><span class="detail">Opened Nov 16, 12:05 AM, closed ~12:10 AM — verified live: navy/gold across every surface (topbar, masthead, cards, cart drawer, signup, footer), gold #CDA140 as the accent everywhere the old amber was, zero old amber left in the site's own chrome, desktop + 390px clean, stats intact (47 visits, 28 unique), commit 2d31051. A follow-on to the closed Blue palette store loop — a separate loop, not the same one. Created + closed Nov 16.</span></li>
+              <li>Entire background navy<span class="tag tag-closed">Closed</span><span class="detail">Opened Nov 16, 12:15 AM, closed ~12:20 AM — verified live: page background navy #182941 throughout, zero charcoal left in the stylesheet; panels stepped up to lighter navy #22385c so sections still read; desktop pixel-sampled — background exactly #182941, panels exactly #22385c — and 390px clean; stats intact (53 visits, 29 unique); commit 3577457. A follow-on to the closed Full-store palette loop — a separate loop, not the same one. Created + closed Nov 16.</span></li>
+              <li>Store redesign — iTunes/Amazon Music pattern, TAIG style<span class="tag tag-closed">Closed</span><span class="detail">Opened Nov 16, 12:58 AM, closed ~1:23 AM — verified live: search in the topbar grouped Artists/Albums/Songs; bottom player bar with real pause/resume + progress; iTunes-style album page — cover + prices left, tracklist right; genre filter line with Clear; cover thumbnails on cart lines; previews play/pause/resume; cart math $10.00 + $1.29 = $11.29; all four artist pages right; stats 71 visits / 29 unique; three bugs found in checking and fixed — cart badge one high, phone-width track row clip, cart drawer wrap. Created + closed Nov 16.</span></li>
+            </ul>
+          </div>
+          <div class="bucket">
+            <h4 class="h-taig2k"><span class="dot dot-taig2k"></span>TAIG2K — new loop<span class="bcount num">1</span></h4>
+            <ul>
+              <li>Daily-resetting loop counters with trends<span class="tag tag-prog">In progress</span><span class="detail">Opened Nov 16, 7:24 AM — this report rebuilt on a dated event log so Opened / Closed / Created + closed reset every day on their own and the days stack up into a trend. Touched, still open: it is Nov 16's one net opening (6 gross openings − 5 closed the same day).</span></li>
             </ul>
           </div>
         </div>
 
         <h2 class="section-title">Every loop, by group and bucket</h2>
+        <p class="section-note">The flow groups (Opened / Closed / Created + closed) list today's loops only — they reset each morning. Close to closing and Untouched list the current state, carried over from previous days.</p>
         <div id="lists"></div>
 
         <h2 class="section-title">TAIG Online Music Store stats</h2>
@@ -359,107 +413,251 @@
         </div>
 
         <footer class="notes">
-          <p><strong>George note:</strong> a George portfolio URL loop was added at 6:53 PM and would make the open total 82 — it overlaps the George email loop already counted in Close to closing, so it is not double-counted. Open stays 81.</p>
-          <p>Source: baseline snapshot, Nov 15, 2026, plus movements through Nov 16, 1:23 AM. Printing this page gives a one-page summary for the notebook.</p>
+          <p><strong>George note:</strong> a George portfolio URL loop was added Nov 15 at 6:53 PM and would make the open total 83 — it overlaps the George email loop already counted in Close to closing, so it is not double-counted. Open stays 82; the +1 over Nov 15's 81 is the daily-resetting counters loop opened Nov 16.</p>
+          <p>Source: dated event log — baseline snapshot, Nov 15, 2026 (day one of the trend), plus every movement since, each entry carrying its date. Printing this page gives a one-page summary for the notebook.</p>
         </footer>
       </div>
 
       <!-- Print one-pager (print only) -->
       <div class="print-sheet" aria-hidden="true">
         <h1>Loop Report</h1>
-        <p class="pdate">Sunday, November 15, 2026 — live totals, movements through Nov 16, 1:23 AM</p>
-        <p class="headline">Open 81 &nbsp;·&nbsp; Closed today 38 &nbsp;·&nbsp; Opened today 42 &nbsp;·&nbsp; Created + closed 35 &nbsp;·&nbsp; Close to closing 15 &nbsp;·&nbsp; Untouched 54</p>
-        <table>
-          <thead>
-            <tr><th>Group</th><th>TAIG ITS</th><th>TAIG2K</th><th>The Hive</th><th class="tot">Total</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Closed today</td><td>3</td><td>18</td><td>17</td><td class="tot">38</td></tr>
-            <tr><td>Opened today</td><td>7</td><td>18</td><td>17</td><td class="tot">42</td></tr>
-            <tr><td>Created + closed today</td><td>2</td><td>17</td><td>16</td><td class="tot">35</td></tr>
-            <tr><td>Close to closing</td><td>3</td><td>6</td><td>6</td><td class="tot">15</td></tr>
-            <tr><td>Untouched</td><td>13</td><td>24</td><td>17</td><td class="tot">54</td></tr>
-          </tbody>
-        </table>
-        <h2>The open pile — 81</h2>
-        <ul>
-          <li>Untouched: 54 (TAIG ITS 13 · TAIG2K 24 · The Hive 17)</li>
-          <li>Close to closing: 15 (TAIG ITS 3 · TAIG2K 6 · The Hive 6)</li>
-          <li>Touched, not close: 12 (bucket split not recorded)</li>
-        </ul>
+        <p class="pdate" id="printDate"></p>
+        <p class="headline" id="printHeadline"></p>
+        <h2 id="printTodayTitle">Today — the five groups</h2>
+        <table id="printTodayTable"></table>
+        <h2>History — day by day</h2>
+        <table id="printHistTable"></table>
         <h2>Reconciliation</h2>
-        <p>Open 81 = untouched 54 + touched 27. Touched 27 = close to closing 15 + touched but not close 12.</p>
-        <p>Baseline was Open 60, Closed 31, Opened 21, Created + closed 28, Close 15, Untouched 33. Closed today 38 = created + closed 35 + 3 started earlier: ISRC verified (Hive), veteran fair reminder (TAIG2K), Clerge tree-cutting draft (ITS).</p>
-        <p>Opened is 42, not 46, and Open is 81, not 85: baseline "Opened today" counts only loops still open; all 7 store loops opened and closed, so they add to Closed and Created + closed only. 21 + 21 maps + 7 opened − 7 closed = 42; 60 + 21 + 7 opened − 7 closed = 81. Gross openings: Opened 42 + Created + closed 35 = 77 (baseline 49 + maps 21 + new 7).</p>
-        <p>Created and died today: the Josh plan PDF — built, stopped, on disk undelivered; counted in Opened today (parked).</p>
-        <p>George portfolio URL loop (added 6:53 PM) overlaps the George email loop in Close to closing — not double-counted; open stays 81, not 82.</p>
-        <h2>Movements since the baseline — 28</h2>
-        <p>21 map loops (TAIG ITS 6 · TAIG2K 11 · The Hive 4), all untouched, plus 7 TAIG2K music-store loops: Logo on storefront (closed), Store-palette shirt recolor (closed), Blue palette shirt navy/gold (closed), Blue palette store (closed), Full-store palette (closed), Entire background navy (closed — separate follow-on to Full-store palette), Store redesign — iTunes/Amazon Music pattern, TAIG style (closed ~1:23 AM). Open now 81; untouched now 54; touched now 27; 81 = 54 + 27.</p>
+        <p>Counters reset daily: Opened / Closed / Created + closed count the current day only, computed from the dated event log. Open, Untouched, and Close to closing are state and carry over — Open does not reset.</p>
+        <p>Nov 16 so far: Opened 1 = 6 gross openings − 5 closed the same day. Nov 15: Opened 42 = 72 gross − 30 created + closed. Open 82 = untouched 53 + touched 29 (close to closing 15 + touched, not close 14).</p>
+        <p>Correction to the draft “Nov 15 final” (Open 84, Opened 46, Closed 38, Created + closed 35): it mixed Nov 15 and Nov 16 work and counted the 3 same-day-closed loops as open. By day: Nov 15 Closed 33, Nov 16 Closed 5 — 33 + 5 = 38; Created + closed 30 + 5 = 35.</p>
+        <p>Baseline (Nov 15 snapshot, day one of the trend): Open 60, Closed 31, Opened 21, Created + closed 28, Close 15, Untouched 33. Nov 15 finished at Open 81, Opened 42, Closed 33, Created + closed 30, Close 15, Untouched 54.</p>
+        <p>Created and died Nov 15: the Josh plan PDF — built, stopped, on disk undelivered; counted in Nov 15's Opened (parked), not in Open or any closed count.</p>
+        <p>George portfolio URL loop (added Nov 15, 6:53 PM) overlaps the George email loop in Close to closing — not double-counted; open stays 82.</p>
         <p>TAIG Online Music Store stats: live at https://taigtsp.duckdns.org/music-store/stats/ — stats start Nov 15, 2026 (no earlier history); first-party aggregate only, no cookies, no IPs.</p>
       </div>
     </main>
 
     <script>
-      // ---- Data: transcribed from the baseline snapshot, Nov 15, 2026 ----
-      // Counts are derived from these item lists, so bucket sums always
-      // add to group totals.
+      // ================================================================
+      // Dated event log — the single source of truth for this report.
+      // Every loop is one entry:
+      //   n     name
+      //   b     bucket: "its" | "taig2k" | "hive" (null = not recorded
+      //         in the baseline snapshot; only affects bucket splits of
+      //         the touched-not-close state, which the snapshot never split)
+      //   o     date opened, "YYYY-MM-DD" (null = opened before Nov 15;
+      //         the snapshot does not give an earlier date)
+      //   ot    time opened "HH:MM" when known, else null
+      //   c     date closed or null
+      //   ct    time closed when known
+      //   t     date last touched or null (null = untouched)
+      //   close true = close to closing (state flag for open loops)
+      //   s     "open" | "closed" | "died"
+      //   died  date it died, for s = "died"
+      // All counters below are computed from this log by date, so the
+      // daily counters reset on their own when the date changes.
+      // ================================================================
+      var D15 = "2026-11-15", D16 = "2026-11-16";
+      var LOG = [];
+      function add(n, b, o, ot, c, ct, t, close, s, died) {
+        LOG.push({ n: n, b: b, o: o, ot: ot || null, c: c || null, ct: ct || null,
+                   t: t || null, close: !!close, s: s || (c ? "closed" : "open"), died: died || null });
+      }
+
+      // ---- Baseline loops closed on Nov 15 (from the snapshot) ----
+      // flag 1 = also opened Nov 15 (created + closed that day);
+      // flag 0 = started earlier (the 3 named in the reconciliation).
+      var BASE_CLOSED = {
+        its: [["Runway bubble", 1], ["Business plan rule", 1], ["Clerge tree-cutting draft", 0]],
+        taig2k: [["Drippy check + pie chart", 1], ["Jay album on Drippy", 1], ["Music store MVP live", 1], ["Branding rename", 1], ["Catalog landing live", 1], ["Turkey giveaway + 276 count", 1], ["ERA answer", 1], ["Card watch started", 1], ["Week-ahead", 1], ["Veteran fair reminder", 0], ["T-Mobile check", 1]],
+        hive: [["Jay venues", 1], ["Jay platforms + text", 1], ["ISRC explained", 1], ["ISRC prompt", 1], ["ISRC verified", 0], ["Stomp To chart plan", 1], ["Luminate forms read", 1], ["Others like Luminate", 1], ["Chart-services doc", 1], ["Jay map read-back", 1], ["Luminate prep sheet", 1], ["19 platform bubbles", 1], ["Josh promo research", 1], ["Josh platform text", 1], ["Josh map read-back", 1], ["Josh illustration", 1], ["Hive Playbook + Rule 1", 1]]
+      };
+      Object.keys(BASE_CLOSED).forEach(function (b) {
+        BASE_CLOSED[b].forEach(function (pair) {
+          add(pair[0], b, pair[1] ? D15 : null, null, D15, null, D15, false, "closed");
+        });
+      });
+
+      // ---- Music-store loops (7): 2 opened + closed Nov 15, 5 on Nov 16 ----
+      add("Logo on storefront", "taig2k", D15, "23:48", D15, "23:59", D15, false, "closed");
+      add("Store-palette shirt recolor", "taig2k", D15, "23:48", D15, "23:50", D15, false, "closed");
+      add("Blue palette shirt (navy/gold)", "taig2k", D16, "00:00", D16, "00:01", D16, false, "closed");
+      add("Blue palette store", "taig2k", D16, "00:00", D16, "00:04", D16, false, "closed");
+      add("Full-store palette", "taig2k", D16, "00:05", D16, "00:10", D16, false, "closed");
+      add("Entire background navy", "taig2k", D16, "00:15", D16, "00:20", D16, false, "closed");
+      add("Store redesign — iTunes/Amazon Music pattern, TAIG style", "taig2k", D16, "00:58", D16, "01:23", D16, false, "closed");
+
+      // ---- Open + untouched loops (state list from the snapshot) ----
+      // opened tag: "map" = one of the 21 map loops, opened Nov 15
+      // ~22:17–22:28; "d15" = opened Nov 15 (in the baseline's opened
+      // count); null = opened before Nov 15 / date not in the snapshot.
+      var MAP_TIME = "22:17–22:28";
+      var UNTOUCHED = {
+        its: [["VBOC outcome", null], ["27 plan items", null], ["\u201C1 for vboc\u201D", null], ["Madison", null], ["All Spa guy", null], ["Ashley demo", null], ["Stadium retrofit", null],
+              ["My Homeless friends", "map"], ["Open positions", "map"], ["Backlog of work", "map"], ["Service Industry", "map"], ["New service offerings", "map"], ["Michelle — A Touch of Clean", "map"]],
+        taig2k: [["Mobile check", "d15"], ["Payments", "d15"], ["T-Mobile offer", "d15"], ["Card hunt", "d15"], ["Suddath", null], ["$17/hr", null], ["Shelly", null], ["Notebook list", null], ["GPT Live", null], ["WiFi", null], ["Series rename", null], ["Series on tree", null], ["Law / spark", null],
+              ["Movie streaming service [The Director]", "map"], ["LCN", "map"], ["Linux Admin GUI", "map"], ["A know a guy app", "map"], ["I know a guy app", "map"], ["Network engineer toolbox", "map"], ["Registration for fun givings drive and similar", "map"], ["THC Portal", "map"], ["TAIG Winds", "map"], ["Infrastructure", "map"], ["AIW's", "map"]],
+        hive: [["Karma ISRC", "d15"], ["Josh map image", "d15"], ["\u201CXVIs\u201D", "d15"], ["Nebula Tracking", "d15"], ["PIO decider", null], ["Mo THC", null], ["9:30 member", null], ["Stargirl role", null], ["Article day", null], ["Tiger Records", null], ["Starke trip", null], ["Suno plan", null], ["PSIS gaps", null],
+              ["Fun givings drives", "map"], ["Performing Opportunities", "map"], ["e Bike Repair shop", "map"]]
+      };
+      Object.keys(UNTOUCHED).forEach(function (b) {
+        UNTOUCHED[b].forEach(function (pair) {
+          var tag = pair[1];
+          add(pair[0], b, tag ? D15 : null, tag === "map" ? MAP_TIME : null, null, null, null, false, "open");
+        });
+      });
+
+      // ---- Open + close-to-closing loops (state list from the snapshot) ----
+      var CLOSE_LIST = {
+        its: [["Clerge reply", "d15"], ["Mo site link", null], ["Clerge card pick", null]],
+        taig2k: [["Multi-artist + genre", "d15"], ["Mobile check", null], ["George email", null], ["Rick reply", "d15"], ["Fair registration", null], ["Galaxy map", null]],
+        hive: [["Luminate filing", null], ["Dec 4–10 lock", "d15"], ["Single pick", null], ["Josh reply", "d15"], ["Platform text", null], ["Stargirl login", null]]
+      };
+      Object.keys(CLOSE_LIST).forEach(function (b) {
+        CLOSE_LIST[b].forEach(function (pair) {
+          add(pair[0], b, pair[1] ? D15 : null, null, null, null, D15, true, "open");
+        });
+      });
+
+      // ---- Open + touched, not close ----
+      // Named ones opened Nov 15 (from the baseline's opened count; the
+      // snapshot records them as touched but lists them in no state list).
+      [["Landing catalog", "taig2k"], ["Luminate missing bits", "hive"], ["Mediabase / SoundExchange / PRO", "hive"], ["Josh platform pick", "hive"], ["Kaiber trial", "hive"], ["Christmas pipeline", "hive"], ["Myth pitch", "hive"]].forEach(function (pair) {
+        add(pair[0], pair[1], D15, null, null, null, D15, false, "open");
+      });
+      // The rest of the baseline's touched-not-close loops: the snapshot
+      // gives the count (12 total) but not their names or bucket split.
+      for (var u = 0; u < 5; u++) {
+        add("Touched loop (name not recorded in the snapshot)", null, null, null, null, null, D15, false, "open");
+      }
+      // DJ mixtape loop: a Nov 15 map loop, touched Nov 16 (Josh replied 00:58).
+      add("Tiesto DJ mix tape", "hive", D15, MAP_TIME, null, null, D16, false, "open");
+      // New loop, Nov 16: this daily-reset rebuild. Opened 07:24, in progress, touched.
+      add("Daily-resetting loop counters with trends", "taig2k", D16, "07:24", null, null, D16, false, "open");
+
+      // ---- Created Nov 15, died Nov 15: counted in Nov 15's Opened (parked) only ----
+      add("Josh plan PDF (parked)", "hive", D15, null, null, null, D15, false, "died", D15);
+
+      // ================================================================
+      // Computation — everything below is derived from the log by date.
+      // ================================================================
       var BUCKETS = [
-        { id: "its",    name: "TAIG ITS" },
-        { id: "taig2k", name: "TAIG2K" },
-        { id: "hive",   name: "The Hive" }
+        { id: "its",    name: "TAIG ITS", short: "ITS" },
+        { id: "taig2k", name: "TAIG2K",   short: "TAIG2K" },
+        { id: "hive",   name: "The Hive", short: "Hive" }
       ];
+      var NOW = "9999-12-31"; // state "as of the end of the log"
 
-      var GROUPS = [
-        {
-          id: "closed", name: "Closed today",
-          items: {
-            its: ["Runway bubble", "Business plan rule", "Clerge tree-cutting draft"],
-            taig2k: ["Drippy check + pie chart", "Jay album on Drippy", "Music store MVP live", "Branding rename", "Catalog landing live", "Turkey giveaway + 276 count", "ERA answer", "Card watch started", "Week-ahead", "Veteran fair reminder", "T-Mobile check", "Logo on storefront", "Store-palette shirt recolor", "Blue palette shirt (navy/gold)", "Blue palette store", "Full-store palette", "Entire background navy", "Store redesign"],
-            hive: ["Jay venues", "Jay platforms + text", "ISRC explained", "ISRC prompt", "ISRC verified", "Stomp To chart plan", "Luminate forms read", "Others like Luminate", "Chart-services doc", "Jay map read-back", "Luminate prep sheet", "19 platform bubbles", "Josh promo research", "Josh platform text", "Josh map read-back", "Josh illustration", "Hive Playbook + Rule 1"]
-          }
-        },
-        {
-          id: "opened", name: "Opened today",
-          items: {
-            its: ["Clerge tree-cutting reply", "My Homeless friends", "Open positions", "Backlog of work", "Service Industry", "New service offerings", "Michelle — A Touch of Clean"],
-            taig2k: ["Mobile check", "Payments", "Multi-artist + genre", "Landing catalog", "T-Mobile offer", "Card hunt", "Rick reply send", "Movie streaming service [The Director]", "LCN", "Linux Admin GUI", "A know a guy app", "I know a guy app", "Network engineer toolbox", "Registration for fun givings drive and similar", "THC Portal", "TAIG Winds", "Infrastructure", "AIW's"],
-            hive: ["Luminate missing bits", "Dec 4–10 lock", "Karma ISRC", "Mediabase / SoundExchange / PRO", "Josh platform pick", "Kaiber trial", "Christmas pipeline", "Myth pitch", "Josh map image", "\u201CXVIs\u201D", "Nebula Tracking", "Josh reply send", "Josh plan PDF (parked)", "Tiesto DJ mix tape", "Fun givings drives", "Performing Opportunities", "e Bike Repair shop"]
-          }
-        },
-        {
-          id: "createdClosed", name: "Created + closed today",
-          items: {
-            its: ["Runway", "Business plan rule"],
-            taig2k: ["Drippy check", "Album on Drippy", "MVP live", "Branding rename", "Catalog landing", "Turkey giveaway", "ERA answer", "Card watch", "Week-ahead", "T-Mobile check", "Logo on storefront", "Store-palette shirt", "Blue palette shirt", "Blue palette store", "Full-store palette", "Entire background navy", "Store redesign"],
-            hive: ["Jay venues", "Jay platforms + text", "ISRC explained", "ISRC prompt", "Chart plan", "Luminate forms", "Others like Luminate", "Chart doc", "Jay map read-back", "Prep sheet", "Platform bubbles", "Josh research", "Josh platform text", "Josh map read-back", "Josh illustration", "Playbook"]
-          }
-        },
-        {
-          id: "close", name: "Close to closing",
-          items: {
-            its: ["Clerge reply", "Mo site link", "Clerge card pick"],
-            taig2k: ["Multi-artist + genre", "Mobile check", "George email", "Rick reply", "Fair registration", "Galaxy map"],
-            hive: ["Luminate filing", "Dec 4–10 lock", "Single pick", "Josh reply", "Platform text", "Stargirl login"]
-          }
-        },
-        {
-          id: "untouched", name: "Untouched",
-          items: {
-            its: ["VBOC outcome", "27 plan items", "\u201C1 for vboc\u201D", "Madison", "All Spa guy", "Ashley demo", "Stadium retrofit", "My Homeless friends", "Open positions", "Backlog of work", "Service Industry", "New service offerings", "Michelle — A Touch of Clean"],
-            taig2k: ["Mobile check", "Payments", "T-Mobile offer", "Card hunt", "Suddath", "$17/hr", "Shelly", "Notebook list", "GPT Live", "WiFi", "Series rename", "Series on tree", "Law / spark", "Movie streaming service [The Director]", "LCN", "Linux Admin GUI", "A know a guy app", "I know a guy app", "Network engineer toolbox", "Registration for fun givings drive and similar", "THC Portal", "TAIG Winds", "Infrastructure", "AIW's"],
-            hive: ["Karma ISRC", "Josh map image", "\u201CXVIs\u201D", "Nebula Tracking", "PIO decider", "Mo THC", "9:30 member", "Stargirl role", "Article day", "Tiger Records", "Starke trip", "Suno plan", "PSIS gaps", "Tiesto DJ mix tape", "Fun givings drives", "Performing Opportunities", "e Bike Repair shop"]
-          }
+      function todayET() {
+        var parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
+        var m = {};
+        parts.forEach(function (p) { m[p.type] = p.value; });
+        return m.year + "-" + m.month + "-" + m.day;
+      }
+      var TODAY = todayET();
+
+      function countWhere(fn) {
+        var r = { its: 0, taig2k: 0, hive: 0, total: 0 };
+        LOG.forEach(function (e) { if (fn(e)) { r.total++; if (e.b) r[e.b]++; } });
+        return r;
+      }
+      // Flow for one date: what opened / closed that day.
+      function flowFor(date) {
+        return {
+          gross:  countWhere(function (e) { return e.o === date; }),
+          net:    countWhere(function (e) { return e.o === date && e.c !== date; }),
+          closed: countWhere(function (e) { return e.c === date; }),
+          cc:     countWhere(function (e) { return e.o === date && e.c === date; })
+        };
+      }
+      function openAt(e, date) {
+        if (e.s === "died" && e.died && e.died <= date) return false;
+        if (e.o && e.o > date) return false;
+        if (e.c && e.c <= date) return false;
+        return true;
+      }
+      // State levels at the end of one date (date = NOW for current state).
+      function stateAt(date) {
+        var r = { open: 0, tnc: 0,
+                  untouched: { its: 0, taig2k: 0, hive: 0, total: 0 },
+                  close:     { its: 0, taig2k: 0, hive: 0, total: 0 } };
+        LOG.forEach(function (e) {
+          if (!openAt(e, date)) return;
+          r.open++;
+          if (e.close) { r.close.total++; if (e.b) r.close[e.b]++; }
+          else if (e.t && e.t <= date) { r.tnc++; }
+          else { r.untouched.total++; if (e.b) r.untouched[e.b]++; }
+        });
+        return r;
+      }
+      var STATE_NOW = stateAt(NOW);
+
+      function namesWhere(fn, bucket) {
+        var out = [];
+        LOG.forEach(function (e) { if (e.b === bucket && fn(e)) out.push(e.n); });
+        return out;
+      }
+      // The five groups for one date: flow groups from that date's
+      // events; state groups from the current state (carried over).
+      function groupsFor(date) {
+        function byBucket(fn) {
+          var items = {};
+          BUCKETS.forEach(function (b) { items[b.id] = namesWhere(fn, b.id); });
+          return items;
         }
-      ];
+        return [
+          { id: "closed", name: "Closed today", kind: "resets daily",
+            items: byBucket(function (e) { return e.c === date; }) },
+          { id: "opened", name: "Opened today", kind: "resets daily",
+            items: byBucket(function (e) { return e.o === date && e.c !== date; }) },
+          { id: "createdClosed", name: "Created + closed today", kind: "resets daily",
+            items: byBucket(function (e) { return e.o === date && e.c === date; }) },
+          { id: "close", name: "Close to closing", kind: "state — carries over",
+            items: byBucket(function (e) { return e.s === "open" && e.close; }) },
+          { id: "untouched", name: "Untouched", kind: "state — carries over",
+            items: byBucket(function (e) { return e.s === "open" && !e.close && !e.t; }) }
+        ];
+      }
+      var GROUPS = groupsFor(TODAY);
 
-      // Open pile by status (from the snapshot's reconciliation).
-      var OPEN_TOTAL = 81;
-      var OPEN_STATUS = [
-        { id: "untouched", name: "Untouched", count: 54, cls: "var(--st-untouched)" },
-        { id: "close",     name: "Close to closing", count: 15, cls: "var(--st-close)" },
-        { id: "touched",   name: "Touched, not close", count: 12, cls: "var(--st-touched)" }
-      ];
+      // History: every day from the first log date through today
+      // (or the last event date, whichever is later).
+      function addDays(dateStr, n) {
+        var d = new Date(dateStr + "T12:00:00Z");
+        d.setUTCDate(d.getUTCDate() + n);
+        return d.toISOString().slice(0, 10);
+      }
+      var LAST_EVENT = D15;
+      LOG.forEach(function (e) {
+        [e.o, e.c, e.t].forEach(function (d) { if (d && d > LAST_EVENT) LAST_EVENT = d; });
+      });
+      var HISTORY = [];
+      (function () {
+        var end = TODAY > LAST_EVENT ? TODAY : LAST_EVENT;
+        var d = D15;
+        while (d <= end) {
+          HISTORY.push({ date: d, flow: flowFor(d), state: stateAt(d) });
+          d = addDays(d, 1);
+        }
+      })();
 
+      // ---------- formatting helpers ----------
+      function esc(s) {
+        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+      function fmtDay(dateStr, opts) {
+        var d = new Date(dateStr + "T12:00:00Z");
+        return new Intl.DateTimeFormat("en-US", Object.assign({ timeZone: "America/New_York" }, opts)).format(d);
+      }
+      function fmtTime(hhmm) {
+        var h = parseInt(hhmm.slice(0, 2), 10), m = hhmm.slice(3, 5);
+        var ap = h >= 12 ? "PM" : "AM"; h = h % 12; if (h === 0) h = 12;
+        return h + ":" + m + " " + ap;
+      }
+      function splitLine(counts) {
+        return BUCKETS.map(function (b) { return b.short + " " + counts[b.id]; }).join(" · ");
+      }
       function groupTotal(g) {
         return BUCKETS.reduce(function (s, b) { return s + g.items[b.id].length; }, 0);
       }
@@ -467,23 +665,40 @@
         for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i].id === id) return GROUPS[i];
         return null;
       }
-      function esc(s) {
-        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      }
 
       var filter = "all";
+
+      // ---- Header ----
+      document.getElementById("headDate").textContent =
+        fmtDay(TODAY, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+      (function () {
+        var best = null;
+        LOG.forEach(function (e) {
+          [[e.o, e.ot], [e.c, e.ct]].forEach(function (pair) {
+            if (pair[0] && pair[1] && /^\d{2}:\d{2}$/.test(pair[1])) {
+              var key = pair[0] + "T" + pair[1];
+              if (!best || key > best.key) best = { key: key, date: pair[0], time: pair[1] };
+            }
+          });
+        });
+        if (best) {
+          document.getElementById("lastMove").textContent =
+            fmtDay(best.date, { month: "short", day: "numeric" }) + ", " + fmtTime(best.time);
+        }
+      })();
+      document.getElementById("groupsTitle").textContent =
+        "The five groups — today, " + fmtDay(TODAY, { month: "short", day: "numeric" });
 
       // ---- Headline cards ----
       function renderCards() {
         var html = "";
-        // Open card: split by status, not bucket (snapshot gives no bucket split for the whole 60).
-        html += '<div class="card"><div class="big num">81</div><div class="label">Open loops</div><div class="splits">'
-          + '<div class="split-row"><span class="dot dot-untouched"></span>Untouched<b class="num">54</b></div>'
-          + '<div class="split-row"><span class="dot dot-close"></span>Close to closing<b class="num">15</b></div>'
-          + '<div class="split-row"><span class="dot dot-touched"></span>Touched, not close<b class="num">12</b></div>'
+        html += '<div class="card"><div class="big num">' + STATE_NOW.open + '</div><div class="label">Open loops</div><div class="kind">State — carries over</div><div class="splits">'
+          + '<div class="split-row"><span class="dot dot-untouched"></span>Untouched<b class="num">' + STATE_NOW.untouched.total + "</b></div>"
+          + '<div class="split-row"><span class="dot dot-close"></span>Close to closing<b class="num">' + STATE_NOW.close.total + "</b></div>"
+          + '<div class="split-row"><span class="dot dot-touched"></span>Touched, not close<b class="num">' + STATE_NOW.tnc + "</b></div>"
           + "</div></div>";
         GROUPS.forEach(function (g) {
-          html += '<div class="card"><div class="big num">' + groupTotal(g) + '</div><div class="label">' + esc(g.name) + '</div><div class="splits">';
+          html += '<div class="card"><div class="big num">' + groupTotal(g) + '</div><div class="label">' + esc(g.name) + '</div><div class="kind">' + g.kind + '</div><div class="splits">';
           BUCKETS.forEach(function (b) {
             html += '<div class="split-row row-' + b.id + '"><span class="dot dot-' + b.id + '"></span>' + esc(b.name) + '<b class="num">' + g.items[b.id].length + "</b></div>";
           });
@@ -526,7 +741,7 @@
         document.getElementById("countsTable").innerHTML = t;
       }
 
-      // ---- Donut ----
+      // ---- Donut (open pile, by state) ----
       function donutSVG(segments, centerNum, centerLabel) {
         var r = 78, c = 2 * Math.PI * r, start = 0, parts = "";
         var total = segments.reduce(function (s, x) { return s + x.count; }, 0);
@@ -548,36 +763,76 @@
         var title = document.getElementById("donutTitle");
         var sub = document.getElementById("donutSub");
         if (filter === "all") {
-          title.textContent = "The open pile — 81";
-          sub.textContent = "Open loops by where they stand.";
-          svg.innerHTML = donutSVG(OPEN_STATUS, "81", "open loops");
-          var total = 81;
-          legend.innerHTML = OPEN_STATUS.map(function (s) {
+          var segs = [
+            { id: "untouched", name: "Untouched", count: STATE_NOW.untouched.total, cls: "var(--st-untouched)" },
+            { id: "close",     name: "Close to closing", count: STATE_NOW.close.total, cls: "var(--st-close)" },
+            { id: "touched",   name: "Touched, not close", count: STATE_NOW.tnc, cls: "var(--st-touched)" }
+          ];
+          title.textContent = "The open pile — " + STATE_NOW.open;
+          sub.textContent = "Open loops by where they stand. Open is state — it carries over day to day and does not reset.";
+          svg.innerHTML = donutSVG(segs, String(STATE_NOW.open), "open loops");
+          svg.setAttribute("aria-label", "Donut chart of the " + STATE_NOW.open + " open loops");
+          legend.innerHTML = segs.map(function (s) {
             return '<div class="dl-row"><span class="dot" style="background:' + s.cls + '"></span>' + esc(s.name)
-              + '<span class="pct num">' + Math.round((s.count / total) * 100) + '%</span><b class="num">' + s.count + "</b></div>";
+              + '<span class="pct num">' + Math.round((s.count / STATE_NOW.open) * 100) + '%</span><b class="num">' + s.count + "</b></div>";
           }).join("");
-          note.textContent = "Untouched and close-to-closing are split by bucket in the lists below. The 12 touched-but-not-close loops are not split by bucket in the snapshot.";
+          note.textContent = "Untouched and close-to-closing are split by bucket in the lists below.";
         } else {
           var b = BUCKETS.filter(function (x) { return x.id === filter; })[0];
-          var un = groupById("untouched").items[filter].length;
-          var cl = groupById("close").items[filter].length;
-          var segs = [
+          var un = STATE_NOW.untouched[filter];
+          var cl = STATE_NOW.close[filter];
+          var segs2 = [
             { name: "Untouched", count: un, cls: "var(--st-untouched)" },
             { name: "Close to closing", count: cl, cls: "var(--st-close)" }
           ];
           var sub2 = un + cl;
           title.textContent = "Open pile — " + b.name;
           sub.textContent = "Untouched vs. close to closing for this bucket.";
-          svg.innerHTML = donutSVG(segs, String(sub2), "known open");
-          legend.innerHTML = segs.map(function (s) {
+          svg.innerHTML = donutSVG(segs2, String(sub2), "known open");
+          svg.setAttribute("aria-label", "Donut chart of open loops in " + b.name);
+          legend.innerHTML = segs2.map(function (s) {
             return '<div class="dl-row"><span class="dot" style="background:' + s.cls + '"></span>' + esc(s.name)
               + '<span class="pct num">' + (sub2 ? Math.round((s.count / sub2) * 100) : 0) + '%</span><b class="num">' + s.count + "</b></div>";
           }).join("");
-          note.textContent = "The 12 touched-but-not-close loops are not split by bucket in the snapshot, so they can't be shown per bucket.";
+          note.textContent = "The touched-but-not-close loops can't be split by bucket here: 12 of the " + STATE_NOW.tnc + " come from the baseline snapshot, which didn't record their bucket split.";
         }
       }
 
-      // ---- Item lists ----
+      // ---- History: trend chart + daily table ----
+      function renderHistory() {
+        var max = 0;
+        HISTORY.forEach(function (h) {
+          if (h.flow.gross.total > max) max = h.flow.gross.total;
+          if (h.flow.closed.total > max) max = h.flow.closed.total;
+        });
+        var html = "";
+        HISTORY.forEach(function (h) {
+          var label = fmtDay(h.date, { weekday: "short", month: "short", day: "numeric" }) + (h.date === TODAY ? " — today" : "");
+          html += '<div class="trend-day"><div class="trend-date">' + label + '</div>'
+            + '<div class="bar-row"><div class="gname">Opened (gross)</div><div class="bar-track"><div class="seg seg-opened" style="width:' + (max ? (h.flow.gross.total / max) * 100 : 0).toFixed(2) + '%"></div></div><div class="gtotal num">' + h.flow.gross.total + "</div></div>"
+            + '<div class="bar-row"><div class="gname">Closed</div><div class="bar-track"><div class="seg seg-closed" style="width:' + (max ? (h.flow.closed.total / max) * 100 : 0).toFixed(2) + '%"></div></div><div class="gtotal num">' + h.flow.closed.total + "</div></div>"
+            + "</div>";
+        });
+        document.getElementById("trend").innerHTML = html;
+
+        var t = '<thead><tr><th>Date</th><th>Opened (gross)</th><th>Closed</th><th>Created + closed</th><th>Open — end of day</th><th>Untouched — EOD</th><th>Close to closing — EOD</th></tr></thead><tbody>';
+        HISTORY.forEach(function (h) {
+          var f = h.flow, s = h.state;
+          t += "<tr>"
+            + '<td class="hcell-date" data-label="Date"><span class="hdate">' + fmtDay(h.date, { weekday: "short", month: "short", day: "numeric" }) + '</span><span class="hsplit">' + fmtDay(h.date, { year: "numeric" }) + (h.date === TODAY ? " · today" : "") + "</span></td>"
+            + '<td data-label="Opened (gross)"><span class="hnum num">' + f.gross.total + '</span><span class="hsplit num">' + splitLine(f.gross) + '</span><span class="hsplit num">' + f.net.total + " still open (" + splitLine(f.net) + ")</span></td>"
+            + '<td data-label="Closed"><span class="hnum num">' + f.closed.total + '</span><span class="hsplit num">' + splitLine(f.closed) + "</span></td>"
+            + '<td data-label="Created + closed"><span class="hnum num">' + f.cc.total + '</span><span class="hsplit num">' + splitLine(f.cc) + "</span></td>"
+            + '<td data-label="Open — end of day"><span class="hnum num">' + s.open + '</span><span class="hsplit num">Untouched ' + s.untouched.total + " · Close " + s.close.total + " · Touched " + s.tnc + "</span></td>"
+            + '<td data-label="Untouched — EOD"><span class="hnum num">' + s.untouched.total + '</span><span class="hsplit num">' + splitLine(s.untouched) + "</span></td>"
+            + '<td data-label="Close to closing — EOD"><span class="hnum num">' + s.close.total + '</span><span class="hsplit num">' + splitLine(s.close) + "</span></td>"
+            + "</tr>";
+        });
+        t += "</tbody>";
+        document.getElementById("histTable").innerHTML = t;
+      }
+
+      // ---- Item lists (today's groups) ----
       function renderLists() {
         var html = "";
         GROUPS.forEach(function (g) {
@@ -597,6 +852,35 @@
           html += "</div></section>";
         });
         document.getElementById("lists").innerHTML = html;
+      }
+
+      // ---- Print one-pager ----
+      function renderPrint() {
+        document.getElementById("printDate").textContent =
+          fmtDay(TODAY, { weekday: "long", month: "long", day: "numeric", year: "numeric" })
+          + " — flow counters are today's; state carries over. History runs Nov 15–" + fmtDay(TODAY, { month: "short", day: "numeric", year: "numeric" }) + ".";
+        var closed = groupById("closed"), opened = groupById("opened"), cc = groupById("createdClosed"),
+            close = groupById("close"), un = groupById("untouched");
+        document.getElementById("printHeadline").textContent =
+          "Open " + STATE_NOW.open + "  ·  Closed today " + groupTotal(closed) + "  ·  Opened today " + groupTotal(opened)
+          + "  ·  Created + closed " + groupTotal(cc) + "  ·  Close to closing " + groupTotal(close) + "  ·  Untouched " + groupTotal(un);
+        document.getElementById("printTodayTitle").textContent =
+          "Today (" + fmtDay(TODAY, { month: "short", day: "numeric" }) + ") — the five groups";
+        var t = '<thead><tr><th>Group</th>' + BUCKETS.map(function (b) { return "<th>" + esc(b.name) + "</th>"; }).join("") + '<th class="tot">Total</th></tr></thead><tbody>';
+        GROUPS.forEach(function (g) {
+          t += "<tr><td>" + esc(g.name) + "</td>"
+            + BUCKETS.map(function (b) { return "<td>" + g.items[b.id].length + "</td>"; }).join("")
+            + '<td class="tot">' + groupTotal(g) + "</td></tr>";
+        });
+        t += "</tbody>";
+        document.getElementById("printTodayTable").innerHTML = t;
+
+        var h = '<thead><tr><th>Date</th><th>Opened (gross)</th><th>Closed</th><th>Created + closed</th><th>Open (EOD)</th><th>Untouched (EOD)</th><th>Close (EOD)</th></tr></thead><tbody>';
+        HISTORY.forEach(function (x) {
+          h += "<tr><td>" + fmtDay(x.date, { month: "short", day: "numeric" }) + "</td><td>" + x.flow.gross.total + "</td><td>" + x.flow.closed.total + "</td><td>" + x.flow.cc.total + "</td><td>" + x.state.open + "</td><td>" + x.state.untouched.total + "</td><td>" + x.state.close.total + "</td></tr>";
+        });
+        h += "</tbody>";
+        document.getElementById("printHistTable").innerHTML = h;
       }
 
       function applyFilter() {
@@ -623,6 +907,8 @@
       });
 
       renderCards();
+      renderHistory();
+      renderPrint();
       applyFilter();
     </script>
   </body>
