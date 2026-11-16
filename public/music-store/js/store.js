@@ -6,6 +6,7 @@
   'use strict';
 
   var API = '/music-store/api/catalog';
+  var EVENT_URL = '/music-store/api/event';
   var CART_KEY = 'taig-music-cart-v1';
   var PREVIEW_SECONDS = 30;
 
@@ -14,6 +15,28 @@
   var audio = new Audio();
   var playingTrackId = null;
   var activeGenre = 'All';
+
+  /* First-party stats: one counted action per call, no personal data.
+     sendBeacon survives page navigation (artist clicks). Stats must
+     never break the store, so every failure is swallowed. */
+  function track(type, detail) {
+    try {
+      var payload = JSON.stringify({
+        type: type,
+        detail: detail || '',
+        page: document.body.getAttribute('data-page') || '',
+      });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(EVENT_URL, new Blob([payload], { type: 'application/json' }));
+      } else if (window.fetch) {
+        fetch(EVENT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload, keepalive: true,
+        }).catch(function () {});
+      }
+    } catch (e) { /* stats must never break the store */ }
+  }
 
   function $(sel, root) { return (root || document).querySelector(sel); }
   function money(cents) { return '$' + (cents / 100).toFixed(2); }
@@ -81,7 +104,7 @@
       var album = albumForArtist(a.id);
       var cover = a.cover || (album && album.cover);
       var num = String(a.roster_position || a.id).padStart(2, '0');
-      html += '<div class="roster-slot" data-genre="' + esc(a.genre || '') + '">'
+      html += '<div class="roster-slot" data-genre="' + esc(a.genre || '') + '" data-artist="' + esc(a.slug) + '">'
         + (cover
           ? (album
             ? '<a href="' + esc(album.page || '/music-store/') + '"><img class="cover" src="' + esc(cover) + '" alt="Album cover — ' + esc(album.title) + '"></a>'
@@ -116,6 +139,8 @@
     if (found) { found.qty += qty; } else { cart.push({ kind: kind, id: id, qty: qty }); }
     saveCart();
     renderCart();
+    var item = kind === 'track' ? trackById(id) : productById(id);
+    track('cart_add', item ? (item.title || item.name) : String(id));
   }
   function setQty(kind, id, qty) {
     cart = cart.filter(function (item) {
@@ -181,6 +206,7 @@
   function showCheckoutNotice() {
     var note = $('#checkout-notice');
     if (note) note.hidden = false;
+    track('checkout_notice', 'shown');
   }
 
   /* ---- previews ---- */
@@ -215,6 +241,7 @@
     if (read) { read.hidden = false; read.textContent = '0:00 / 0:30 · preview'; }
     audio.src = '/music-store/audio/' + track.preview;
     audio.play().catch(function () { stopPreview(); });
+    track('preview_play', track.title);
   }
   audio.addEventListener('timeupdate', function () {
     if (playingTrackId === null) return;
@@ -303,9 +330,16 @@
 
   function bindEvents() {
     document.addEventListener('click', function (ev) {
+      var artistLink = ev.target.closest('.roster-slot a');
+      if (artistLink) {
+        var slot = artistLink.closest('.roster-slot');
+        if (slot) track('artist_click', slot.getAttribute('data-artist') || '');
+        return;
+      }
       var chip = ev.target.closest('[data-filter-genre]');
       if (chip) {
         setGenre(chip.getAttribute('data-filter-genre'));
+        track('genre_filter', chip.getAttribute('data-filter-genre'));
         return;
       }
       var addBtn = ev.target.closest('[data-add]');

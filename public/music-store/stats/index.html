@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Store stats — TAIG Online Music Store</title>
+<meta name="description" content="First-party activity and traffic stats for the TAIG Online Music Store. Aggregate only — no personal data.">
+<link rel="stylesheet" href="/music-store/css/store.css">
+<style>
+  .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 20px; }
+  .stat-card { background: #1c1917; border: 1px solid #2e2a26; border-radius: 14px; padding: 18px; }
+  .stat-card .num { font-family: Georgia, "Times New Roman", serif; font-size: 2.2rem; color: #e8a33d; line-height: 1.1; }
+  .stat-card .lbl { color: #a8a29a; font-size: .9rem; margin-top: 2px; }
+  .stat-card .sub { color: #a8a29a; font-size: .8rem; margin-top: 6px; }
+  .range-row { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; align-items: center; }
+  .range-row .muted { margin-left: auto; }
+  .chart { display: flex; align-items: flex-end; gap: 3px; height: 150px; margin-top: 16px; padding: 12px 12px 0; background: #1c1917; border: 1px solid #2e2a26; border-radius: 14px; }
+  .chart .bar { flex: 1; background: #e8a33d; border-radius: 3px 3px 0 0; min-height: 2px; }
+  .chart .bar.plays { background: #8a7a5c; }
+  .chart-legend { display: flex; gap: 18px; margin-top: 8px; color: #a8a29a; font-size: .85rem; }
+  .chart-legend .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .top-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 16px; }
+  .top-list { background: #1c1917; border: 1px solid #2e2a26; border-radius: 14px; padding: 18px; }
+  .top-list h3 { margin: 0 0 10px; font-size: 1.05rem; }
+  .top-list ol { margin: 0; padding-left: 22px; }
+  .top-list li { padding: 3px 0; display: flex; justify-content: space-between; gap: 12px; }
+  .top-list li .count { color: #e8a33d; font-weight: 700; white-space: nowrap; }
+  .top-list .empty { color: #a8a29a; }
+  @media (max-width: 720px) {
+    .stat-cards { grid-template-columns: repeat(2, 1fr); }
+    .top-grid { grid-template-columns: 1fr; }
+    .range-row .muted { margin-left: 0; }
+  }
+</style>
+</head>
+<body data-page="stats">
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="wordmark" href="/music-store/">TAIG <span>ONLINE MUSIC STORE</span></a>
+    <span class="topbar-spacer"></span>
+    <a class="btn btn-ghost btn-small" href="/music-store/">Back to the store</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="masthead">
+    <h1>Store <span>stats</span></h1>
+    <p class="tagline">What visitors do on the store — visits, preview plays, cart adds, and where the traffic comes from.</p>
+  </div>
+
+  <div class="range-row" role="group" aria-label="Date range">
+    <button class="genre-chip active" data-range="30" type="button">Last 30 days</button>
+    <button class="genre-chip" data-range="90" type="button">Last 90 days</button>
+    <span class="muted small" id="generated">Loading…</span>
+  </div>
+
+  <div class="stat-cards" id="stat-cards">
+    <div class="stat-card"><div class="num">—</div><div class="lbl">Visits</div><div class="sub">page views</div></div>
+    <div class="stat-card"><div class="num">—</div><div class="lbl">Unique visitors</div><div class="sub">per day, added up</div></div>
+    <div class="stat-card"><div class="num">—</div><div class="lbl">Preview plays</div><div class="sub">30-second previews</div></div>
+    <div class="stat-card"><div class="num">—</div><div class="lbl">Cart adds</div><div class="sub">tracks, albums, CDs</div></div>
+  </div>
+  <p class="muted small" id="all-time" style="margin-top:10px"></p>
+
+  <section>
+    <h2>Visits per day</h2>
+    <p class="section-sub muted">Page views each day. The darker bars are preview plays the same day.</p>
+    <div class="chart" id="chart"><p class="loading">Loading the chart…</p></div>
+    <div class="chart-legend">
+      <span><span class="swatch" style="background:#e8a33d"></span>Visits</span>
+      <span><span class="swatch" style="background:#8a7a5c"></span>Preview plays</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>What's getting played, clicked, and found</h2>
+    <div class="top-grid" id="top-grid">
+      <div class="top-list"><h3>Top previewed tracks</h3><p class="empty">Loading…</p></div>
+      <div class="top-list"><h3>Top pages</h3><p class="empty">Loading…</p></div>
+      <div class="top-list"><h3>Top referrers</h3><p class="empty">Loading…</p></div>
+      <div class="top-list"><h3>Devices</h3><p class="empty">Loading…</p></div>
+      <div class="top-list"><h3>Top genres browsed</h3><p class="empty">Loading…</p></div>
+      <div class="top-list"><h3>Top artist clicks</h3><p class="empty">Loading…</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Also in this range</h2>
+    <p class="muted" id="also">Loading…</p>
+  </section>
+
+  <section>
+    <p class="muted small">How this is counted: first-party only, straight from the store's own server — no third-party tracker, no cookies, no personal data. A "unique visitor" is a one-way daily hash that can't identify anyone or follow them across days; no IP addresses are stored. Referrers are the site name only, never the full link. Stats start the day this page went live — there is no history from before then.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><strong style="color:#f5f0e8">TAIG Online Music Store</strong> · TAIG Promotions · Jacksonville, FL</p>
+    <p>Label: Crumbs on the Table · Payment coming soon.</p>
+  </div>
+</footer>
+
+<script src="/music-store/js/stats.js"></script>
+</body>
+</html>

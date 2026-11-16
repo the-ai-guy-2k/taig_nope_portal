@@ -13,6 +13,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const initSqlJs = require('sql.js');
 
 const DB_PATH = process.env.MUSIC_STORE_DB
@@ -47,6 +48,7 @@ async function openDb() {
     seed(db);
     persist(db);
   }
+  if (ensureStatsTables(db)) persist(db);
   return db;
 }
 
@@ -257,6 +259,188 @@ function persist(db) {
   fs.writeFileSync(DB_PATH, Buffer.from(db.export()));
 }
 
+/* ---- Store stats (first-party, aggregate only) -------------------------
+ * Two tables, created idempotently for fresh and existing databases:
+ *   store_events   — one row per counted action (pageview, preview_play,
+ *     cart_add, checkout_notice, genre_filter, artist_click). No IP, no
+ *     full user-agent, no cookies: referrer is the host only, device is
+ *     just mobile/desktop.
+ *   store_visitors — one row per (day, visitor) where visitor is a
+ *     one-way SHA-256 hash of IP + user-agent + day. The hash rotates
+ *     daily by design, so it can count unique visitors per day but can
+ *     never identify a person or join visits across days. The IP itself
+ *     is never stored.
+ * ---------------------------------------------------------------------- */
+
+const EVENT_TYPES = new Set([
+  'pageview', 'preview_play', 'cart_add', 'checkout_notice',
+  'genre_filter', 'artist_click',
+]);
+
+function ensureStatsTables(db) {
+  const has = (name) => rows(db, `SELECT COUNT(*) AS n FROM sqlite_master WHERE name='${name}'`)[0].n > 0;
+  let changed = false;
+  if (!has('store_events')) {
+    db.run(`CREATE TABLE store_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      created_at TEXT NOT NULL,
+      day TEXT NOT NULL,
+      type TEXT NOT NULL,
+      page TEXT,
+      detail TEXT,
+      referrer_host TEXT,
+      device TEXT
+    )`);
+    changed = true;
+  }
+  if (!has('store_visitors')) {
+    db.run(`CREATE TABLE store_visitors (
+      day TEXT NOT NULL,
+      visitor_hash TEXT NOT NULL,
+      PRIMARY KEY (day, visitor_hash)
+    )`);
+    changed = true;
+  }
+  if (!has('idx_store_events_day_type')) {
+    db.run('CREATE INDEX idx_store_events_day_type ON store_events(day, type)');
+    changed = true;
+  }
+  return changed;
+}
+
+function clientIp(req) {
+  const fwd = req.headers && req.headers['x-forwarded-for'];
+  if (fwd) return String(fwd).split(',')[0].trim();
+  return req.ip || '';
+}
+
+function deviceClass(req) {
+  const ua = (req.headers && req.headers['user-agent']) || '';
+  return /mobile|android|iphone|ipad|ipod/i.test(ua) ? 'mobile' : 'desktop';
+}
+
+function referrerHost(req) {
+  const ref = (req.headers && (req.headers.referer || req.headers.referrer)) || '';
+  try { return new URL(ref).hostname; } catch (e) { return ''; }
+}
+
+/* Days run on Tee's clock (America/New_York), not UTC — "today" on the
+   dashboard is his today. en-CA formats as YYYY-MM-DD. */
+const dayFmt = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit',
+});
+function dayString(d) { return dayFmt.format(d); }
+
+/* Record one counted action. Synchronous insert + persist — no await sits
+   between db.run and persist, so concurrent requests cannot interleave
+   a half-written event. Returns false for unknown event types. */
+async function recordEvent(req, type, detail, page) {
+  if (!EVENT_TYPES.has(type)) return false;
+  const db = await getDb();
+  const now = new Date();
+  const day = dayString(now);
+  const ua = (req.headers && req.headers['user-agent']) || '';
+  const hash = crypto.createHash('sha256')
+    .update(`${clientIp(req)}|${ua}|${day}`).digest('hex');
+  db.run(`INSERT INTO store_events (created_at, day, type, page, detail, referrer_host, device)
+    VALUES ('${now.toISOString()}', '${day}', '${esc(type)}', '${esc(page || '')}',
+      '${esc(String(detail == null ? '' : detail).slice(0, 200))}',
+      '${esc(referrerHost(req))}', '${esc(deviceClass(req))}')`);
+  db.run(`INSERT OR IGNORE INTO store_visitors (day, visitor_hash)
+    VALUES ('${day}', '${hash}')`);
+  persist(db);
+  return true;
+}
+
+function countByType(db, since) {
+  const where = since ? `WHERE day >= '${esc(since)}'` : '';
+  const out = {};
+  for (const r of rows(db, `SELECT type, COUNT(*) AS n FROM store_events ${where} GROUP BY type`)) {
+    out[r.type] = r.n;
+  }
+  return out;
+}
+
+function countVisitors(db, since) {
+  const where = since ? `WHERE day >= '${esc(since)}'` : '';
+  return rows(db, `SELECT COUNT(*) AS n FROM store_visitors ${where}`)[0].n;
+}
+
+function topList(db, sql, limit) {
+  return rows(db, sql).slice(0, limit).map((r) => ({ label: r.label, count: r.n }));
+}
+
+/* Aggregates for the stats dashboard. rangeDays caps at 365; the daily
+   series always covers exactly that many days (zero-filled). Visitor
+   counts are per-day uniques added across the range — the daily hash
+   rotates, so cross-day dedup is impossible by design. */
+async function getStats(rangeDays) {
+  const db = await getDb();
+  const days = Number.isFinite(rangeDays) && rangeDays > 0 ? Math.min(Math.floor(rangeDays), 365) : 30;
+  const since = dayString(new Date(Date.now() - (days - 1) * 86400000));
+
+  const inRange = countByType(db, since);
+  const allTime = countByType(db, null);
+  const sum = (o, key) => o[key] || 0;
+  const totals = {
+    pageviews: sum(inRange, 'pageview'),
+    visitors: countVisitors(db, since),
+    preview_plays: sum(inRange, 'preview_play'),
+    cart_adds: sum(inRange, 'cart_add'),
+    checkout_notices: sum(inRange, 'checkout_notice'),
+    genre_filters: sum(inRange, 'genre_filter'),
+    artist_clicks: sum(inRange, 'artist_click'),
+  };
+  const totalsAllTime = {
+    pageviews: sum(allTime, 'pageview'),
+    visitors: countVisitors(db, null),
+    preview_plays: sum(allTime, 'preview_play'),
+    cart_adds: sum(allTime, 'cart_add'),
+    checkout_notices: sum(allTime, 'checkout_notice'),
+    genre_filters: sum(allTime, 'genre_filter'),
+    artist_clicks: sum(allTime, 'artist_click'),
+  };
+
+  const byDay = {};
+  for (let i = 0; i < days; i++) {
+    const d = dayString(new Date(Date.now() - i * 86400000));
+    byDay[d] = { day: d, pageviews: 0, visitors: 0, preview_plays: 0, cart_adds: 0 };
+  }
+  for (const r of rows(db, `SELECT day, type, COUNT(*) AS n FROM store_events
+      WHERE day >= '${esc(since)}' GROUP BY day, type`)) {
+    if (!byDay[r.day]) continue;
+    if (r.type === 'pageview') byDay[r.day].pageviews = r.n;
+    if (r.type === 'preview_play') byDay[r.day].preview_plays = r.n;
+    if (r.type === 'cart_add') byDay[r.day].cart_adds = r.n;
+  }
+  for (const r of rows(db, `SELECT day, COUNT(*) AS n FROM store_visitors
+      WHERE day >= '${esc(since)}' GROUP BY day`)) {
+    if (byDay[r.day]) byDay[r.day].visitors = r.n;
+  }
+  const daily = Object.keys(byDay).sort().map((d) => byDay[d]);
+
+  return {
+    generated_at: new Date().toISOString(),
+    range_days: days,
+    totals,
+    totals_all_time: totalsAllTime,
+    daily,
+    top_tracks: topList(db, `SELECT detail AS label, COUNT(*) AS n FROM store_events
+      WHERE type='preview_play' AND day >= '${esc(since)}' GROUP BY detail ORDER BY n DESC`, 10),
+    top_pages: topList(db, `SELECT page AS label, COUNT(*) AS n FROM store_events
+      WHERE type='pageview' AND day >= '${esc(since)}' GROUP BY page ORDER BY n DESC`, 10),
+    top_referrers: topList(db, `SELECT referrer_host AS label, COUNT(*) AS n FROM store_events
+      WHERE type='pageview' AND day >= '${esc(since)}' AND referrer_host != ''
+      GROUP BY referrer_host ORDER BY n DESC`, 10),
+    devices: topList(db, `SELECT device AS label, COUNT(*) AS n FROM store_events
+      WHERE type='pageview' AND day >= '${esc(since)}' GROUP BY device ORDER BY n DESC`, 10),
+    top_genres: topList(db, `SELECT detail AS label, COUNT(*) AS n FROM store_events
+      WHERE type='genre_filter' AND day >= '${esc(since)}' GROUP BY detail ORDER BY n DESC`, 10),
+    top_artists: topList(db, `SELECT detail AS label, COUNT(*) AS n FROM store_events
+      WHERE type='artist_click' AND day >= '${esc(since)}' GROUP BY detail ORDER BY n DESC`, 10),
+  };
+}
+
 function getDb() {
   if (!dbPromise) dbPromise = openDb();
   return dbPromise;
@@ -276,4 +460,4 @@ async function getCatalog() {
   return { store: seed.store, artists, albums, tracks, products };
 }
 
-module.exports = { getCatalog, getDb };
+module.exports = { getCatalog, getDb, recordEvent, getStats };

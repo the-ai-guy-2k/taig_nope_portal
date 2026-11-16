@@ -7,11 +7,25 @@ const {
   placeholderRoutes,
   planningRoutes,
 } = require('./routes');
+const { recordEvent } = require('./services/musicStoreDb');
 
 const app = express();
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '..', 'views'));
+
+/* Music store pageviews, server-side: counts the two storefront pages
+   (landing + album) before static serves them. Scoped to exactly those
+   paths — nothing else on the portal is counted. Fire-and-forget: a stats
+   failure must never slow or break a page load. */
+app.use((req, res, next) => {
+  const p = req.path;
+  if (p === '/music-store/' || p === '/music-store/album/' || p === '/music-store/album') {
+    const page = p.indexOf('/album') !== -1 ? 'album' : 'landing';
+    recordEvent(req, 'pageview', '', page).catch(() => {});
+  }
+  next();
+});
 
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(express.json());
