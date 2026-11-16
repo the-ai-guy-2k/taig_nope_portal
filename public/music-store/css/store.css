@@ -423,7 +423,11 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 .track-play:hover { background: rgba(205, 161, 64, .14); }
 .track.is-playing { background: rgba(205, 161, 64, .14); }
 .track-title { font-weight: 600; flex: 1 1 160px; min-width: 0; }
-.track-artist { color: #a8a29a; font-size: .95rem; flex: 0 1 150px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The artist name never shrinks off the row: it keeps its natural
+   width, and flex-wrap moves it to the next line instead of clipping
+   it (at ~500px the SINGLE-tagged row used to squeeze the artist
+   against the right edge). */
+.track-artist { color: #a8a29a; font-size: .95rem; flex: 0 0 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .track-dur { color: #a8a29a; font-size: .95rem; }
 .preview-readout { color: #CDA140; font-size: .85rem; white-space: nowrap; }
 .preview-readout[hidden] { display: none; }
@@ -492,8 +496,14 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   gap: 10px;
   padding: 10px 0;
   border-bottom: 1px solid #2a3f5f;
+  flex-wrap: wrap;
 }
 .cart-item .name { flex: 1; min-width: 0; }
+.line-price { white-space: nowrap; font-weight: 600; }
+/* The qty stepper + Remove always sit on their own line, right-aligned,
+   so the item name gets the full line (in a 380px drawer five elements
+   in one row squeezed the name to a few words per line). */
+.cart-controls { display: flex; align-items: center; gap: 10px; flex: 1 1 100%; justify-content: flex-end; }
 .cart-thumb {
   width: 48px;
   height: 48px;

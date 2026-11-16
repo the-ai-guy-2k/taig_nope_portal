@@ -162,8 +162,26 @@
       + '</div>';
   }
 
+  function resolveItem(item) {
+    if (!catalog || !item) return null;
+    return item.kind === 'track' ? trackById(item.id) : productById(item.id);
+  }
+  /* Drop cart lines that no longer match the catalog. A stale entry
+     from an older catalog would otherwise inflate the badge (the badge
+     counts every line) while the drawer only renders lines that
+     resolve — the badge reads one too high and the drawer looks empty. */
+  function pruneCart() {
+    if (!catalog) return;
+    var before = cart.length;
+    cart = cart.filter(function (item) { return !!resolveItem(item); });
+    if (cart.length !== before) saveCart();
+  }
+
   function cartCount() {
-    return cart.reduce(function (n, item) { return n + item.qty; }, 0);
+    return cart.reduce(function (n, item) {
+      if (catalog && !resolveItem(item)) return n;
+      return n + item.qty;
+    }, 0);
   }
   function cartTotal() {
     return cart.reduce(function (sum, item) {
@@ -203,14 +221,15 @@
     var body = $('#cart-items');
     var foot = $('#cart-footer');
     if (!body) return;
-    if (!cart.length) {
+    var items = catalog ? cart.filter(function (item) { return !!resolveItem(item); }) : cart;
+    if (!items.length) {
       body.innerHTML = '<p class="cart-empty">Your cart is empty. Add the album, a track, or a CD.</p>';
       if (foot) foot.hidden = true;
       return;
     }
     var html = '';
-    cart.forEach(function (item) {
-      var p = item.kind === 'track' ? trackById(item.id) : productById(item.id);
+    items.forEach(function (item) {
+      var p = resolveItem(item);
       if (!p) return;
       var name = item.kind === 'track' ? p.title : p.name;
       var sub = item.kind === 'track'
@@ -220,11 +239,11 @@
       html += '<div class="cart-item" data-kind="' + item.kind + '" data-id="' + item.id + '">'
         + (cover ? '<img class="cart-thumb" src="' + esc(cover) + '" alt="">' : '')
         + '<div class="name">' + esc(name) + '<small>' + esc(sub) + '</small></div>'
-        + '<div class="qty"><button data-act="dec" aria-label="Decrease quantity">−</button>'
+        + '<div class="line-price">' + money(p.price_cents * item.qty) + '</div>'
+        + '<div class="cart-controls"><div class="qty"><button data-act="dec" aria-label="Decrease quantity">−</button>'
         + '<span>' + item.qty + '</span>'
         + '<button data-act="inc" aria-label="Increase quantity">+</button></div>'
-        + '<div>' + money(p.price_cents * item.qty) + '</div>'
-        + '<button class="cart-remove" data-act="remove">Remove</button>'
+        + '<button class="cart-remove" data-act="remove">Remove</button></div>'
         + '</div>';
     });
     body.innerHTML = html;
@@ -739,6 +758,8 @@
       .then(function (res) { if (!res.ok) throw new Error('catalog failed'); return res.json(); })
       .then(function (data) {
         catalog = data;
+        pruneCart();
+        renderCart();
         if (page === 'landing') renderLanding();
         if (page === 'album') renderAlbum();
         if (page === 'artist') renderArtist();
