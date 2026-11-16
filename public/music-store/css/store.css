@@ -80,8 +80,16 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
 }
 .cart-badge[hidden] { display: none; }
 
-/* Masthead */
-.masthead { padding: 44px 0 8px; }
+/* Masthead — navy panel behind the lockup (logo navy #182941 + gold #CDA140).
+   The lockup stays white/gold: white on navy is legible, navy bars on dark
+   would vanish, so the navy comes in as the field, not the logo. */
+.masthead {
+  margin-top: 24px;
+  background: #182941;
+  border: 1px solid #2a3f5f;
+  border-radius: 16px;
+  padding: 32px 24px 28px;
+}
 .masthead h1 {
   margin: 0;
   font-size: clamp(2.4rem, 8vw, 4.2rem);
@@ -229,10 +237,10 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 .why h3 { margin: 0 0 6px; font-size: 1.05rem; }
 .why p { margin: 0; }
 
-/* Signup */
+/* Signup — navy panel to bookend the page with the masthead. */
 .signup {
-  background: #1c1917;
-  border: 1px solid #2e2a26;
+  background: #182941;
+  border: 1px solid #2a3f5f;
   border-radius: 14px;
   padding: 20px;
 }
@@ -430,5 +438,6 @@ footer .fineprint { font-size: .8rem; margin-top: 8px; }
   .cards, .why { grid-template-columns: 1fr; }
   .wordmark { font-size: .95rem; gap: 8px; }
   .brand-mark { height: 26px; }
+  .masthead { padding: 24px 16px 20px; margin-top: 16px; }
   .masthead-logo { width: min(300px, 82vw); }
 }
