@@ -85,12 +85,27 @@
   </section>
 
   <section>
+    <h2>Where visitors come from</h2>
+    <p class="section-sub muted">Country and city, looked up from the visitor's IP address on this server — the IP itself is never stored. Country is solid, city is decent, never street-level.</p>
+    <div class="top-grid" id="geo-grid">
+      <div class="top-list"><h3>Top countries</h3><p class="empty">Loading…</p></div>
+      <div class="top-list"><h3>Top cities</h3><p class="empty">Loading…</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Backfilled from server logs</h2>
+    <p class="muted" id="backfill">Loading…</p>
+    <div class="top-grid" id="backfill-grid"></div>
+  </section>
+
+  <section>
     <h2>Also in this range</h2>
     <p class="muted" id="also">Loading…</p>
   </section>
 
   <section>
-    <p class="muted small">How this is counted: first-party only, straight from the store's own server — no third-party tracker, no cookies, no personal data. A "unique visitor" is a one-way daily hash that can't identify anyone or follow them across days; no IP addresses are stored. Referrers are the site name only, never the full link. Stats start the day this page went live — there is no history from before then.</p>
+    <p class="muted small">How this is counted: first-party only, straight from the store's own server — no third-party tracker, no cookies, no personal data. A "unique visitor" is a one-way daily hash that can't identify anyone or follow them across days; no IP addresses are stored. Location is country, city and region only, looked up from the visitor's IP on this server — the IP itself is never stored. Referrers are the site name only, never the full link. Stats start the day this page went live — there is no history from before then, except the backfilled geo below, which is rebuilt from the server's access logs back to the store going live.</p>
   </section>
 </main>
 

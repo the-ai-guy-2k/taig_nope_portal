@@ -69,6 +69,28 @@
       + renderList('Top artist clicks', data.top_artists, 'No artist clicks in this range yet.');
   }
 
+  function renderGeo(data) {
+    $('#geo-grid').innerHTML =
+      renderList('Top countries', data.top_countries, 'No visitor locations recorded in this range yet.')
+      + renderList('Top cities', data.top_cities, 'No visitor cities recorded in this range yet.');
+  }
+
+  function renderBackfill(data) {
+    var b = data.geo_backfill || {};
+    if (!b.total_visits) {
+      $('#backfill').textContent = 'No backfilled geo yet — the server-log backfill has not been run.';
+      $('#backfill-grid').innerHTML = '';
+      return;
+    }
+    $('#backfill').textContent = b.total_visits + ' visits, ' + b.first_day + ' to ' + b.last_day
+      + '. Rebuilt from the server\u2019s access logs for the store pages, back to the store going live — '
+      + 'not collected live like the counts above. These include our own checks and Tee\u2019s own visits; '
+      + 'they are not separated out. Country is solid, city is decent, never street-level.';
+    $('#backfill-grid').innerHTML =
+      renderList('Backfilled top countries', b.top_countries, 'No backfilled countries.')
+      + renderList('Backfilled top cities', b.top_cities, 'No backfilled cities.');
+  }
+
   function renderAlso(data) {
     var t = data.totals;
     $('#also').textContent = 'Checkout notices shown: ' + t.checkout_notices
@@ -85,6 +107,8 @@
         renderCards(data);
         renderChart(data);
         renderTop(data);
+        renderGeo(data);
+        renderBackfill(data);
         renderAlso(data);
       })
       .catch(function () {

@@ -43,6 +43,7 @@
   "dependencies": {
     "ejs": "^3.1.10",
     "express": "^4.21.2",
+    "maxmind": "^5.1.0",
     "sql.js": "^1.16.0"
   }
 }

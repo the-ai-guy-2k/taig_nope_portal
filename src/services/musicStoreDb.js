@@ -15,6 +15,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const initSqlJs = require('sql.js');
+const { lookupGeo } = require('./geoLookup');
 
 const DB_PATH = process.env.MUSIC_STORE_DB
   || path.join(__dirname, '..', '..', 'nebula_local', 'music-store.sqlite');
@@ -270,6 +271,15 @@ function persist(db) {
  *     daily by design, so it can count unique visitors per day but can
  *     never identify a person or join visits across days. The IP itself
  *     is never stored.
+ *   store_geo_backfill — aggregate geo counts reconstructed from the
+ *     nginx access logs (see scripts/backfill-store-geo.js): one row
+ *     per (day, country, region, city) with a visit count. Kept apart
+ *     from the live-collected events so the dashboard can label it
+ *     honestly. Only counts are stored here, never IPs.
+ * Geo on live events: recordEvent looks up the visitor's country,
+ * region and city from the same IP that feeds the visitor hash, and
+ * stores ONLY those three fields (country = ISO code, e.g. 'US').
+ * The IP itself is never written to any table.
  * ---------------------------------------------------------------------- */
 
 const EVENT_TYPES = new Set([
@@ -298,6 +308,29 @@ function ensureStatsTables(db) {
       day TEXT NOT NULL,
       visitor_hash TEXT NOT NULL,
       PRIMARY KEY (day, visitor_hash)
+    )`);
+    changed = true;
+  }
+  /* Geo columns on store_events (added Nov 15, 2026): country/region/city
+     only — the IP itself is never stored. Idempotent ALTERs, so the live
+     DB migrates in place on next open. */
+  if (has('store_events')) {
+    const cols = rows(db, 'PRAGMA table_info(store_events)').map((c) => c.name);
+    for (const col of ['country', 'region', 'city']) {
+      if (!cols.includes(col)) {
+        db.run(`ALTER TABLE store_events ADD COLUMN ${col} TEXT`);
+        changed = true;
+      }
+    }
+  }
+  if (!has('store_geo_backfill')) {
+    db.run(`CREATE TABLE store_geo_backfill (
+      day TEXT NOT NULL,
+      country TEXT NOT NULL,
+      region TEXT NOT NULL,
+      city TEXT NOT NULL,
+      visits INTEGER NOT NULL,
+      PRIMARY KEY (day, country, region, city)
     )`);
     changed = true;
   }
@@ -342,10 +375,15 @@ async function recordEvent(req, type, detail, page) {
   const ua = (req.headers && req.headers['user-agent']) || '';
   const hash = crypto.createHash('sha256')
     .update(`${clientIp(req)}|${ua}|${day}`).digest('hex');
-  db.run(`INSERT INTO store_events (created_at, day, type, page, detail, referrer_host, device)
+  /* Geo: country/region/city only, from the same IP that feeds the hash.
+     The IP itself is never stored. Unknown IP → blanks, event still counts. */
+  const geo = lookupGeo(clientIp(req)) || { country: '', region: '', city: '' };
+  db.run(`INSERT INTO store_events (created_at, day, type, page, detail, referrer_host, device,
+      country, region, city)
     VALUES ('${now.toISOString()}', '${day}', '${esc(type)}', '${esc(page || '')}',
       '${esc(String(detail == null ? '' : detail).slice(0, 200))}',
-      '${esc(referrerHost(req))}', '${esc(deviceClass(req))}')`);
+      '${esc(referrerHost(req))}', '${esc(deviceClass(req))}',
+      '${esc(geo.country)}', '${esc(geo.region)}', '${esc(geo.city)}')`);
   db.run(`INSERT OR IGNORE INTO store_visitors (day, visitor_hash)
     VALUES ('${day}', '${hash}')`);
   persist(db);
@@ -368,6 +406,27 @@ function countVisitors(db, since) {
 
 function topList(db, sql, limit) {
   return rows(db, sql).slice(0, limit).map((r) => ({ label: r.label, count: r.n }));
+}
+
+/* Geo counts reconstructed from the nginx access logs (backfill). Kept
+   separate from the live-collected events so the dashboard can label
+   them honestly. Returns zeros/empty when no backfill has been run. */
+function geoBackfill(db) {
+  const empty = { total_visits: 0, first_day: null, last_day: null, top_countries: [], top_cities: [] };
+  const hasTable = rows(db, "SELECT COUNT(*) AS n FROM sqlite_master WHERE name='store_geo_backfill'")[0].n > 0;
+  if (!hasTable) return empty;
+  const total = rows(db, 'SELECT COALESCE(SUM(visits), 0) AS n FROM store_geo_backfill')[0].n;
+  if (!total) return empty;
+  const range = rows(db, 'SELECT MIN(day) AS first_day, MAX(day) AS last_day FROM store_geo_backfill')[0];
+  return {
+    total_visits: total,
+    first_day: range.first_day,
+    last_day: range.last_day,
+    top_countries: topList(db, `SELECT country AS label, SUM(visits) AS n FROM store_geo_backfill
+      WHERE country != '' GROUP BY country ORDER BY n DESC`, 10),
+    top_cities: topList(db, `SELECT city AS label, SUM(visits) AS n FROM store_geo_backfill
+      WHERE city != '' GROUP BY city ORDER BY n DESC`, 10),
+  };
 }
 
 /* Aggregates for the stats dashboard. rangeDays caps at 365; the daily
@@ -438,6 +497,13 @@ async function getStats(rangeDays) {
       WHERE type='genre_filter' AND day >= '${esc(since)}' GROUP BY detail ORDER BY n DESC`, 10),
     top_artists: topList(db, `SELECT detail AS label, COUNT(*) AS n FROM store_events
       WHERE type='artist_click' AND day >= '${esc(since)}' GROUP BY detail ORDER BY n DESC`, 10),
+    top_countries: topList(db, `SELECT country AS label, COUNT(*) AS n FROM store_events
+      WHERE type='pageview' AND day >= '${esc(since)}' AND country != ''
+      GROUP BY country ORDER BY n DESC`, 10),
+    top_cities: topList(db, `SELECT city AS label, COUNT(*) AS n FROM store_events
+      WHERE type='pageview' AND day >= '${esc(since)}' AND city != ''
+      GROUP BY city ORDER BY n DESC`, 10),
+    geo_backfill: geoBackfill(db),
   };
 }
 
