@@ -5,7 +5,7 @@
 html, body { overflow-x: clip; }
 body {
   margin: 0;
-  background: #12100e;
+  background: #182941;
   color: #f5f0e8;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   line-height: 1.5;
@@ -17,12 +17,14 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
 .muted { color: #a8a29a; }
 .small { font-size: .85rem; }
 /* Top bar */
-/* Topbar — navy, so the white/gold mark sits on the logo's own palette. */
+/* Topbar — solid lighter navy, same as the panels, so it reads as a bar
+   over the navy page. (Was 94%-opaque navy; on a navy page that would
+   vanish into the background.) */
 .topbar {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(24, 41, 65, .94);
+  background: #22385c;
   border-bottom: 1px solid #2a3f5f;
 }
 .topbar-inner {
@@ -86,7 +88,7 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
    would vanish, so the navy comes in as the field, not the logo. */
 .masthead {
   margin-top: 24px;
-  background: #182941;
+  background: #22385c;
   border: 1px solid #2a3f5f;
   border-radius: 16px;
   padding: 32px 24px 28px;
@@ -113,7 +115,7 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
 /* Featured banner */
 .banner {
   margin-top: 28px;
-  background: #182941;
+  background: #22385c;
   border: 1px solid #2a3f5f;
   border-radius: 16px;
   padding: 20px;
@@ -182,7 +184,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   gap: 16px;
 }
 .card {
-  background: #182941;
+  background: #22385c;
   border: 1px solid #2a3f5f;
   border-radius: 14px;
   padding: 18px;
@@ -207,7 +209,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 .roster-slot {
   flex: 1 1 200px;
   max-width: 340px;
-  background: #182941;
+  background: #22385c;
   border: 1px solid #2a3f5f;
   border-radius: 14px;
   padding: 18px;
@@ -230,7 +232,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   gap: 16px;
 }
 .why div {
-  background: #182941;
+  background: #22385c;
   border: 1px solid #2a3f5f;
   border-radius: 14px;
   padding: 18px;
@@ -240,7 +242,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 
 /* Signup — navy panel to bookend the page with the masthead. */
 .signup {
-  background: #182941;
+  background: #22385c;
   border: 1px solid #2a3f5f;
   border-radius: 14px;
   padding: 20px;
@@ -248,8 +250,8 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 .signup form { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
 .signup input[type="email"] {
   flex: 1 1 220px;
-  background: #12100e;
-  border: 1px solid #6b645b;
+  background: #182941;
+  border: 1px solid #2a3f5f;
   border-radius: 999px;
   color: #f5f0e8;
   padding: 10px 16px;
@@ -276,7 +278,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 .album-hero .artist { color: #CDA140; font-weight: 600; margin: 0 0 10px; font-size: 1.1rem; }
 .formats { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
 .format {
-  background: #182941;
+  background: #22385c;
   border: 1px solid #2a3f5f;
   border-radius: 12px;
   padding: 14px 16px;
@@ -293,7 +295,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   border: 1px solid #2a3f5f;
   border-radius: 14px;
   overflow: hidden;
-  background: #182941;
+  background: #22385c;
 }
 .track {
   display: flex;
@@ -354,7 +356,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   right: 0;
   bottom: 0;
   width: min(380px, 92vw);
-  background: #182941;
+  background: #22385c;
   border-left: 1px solid #2a3f5f;
   z-index: 51;
   display: flex;
@@ -423,7 +425,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 /* Footer — navy panel, matching the masthead and signup bookends. */
 footer {
   margin-top: 56px;
-  background: #182941;
+  background: #22385c;
   border: 1px solid #2a3f5f;
   border-radius: 14px;
   padding: 24px;
