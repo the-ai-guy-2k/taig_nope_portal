@@ -169,6 +169,23 @@
       .bucket li:first-child { border-top: none; }
       .bucket .empty { color: var(--ink-3); font-size: 14px; padding: 4px 0 8px; }
 
+      /* ---------- tonight's new loops ---------- */
+      .newloops-note { font-size: 14.5px; color: var(--ink-2); margin: 0 0 12px; max-width: 74ch; }
+      .totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 12px; }
+      .total-cell { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+      .total-cell .tbig { font-size: 30px; font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+      .total-cell .tlab { font-size: 13.5px; font-weight: 600; margin-top: 5px; }
+      .total-cell .teq { font-size: 12.5px; color: var(--ink-2); margin-top: 3px; }
+      .bucket li .detail { display: block; color: var(--ink-2); font-size: 13px; margin-top: 1px; }
+
+      /* ---------- music store stats ---------- */
+      .store-panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+      .store-panel .soon {
+        display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+        color: var(--taig2k); border: 1px solid var(--taig2k); border-radius: 999px; padding: 2px 10px; margin-bottom: 8px;
+      }
+      .store-panel p { margin: 0; font-size: 15px; color: var(--ink-2); max-width: 74ch; }
+
       footer.notes { margin-top: 36px; border-top: 1px solid var(--line); padding-top: 14px; color: var(--ink-2); font-size: 13.5px; }
       footer.notes p { margin: 0 0 6px; }
 
@@ -249,8 +266,63 @@
           <p>One loop was created today and died today: the Josh plan PDF — built, stopped, on disk undelivered. It is counted in Opened today (parked), not in any closed count.</p>
         </div>
 
+        <h2 class="section-title">Tonight's new loops — opened after the baseline</h2>
+        <p class="newloops-note">From the three notebook maps sent tonight at 10:17 PM (The Hive, TAIG IT Solutions, TAIG2K). These 21 loops opened <strong>after</strong> the baseline snapshot above, so the baseline numbers stay exactly as they are — the new loops are counted here, separately. All 21 are untouched: just opened, nothing done yet.</p>
+        <div class="totals">
+          <div class="total-cell"><div class="tbig num">81</div><div class="tlab">Open now</div><div class="teq num">Baseline 60 + 21 new</div></div>
+          <div class="total-cell"><div class="tbig num">54</div><div class="tlab">Untouched now</div><div class="teq num">Baseline 33 + 21 new</div></div>
+          <div class="total-cell"><div class="tbig num">27</div><div class="tlab">Touched</div><div class="teq">Unchanged from baseline</div></div>
+          <div class="total-cell"><div class="tbig num">21</div><div class="tlab">New loops tonight</div><div class="teq num">TAIG ITS 6 · TAIG2K 11 · The Hive 4</div></div>
+        </div>
+        <p class="newloops-note">Check: <span class="num">81 open = 54 untouched + 27 touched</span> (the touched 27 is still 15 close to closing + 12 touched, not close).</p>
+        <p class="newloops-note">Two different 21s: the baseline's “Opened today” is 21, and tonight's new loops also happen to be 21. They are separate counts. Already in the baseline and <strong>not</strong> counted again here: Food Truck Menus, Clerge (he appears below only as a sub-item of the Service Industry loop), PIA, Diamond IQ / PSIS, and the TAIG Online Music Store MVP.</p>
+        <div class="bucket-grid">
+          <div class="bucket">
+            <h4 class="h-its"><span class="dot dot-its"></span>TAIG ITS<span class="bcount num">6</span></h4>
+            <ul>
+              <li>My Homeless friends<span class="detail">Sponsoring fun givings drives</span></li>
+              <li>Open positions<span class="detail">Sales, IT Tech</span></li>
+              <li>Backlog of work</li>
+              <li>Service Industry<span class="detail">Lawn care — Clerge, B's lawn care; Mo's laptop sales + repair</span></li>
+              <li>New service offerings<span class="detail">Marketing &amp; Promotions, Social media mgmt, IT MSP Services, Business work — check if it needs IT implementation or refresh</span></li>
+              <li>Michelle — A Touch of Clean</li>
+            </ul>
+          </div>
+          <div class="bucket">
+            <h4 class="h-taig2k"><span class="dot dot-taig2k"></span>TAIG2K<span class="bcount num">11</span></h4>
+            <ul>
+              <li>Movie streaming service [The Director]</li>
+              <li>LCN</li>
+              <li>Linux Admin GUI</li>
+              <li>A know a guy app</li>
+              <li>I know a guy app</li>
+              <li>Network engineer toolbox</li>
+              <li>Registration for fun givings drive and similar</li>
+              <li>THC Portal</li>
+              <li>TAIG Winds</li>
+              <li>Infrastructure<span class="detail">Replit, AWS, Digital Ocean</span></li>
+              <li>AIW's<span class="detail">CAE, Canva, Auto critic</span></li>
+            </ul>
+          </div>
+          <div class="bucket">
+            <h4 class="h-hive"><span class="dot dot-hive"></span>The Hive<span class="bcount num">4</span></h4>
+            <ul>
+              <li>Tiesto DJ mix tape<span class="detail">Find a good DJ to mix and make a Tiesto version mix tape</span></li>
+              <li>Fun givings drives<span class="detail">Turkey drives, Toy drives, Holiday Decoration Drive</span></li>
+              <li>Performing Opportunities<span class="detail">Open mic nights</span></li>
+              <li>e Bike Repair shop</li>
+            </ul>
+          </div>
+        </div>
+
         <h2 class="section-title">Every loop, by group and bucket</h2>
         <div id="lists"></div>
+
+        <h2 class="section-title">TAIG Online Music Store stats</h2>
+        <div class="store-panel">
+          <span class="soon">Coming soon</span>
+          <p>The store's stats will live on a separate stats dashboard, being built on its own. This section will link to it once that dashboard is live.</p>
+        </div>
 
         <footer class="notes">
           <p><strong>George note:</strong> a George portfolio URL loop was added at 6:53 PM and would make the open total 61 — it overlaps the George email loop already counted in Close to closing, so it is not double-counted. Open stays 60.</p>
@@ -286,6 +358,9 @@
         <p>Closed today 31 = created + closed 28 + 3 started earlier: ISRC verified (Hive), veteran fair reminder (TAIG2K), Clerge tree-cutting draft (ITS).</p>
         <p>Created and died today: the Josh plan PDF — built, stopped, on disk undelivered; counted in Opened today (parked).</p>
         <p>George portfolio URL loop (added 6:53 PM) overlaps the George email loop in Close to closing — not double-counted; open stays 60, not 61.</p>
+        <h2>After the baseline — tonight's new loops</h2>
+        <p>21 new loops opened from tonight's notebook maps (TAIG ITS 6 · TAIG2K 11 · The Hive 4), all untouched. Open now 81 = 60 + 21; untouched now 54 = 33 + 21; touched stays 27; 81 = 54 + 27. (Separate from the baseline "Opened today" 21.)</p>
+        <p>TAIG Online Music Store stats: coming soon — separate stats dashboard; link to be added when it is live.</p>
       </div>
     </main>
 
