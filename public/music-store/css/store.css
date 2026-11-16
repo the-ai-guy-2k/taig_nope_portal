@@ -112,18 +112,22 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
   max-width: 34em;
 }
 
-/* Featured banner */
-.banner {
-  margin-top: 28px;
+/* Featured album hero (landing) — the iTunes-style featured slot:
+   big cover, album title, artist, meta, price + Add actions. */
+.hero {
   background: #22385c;
   border: 1px solid #2a3f5f;
   border-radius: 16px;
-  padding: 20px;
+  padding: 24px;
   display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 24px;
-  align-items: center;
+  grid-template-columns: 300px 1fr;
+  gap: 28px;
+  align-items: start;
 }
+.hero h2 { margin: 0 0 4px; font-size: clamp(1.6rem, 4.5vw, 2.2rem); line-height: 1.1; }
+.hero .artist { color: #CDA140; font-weight: 600; margin: 0 0 10px; font-size: 1.1rem; }
+.hero .meta { margin: 0 0 16px; }
+.hero .hero-link { display: inline-block; margin-top: 16px; }
 .cover {
   width: 100%;
   aspect-ratio: 1;
@@ -131,9 +135,6 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
   border-radius: 10px;
   background: #2a3f5f;
 }
-.banner h2 { margin: 0 0 4px; font-size: 1.7rem; line-height: 1.15; }
-.banner .artist { color: #CDA140; font-weight: 600; margin: 0 0 8px; }
-.banner .meta { margin: 0 0 16px; }
 .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
 .btn {
   display: inline-block;
@@ -266,6 +267,23 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 }
 .notice[hidden] { display: none; }
 
+/* Artist page hero */
+.artist-hero {
+  margin-top: 28px;
+  background: #22385c;
+  border: 1px solid #2a3f5f;
+  border-radius: 16px;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+.artist-hero h1 { margin: 0 0 6px; font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.1; }
+.artist-hero .blurb { color: #d6cfc4; margin: 12px 0 0; max-width: 34em; }
+.artist-hero .tag { margin-left: 0; }
+.artist-hero .coming { color: #a8a29a; margin: 16px 0 0; }
+
 /* Album hero */
 .album-hero {
   margin-top: 28px;
@@ -322,6 +340,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 .track-play:hover { background: rgba(205, 161, 64, .14); }
 .track.is-playing { background: rgba(205, 161, 64, .14); }
 .track-title { font-weight: 600; flex: 1 1 160px; min-width: 0; }
+.track-artist { color: #a8a29a; font-size: .95rem; flex: 0 1 150px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .track-dur { color: #a8a29a; font-size: .95rem; }
 .preview-readout { color: #CDA140; font-size: .85rem; white-space: nowrap; }
 .preview-readout[hidden] { display: none; }
@@ -437,8 +456,10 @@ footer .fineprint { font-size: .8rem; margin-top: 8px; }
 .loading { color: #a8a29a; padding: 24px 0; }
 
 @media (max-width: 720px) {
-  .banner { grid-template-columns: 1fr; }
-  .banner .cover { max-width: 280px; }
+  .hero { grid-template-columns: 1fr; }
+  .hero .cover { max-width: 280px; }
+  .artist-hero { grid-template-columns: 1fr; }
+  .artist-hero .cover { max-width: 280px; }
   .album-hero { grid-template-columns: 1fr; }
   .album-hero .cover { max-width: 300px; }
   .cards, .why { grid-template-columns: 1fr; }

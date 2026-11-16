@@ -1,7 +1,9 @@
-/* TAIG Online Music Store — storefront behavior (MVP demo).
-   Catalog renders from /music-store/api/catalog (SQLite).
-   Cart is client-side only (localStorage). No checkout, no payment:
-   the checkout button shows the payment-coming-soon notice. */
+/* TAIG Online Music Store — storefront behavior.
+   iTunes-style browse: featured album hero, featured tracks, artist
+   catalog, artist pages, album page. Catalog renders from
+   /music-store/api/catalog (SQLite). Cart is client-side only
+   (localStorage). No checkout, no payment: the checkout button shows
+   the payment-coming-soon notice. */
 (function () {
   'use strict';
 
@@ -100,28 +102,34 @@
     var box = $('#roster');
     if (!box) return;
     var html = '';
-    catalog.artists.forEach(function (a) {
-      var album = albumForArtist(a.id);
-      var cover = a.cover || (album && album.cover);
-      var num = String(a.roster_position || a.id).padStart(2, '0');
-      html += '<div class="roster-slot" data-genre="' + esc(a.genre || '') + '" data-artist="' + esc(a.slug) + '">'
-        + (cover
-          ? (album
-            ? '<a href="' + esc(album.page || '/music-store/') + '"><img class="cover" src="' + esc(cover) + '" alt="Album cover — ' + esc(album.title) + '"></a>'
-            : '<img class="cover" src="' + esc(cover) + '" alt="Cover art — ' + esc(a.name) + '">')
-          : '')
-        + '<div class="num">' + num + '</div>'
-        + '<h3>' + (album
-          ? '<a href="' + esc(album.page || '/music-store/') + '">' + esc(a.name) + '</a>'
-          : esc(a.name)) + '</h3>'
-        + '<p><span class="tag">' + esc(a.genre || '') + '</span></p>'
-        + '<p class="muted">' + esc(a.blurb || '') + '</p>'
-        + (album
-          ? '<p><a href="' + esc(album.page || '/music-store/') + '">' + esc(album.title) + ' — out now</a></p>'
-          : '<p class="muted">Debut release coming soon</p>')
-        + '</div>';
-    });
+    catalog.artists.forEach(function (a) { html += artistSlotHTML(a); });
     box.innerHTML = html;
+  }
+
+  /* One artist card, used by the landing roster, the album-page
+     recommendations, and the artist-page "more artists". Every card
+     links to the artist's own page; the album link (when the artist
+     has one) still goes to the album page. */
+  function artistPageURL(a) {
+    return '/music-store/artist/?slug=' + encodeURIComponent(a.slug || a.id);
+  }
+  function artistSlotHTML(a) {
+    var album = albumForArtist(a.id);
+    var cover = a.cover || (album && album.cover);
+    var num = String(a.roster_position || a.id).padStart(2, '0');
+    var page = artistPageURL(a);
+    return '<div class="roster-slot" data-genre="' + esc(a.genre || '') + '" data-artist="' + esc(a.slug) + '">'
+      + (cover
+        ? '<a href="' + esc(page) + '"><img class="cover" src="' + esc(cover) + '" alt="Cover art — ' + esc(a.name) + '"></a>'
+        : '')
+      + '<div class="num">' + num + '</div>'
+      + '<h3><a href="' + esc(page) + '">' + esc(a.name) + '</a></h3>'
+      + '<p><span class="tag">' + esc(a.genre || '') + '</span></p>'
+      + '<p class="muted">' + esc(a.blurb || '') + '</p>'
+      + (album
+        ? '<p><a href="' + esc(album.page || '/music-store/') + '">' + esc(album.title) + ' — out now</a></p>'
+        : '<p class="muted">Debut release coming soon</p>')
+      + '</div>';
   }
 
   function cartCount() {
@@ -256,18 +264,88 @@
   });
 
   /* ---- rendering ---- */
+  /* Featured album hero (landing): the store's one album is the
+     featured album. Same cover/meta/actions as the album page hero,
+     plus a link to the full tracklist. */
+  function renderHero() {
+    var box = $('#featured-hero');
+    if (!box) return;
+    var album = catalog.albums[0];
+    if (!album) { box.innerHTML = '<p class="muted">No album featured yet.</p>'; return; }
+    var artist = catalog.artists.find(function (a) { return a.id === album.artist_id; });
+    var digital = catalog.products.find(function (p) { return p.album_id === album.id && p.kind === 'album'; });
+    var cd = catalog.products.find(function (p) { return p.album_id === album.id && p.kind === 'cd'; });
+    if (!artist || !digital || !cd) return;
+    box.innerHTML =
+      '<img class="cover" src="' + esc(album.cover) + '" alt="Album cover — ' + esc(album.title) + '">'
+      + '<div><h2>' + esc(album.title) + '</h2>'
+      + '<p class="artist"><a href="' + esc(artistPageURL(artist)) + '">' + esc(artist.name) + '</a></p>'
+      + '<p class="meta muted">Out now · ' + album.track_count + ' songs · ' + esc(album.total_time)
+      + '<br>Label: ' + esc(album.label) + ' · Released ' + esc(album.release_date) + '</p>'
+      + '<div class="formats">'
+      + '<div class="format"><div class="price">' + money(digital.price_cents) + '</div>'
+      + '<p>Digital album · ' + esc(digital.detail) + '</p>'
+      + '<button class="btn" data-add="album" data-id="' + digital.id + '">Add album</button></div>'
+      + '<div class="format"><div class="price">' + money(cd.price_cents) + '</div>'
+      + '<p>CD · ' + esc(cd.detail) + '</p>'
+      + '<button class="btn" data-add="cd" data-id="' + cd.id + '">Add CD</button></div>'
+      + '</div>'
+      + '<a class="hero-link" href="' + esc(album.page || '/music-store/') + '">See all ' + album.track_count + ' tracks →</a>'
+      + '</div>';
+  }
+
+  /* Featured tracks (landing): the album's previewable tracks as
+     iTunes-style rows. Same row markup as the album page, so the
+     shared preview player and cart buttons work unchanged. */
+  function renderFeaturedTracks() {
+    var list = $('#featured-tracks');
+    if (!list) return;
+    var album = catalog.albums[0];
+    if (!album) { list.innerHTML = ''; return; }
+    var artist = catalog.artists.find(function (a) { return a.id === album.artist_id; });
+    var html = '';
+    catalog.tracks.filter(function (t) { return t.album_id === album.id && t.demo_available; }).forEach(function (t) {
+      html += '<li class="track" data-track-id="' + t.id + '">'
+        + '<span class="track-num">' + String(t.num).padStart(2, '0') + '</span>'
+        + '<button class="track-play" data-play="' + t.id + '" aria-label="Play 30-second preview of ' + esc(t.title) + '">▶</button>'
+        + '<span class="track-title">' + esc(t.title)
+        + (t.is_single ? '<span class="tag">Single</span>' : '') + '</span>'
+        + (artist ? '<span class="track-artist">' + esc(artist.name) + '</span>' : '')
+        + '<span class="track-dur">' + esc(t.duration) + '</span>'
+        + '<span class="preview-readout" hidden>0:00 / 0:30 · preview</span>'
+        + '<button class="btn btn-small" data-add="track" data-id="' + t.id + '">+ ' + money(t.price_cents) + '</button>'
+        + '</li>';
+    });
+    list.innerHTML = html;
+  }
+
   function renderLanding() {
-    /* Landing = the artist catalog. Pick an artist; the artist's page
-       (Jay's album page) is where the music and buying live. */
+    /* Landing = featured album hero + featured tracks + the artist
+       catalog. The genre filter lives on the artist grid only. */
+    renderHero();
+    renderFeaturedTracks();
     renderGenreFilter();
     renderRoster();
     applyGenreFilter();
   }
 
+  /* Recommendations (album page + artist page): the label's other
+     artists, as roster cards linking to their artist pages. */
+  function renderRecommendations(box, excludeArtistId) {
+    if (!box) return;
+    var html = '';
+    catalog.artists.forEach(function (a) {
+      if (a.id === excludeArtistId) return;
+      html += artistSlotHTML(a);
+    });
+    box.innerHTML = html;
+  }
+
   function renderAlbum() {
-    /* The album page is the album whose page URL matches this page's path,
-       so one template serves every artist. Jay's page is /music-store/album/;
-       the other artists live under /music-store/artist/<slug>/. */
+    /* The album page is the album whose page URL matches this page's
+       path. Jay's page is /music-store/album/. Artist pages are a
+       separate page type (data-page="artist", ?slug=) with no album
+       fallback — see renderArtist. */
     var path = window.location.pathname.replace(/\/$/, '');
     var album = catalog.albums.find(function (a) { return (a.page || '').replace(/\/$/, '') === path; })
       || catalog.albums[0];
@@ -280,7 +358,7 @@
       hero.innerHTML =
         '<img class="cover" src="' + esc(album.cover) + '" alt="Album cover — ' + esc(album.title) + '">'
         + '<div><h1>' + esc(album.title) + '</h1>'
-        + '<p class="artist">' + esc(artist.name) + '</p>'
+        + '<p class="artist"><a href="' + esc(artistPageURL(artist)) + '">' + esc(artist.name) + '</a></p>'
         + '<p class="muted">Out now · ' + album.track_count + ' songs · ' + esc(album.total_time)
         + '<br>Label: ' + esc(album.label) + ' · Released ' + esc(album.release_date) + '</p>'
         + '<div class="formats">'
@@ -326,6 +404,56 @@
       });
       list.innerHTML = html;
     }
+    renderRecommendations($('#recommendations'), album ? album.artist_id : null);
+  }
+
+  function renderArtist() {
+    /* Artist page: ?slug= picks the artist. No fallback to another
+       artist — an unknown slug is a not-found message, never Jay's
+       album. (The old static artist pages fell back to albums[0];
+       that bug is why they were deleted.) */
+    var params = new URLSearchParams(window.location.search);
+    var slug = params.get('slug') || '';
+    var artist = catalog.artists.find(function (a) { return a.slug === slug; });
+    var hero = $('#artist-hero');
+    if (!hero) return;
+    if (!artist) {
+      hero.innerHTML = '<div style="margin-top:28px"><h1>Artist not found</h1>'
+        + '<p class="muted">We couldn\'t find that artist on the store.</p>'
+        + '<p style="margin-top:16px"><a href="/music-store/">← Back to the store</a></p></div>';
+      document.title = 'Artist not found — TAIG Online Music Store';
+      var sec = $('#artist-albums-section');
+      if (sec) sec.hidden = true;
+      renderRecommendations($('#artist-more'), null);
+      return;
+    }
+    document.title = artist.name + ' — TAIG Online Music Store';
+    var album = albumForArtist(artist.id);
+    var cover = artist.cover || (album && album.cover);
+    hero.innerHTML = '<div class="artist-hero">'
+      + (cover ? '<img class="cover" src="' + esc(cover) + '" alt="Cover art — ' + esc(artist.name) + '">' : '')
+      + '<div><h1>' + esc(artist.name) + '</h1>'
+      + '<p><span class="tag">' + esc(artist.genre || '') + '</span></p>'
+      + '<p class="blurb">' + esc(artist.blurb || '') + '</p>'
+      + (album ? '' : '<p class="coming">Debut release coming soon.</p>')
+      + '</div></div>';
+    var albumsSec = $('#artist-albums-section');
+    var albumsBox = $('#artist-albums');
+    if (album && albumsSec && albumsBox) {
+      var digital = catalog.products.find(function (p) { return p.album_id === album.id && p.kind === 'album'; });
+      albumsSec.hidden = false;
+      albumsBox.innerHTML = '<div class="card">'
+        + '<img class="thumb" src="' + esc(album.cover) + '" alt="Album cover — ' + esc(album.title) + '">'
+        + '<h3><a href="' + esc(album.page || '/music-store/') + '">' + esc(album.title) + '</a></h3>'
+        + '<p class="muted">' + album.track_count + ' songs · ' + esc(album.total_time) + '</p>'
+        + (digital ? '<p class="price">' + money(digital.price_cents) + ' digital</p>' : '')
+        + '<div class="btn-row"><a class="btn" href="' + esc(album.page || '/music-store/') + '">View album</a>'
+        + (digital ? '<button class="btn" data-add="album" data-id="' + digital.id + '">Add album</button>' : '')
+        + '</div></div>';
+    } else if (albumsSec) {
+      albumsSec.hidden = true;
+    }
+    renderRecommendations($('#artist-more'), artist.id);
   }
 
   function bindEvents() {
@@ -400,6 +528,7 @@
         catalog = data;
         if (page === 'landing') renderLanding();
         if (page === 'album') renderAlbum();
+        if (page === 'artist') renderArtist();
         var loading = $('.loading');
         if (loading) loading.hidden = true;
       })
