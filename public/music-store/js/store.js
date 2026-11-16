@@ -19,7 +19,7 @@
   /* First-party stats: one counted action per call, no personal data.
      sendBeacon survives page navigation (artist clicks). Stats must
      never break the store, so every failure is swallowed. */
-  function track(type, detail) {
+  function sendStat(type, detail) {
     try {
       var payload = JSON.stringify({
         type: type,
@@ -140,7 +140,7 @@
     saveCart();
     renderCart();
     var item = kind === 'track' ? trackById(id) : productById(id);
-    track('cart_add', item ? (item.title || item.name) : String(id));
+    sendStat('cart_add', item ? (item.title || item.name) : String(id));
   }
   function setQty(kind, id, qty) {
     cart = cart.filter(function (item) {
@@ -206,7 +206,7 @@
   function showCheckoutNotice() {
     var note = $('#checkout-notice');
     if (note) note.hidden = false;
-    track('checkout_notice', 'shown');
+    sendStat('checkout_notice', 'shown');
   }
 
   /* ---- previews ---- */
@@ -241,7 +241,7 @@
     if (read) { read.hidden = false; read.textContent = '0:00 / 0:30 · preview'; }
     audio.src = '/music-store/audio/' + track.preview;
     audio.play().catch(function () { stopPreview(); });
-    track('preview_play', track.title);
+    sendStat('preview_play', track.title);
   }
   audio.addEventListener('timeupdate', function () {
     if (playingTrackId === null) return;
@@ -333,13 +333,13 @@
       var artistLink = ev.target.closest('.roster-slot a');
       if (artistLink) {
         var slot = artistLink.closest('.roster-slot');
-        if (slot) track('artist_click', slot.getAttribute('data-artist') || '');
+        if (slot) sendStat('artist_click', slot.getAttribute('data-artist') || '');
         return;
       }
       var chip = ev.target.closest('[data-filter-genre]');
       if (chip) {
         setGenre(chip.getAttribute('data-filter-genre'));
-        track('genre_filter', chip.getAttribute('data-filter-genre'));
+        sendStat('genre_filter', chip.getAttribute('data-filter-genre'));
         return;
       }
       var addBtn = ev.target.closest('[data-add]');
