@@ -1,10 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
   <rect width="1000" height="1000" fill="#1c1917"/>
-  <polygon points="120,880 320,180 470,180 270,880" fill="#e8a33d"/>
-  <polygon points="380,880 580,180 680,180 480,880" fill="#2e2a26"/>
-  <polygon points="620,880 760,420 860,420 720,880" fill="#e8a33d" opacity="0.55"/>
+  <polygon points="680,1000 800,350 880,350 760,1000" fill="#e8a33d"/>
+  <polygon points="820,1000 920,550 980,550 880,1000" fill="#2e2a26"/>
   <text x="120" y="420" font-family="Georgia, serif" font-size="88" fill="#f5f0e8">Loud</text>
   <text x="120" y="510" font-family="Georgia, serif" font-size="88" fill="#f5f0e8">Quiet</text>
   <text x="120" y="580" font-family="Georgia, serif" font-size="34" fill="#e8a33d">STATIC BLOOM</text>
-  <text x="120" y="950" font-family="Georgia, serif" font-size="24" letter-spacing="4" fill="#a8a29a">ROCK</text>
+  <text x="120" y="920" font-family="Georgia, serif" font-size="24" letter-spacing="4" fill="#a8a29a">ROCK</text>
 </svg>
