@@ -40,8 +40,16 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
   text-decoration: none;
   font-size: 1.05rem;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 .wordmark span { color: #e8a33d; }
+.brand-mark {
+  height: 30px;
+  width: auto;
+  display: block;
+}
 .topbar-spacer { flex: 1; }
 .cart-btn {
   position: relative;
@@ -81,6 +89,11 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
   letter-spacing: .01em;
 }
 .masthead h1 span { color: #e8a33d; }
+.masthead-logo {
+  width: min(340px, 78vw);
+  height: auto;
+  display: block;
+}
 .tagline {
   margin: 12px 0 0;
   font-size: clamp(1rem, 2.5vw, 1.25rem);
@@ -415,5 +428,7 @@ footer .fineprint { font-size: .8rem; margin-top: 8px; }
   .album-hero { grid-template-columns: 1fr; }
   .album-hero .cover { max-width: 300px; }
   .cards, .why { grid-template-columns: 1fr; }
-  .wordmark { font-size: .95rem; }
+  .wordmark { font-size: .95rem; gap: 8px; }
+  .brand-mark { height: 26px; }
+  .masthead-logo { width: min(300px, 82vw); }
 }
