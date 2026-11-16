@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Loop Report</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f7f5f1;
+        --surface: #ffffff;
+        --surface-2: #efede8;
+        --ink: #1d2126;
+        --ink-2: #4c545e;
+        --ink-3: #767f89;
+        --line: #d9d5cc;
+        --its: #2b6cb0;
+        --taig2k: #bc5d10;
+        --hive: #2e7d46;
+        --st-untouched: #8a9099;
+        --st-close: #c99327;
+        --st-touched: #4f7d95;
+        --track: #e7e4dc;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #16181b;
+          --surface: #1f2226;
+          --surface-2: #26292e;
+          --ink: #ece9e2;
+          --ink-2: #b6bcc4;
+          --ink-3: #8b939d;
+          --line: #383c42;
+          --its: #6ea8dc;
+          --taig2k: #e08a3c;
+          --hive: #63bd82;
+          --st-untouched: #9aa1a9;
+          --st-close: #dfae4a;
+          --st-touched: #7ba7bd;
+          --track: #2c2f34;
+        }
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: ui-sans-system, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.45;
+      }
+      .num { font-variant-numeric: tabular-nums; }
+      main { max-width: 1080px; margin: 0 auto; padding: 20px 16px 48px; }
+
+      /* ---------- header ---------- */
+      header.report-head { padding: 8px 0 4px; }
+      header.report-head h1 {
+        font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+        font-size: clamp(30px, 5vw, 42px);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin: 0 0 4px;
+      }
+      header.report-head p { margin: 0; color: var(--ink-2); font-size: 15px; }
+      header.report-head p .sep { color: var(--ink-3); }
+
+      h2.section-title {
+        font-size: 13px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+        color: var(--ink-2); margin: 34px 0 12px;
+        display: flex; align-items: baseline; gap: 10px;
+      }
+      h2.section-title::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
+
+      /* ---------- headline cards ---------- */
+      .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 18px; }
+      .card {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+        padding: 14px 14px 12px;
+      }
+      .card .big { font-size: 40px; font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+      .card .label { font-size: 13.5px; font-weight: 600; margin-top: 6px; }
+      .card .splits { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; display: grid; gap: 3px; }
+      .split-row { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink-2); transition: opacity .15s; }
+      .split-row b { margin-left: auto; color: var(--ink); font-weight: 700; }
+      .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+      .dot-its { background: var(--its); } .dot-taig2k { background: var(--taig2k); } .dot-hive { background: var(--hive); }
+      .dot-untouched { background: var(--st-untouched); } .dot-close { background: var(--st-close); } .dot-touched { background: var(--st-touched); }
+      body[data-filter="its"] .split-row:not(.row-its),
+      body[data-filter="taig2k"] .split-row:not(.row-taig2k),
+      body[data-filter="hive"] .split-row:not(.row-hive) { opacity: .35; }
+
+      /* ---------- filter ---------- */
+      .filterbar {
+        position: sticky; top: 0; z-index: 5;
+        background: var(--bg); padding: 12px 0 10px; margin-top: 26px;
+        display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      }
+      .filterbar .flabel { font-size: 13px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-2); margin-right: 2px; }
+      .fbtn {
+        min-height: 40px; padding: 8px 16px; border-radius: 999px; cursor: pointer;
+        border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+        font: inherit; font-size: 14px; font-weight: 600;
+        display: inline-flex; align-items: center; gap: 8px;
+      }
+      .fbtn[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+      .fbtn:focus-visible { outline: 2px solid var(--its); outline-offset: 2px; }
+
+      /* ---------- charts ---------- */
+      .charts { display: grid; grid-template-columns: 1.55fr 1fr; gap: 14px; align-items: start; }
+      @media (max-width: 760px) { .charts { grid-template-columns: 1fr; } }
+      .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+      .panel h3 { margin: 0 0 4px; font-size: 16px; font-weight: 700; }
+      .panel .sub { margin: 0 0 14px; font-size: 13px; color: var(--ink-2); }
+
+      .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 14px; font-size: 13px; color: var(--ink-2); }
+      .legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+      .bar-row { display: grid; grid-template-columns: 128px 1fr 34px; gap: 10px; align-items: center; margin-bottom: 12px; }
+      .bar-row .gname { font-size: 13.5px; font-weight: 600; line-height: 1.25; }
+      .bar-track { display: flex; height: 30px; background: var(--track); border-radius: 5px; overflow: hidden; }
+      .seg { height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12.5px; font-weight: 700; min-width: 0; overflow: hidden; }
+      @media (prefers-color-scheme: dark) { .seg { color: #14161a; } }
+      .seg-its { background: var(--its); } .seg-taig2k { background: var(--taig2k); } .seg-hive { background: var(--hive); }
+      .bar-row .gtotal { font-size: 16px; font-weight: 700; text-align: right; }
+      @media (max-width: 520px) { .bar-row { grid-template-columns: 96px 1fr 30px; } .bar-row .gname { font-size: 12.5px; } }
+
+      table.counts { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 13.5px; }
+      table.counts th, table.counts td { padding: 6px 8px; border-top: 1px solid var(--line); text-align: right; }
+      table.counts th:first-child, table.counts td:first-child { text-align: left; }
+      table.counts thead th { border-top: none; color: var(--ink-2); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+      table.counts td.tot, table.counts th.tot { font-weight: 700; }
+      table.counts td.hl, table.counts th.hl { background: var(--surface-2); }
+
+      .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+      .donut-svg { width: 190px; height: 190px; }
+      .donut-center-num { font-size: 40px; font-weight: 700; fill: var(--ink); }
+      .donut-center-lab { font-size: 12.5px; fill: var(--ink-2); }
+      .donut-legend { width: 100%; display: grid; gap: 6px; }
+      .donut-legend .dl-row { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+      .donut-legend .dl-row b { margin-left: auto; }
+      .donut-legend .dl-row .pct { color: var(--ink-3); font-size: 13px; width: 44px; text-align: right; }
+      .donut-note { font-size: 12.5px; color: var(--ink-2); margin: 2px 0 0; }
+
+      /* ---------- reconciliation ---------- */
+      .recon { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+      .recon p { margin: 0 0 8px; font-size: 15.5px; }
+      .recon p:last-child { margin-bottom: 0; }
+      .recon .eq { font-weight: 700; white-space: nowrap; }
+      .recon ul { margin: 4px 0 10px; padding-left: 20px; color: var(--ink-2); font-size: 14.5px; }
+      .recon ul li { margin-bottom: 3px; }
+
+      /* ---------- item lists ---------- */
+      .group { margin-bottom: 26px; }
+      .group-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+      .group-head h3 { margin: 0; font-size: 19px; font-weight: 700; }
+      .group-head .gtot { font-size: 14px; color: var(--ink-2); }
+      .bucket-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      @media (max-width: 760px) { .bucket-grid { grid-template-columns: 1fr; } }
+      .bucket { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px 8px; }
+      .bucket h4 { margin: 0 0 8px; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; display: flex; align-items: center; gap: 7px; }
+      .bucket h4 .bcount { margin-left: auto; font-size: 14px; letter-spacing: 0; }
+      .bucket h4.h-its { color: var(--its); } .bucket h4.h-taig2k { color: var(--taig2k); } .bucket h4.h-hive { color: var(--hive); }
+      .bucket ul { list-style: none; margin: 0; padding: 0; }
+      .bucket li { padding: 5px 0 5px 12px; border-top: 1px solid var(--line); font-size: 14.5px; position: relative; }
+      .bucket li::before { content: ""; position: absolute; left: 0; top: 13px; width: 5px; height: 5px; border-radius: 50%; background: var(--ink-3); }
+      .bucket li:first-child { border-top: none; }
+      .bucket .empty { color: var(--ink-3); font-size: 14px; padding: 4px 0 8px; }
+
+      footer.notes { margin-top: 36px; border-top: 1px solid var(--line); padding-top: 14px; color: var(--ink-2); font-size: 13.5px; }
+      footer.notes p { margin: 0 0 6px; }
+
+      /* ---------- print one-pager ---------- */
+      .print-sheet { display: none; }
+      @media print {
+        @page { size: Letter; margin: 0.55in 0.6in; }
+        body { background: #fff; color: #000; font-size: 11pt; }
+        .screen-only { display: none !important; }
+        .print-sheet { display: block; }
+        .print-sheet h1 { font-family: Georgia, serif; font-size: 22pt; margin: 0 0 2pt; }
+        .print-sheet .pdate { color: #444; margin: 0 0 12pt; font-size: 10.5pt; }
+        .print-sheet .headline { font-size: 12.5pt; font-weight: 700; margin: 0 0 12pt; line-height: 1.6; }
+        .print-sheet table { width: 100%; border-collapse: collapse; margin-bottom: 12pt; }
+        .print-sheet th, .print-sheet td { border: 1px solid #999; padding: 4pt 7pt; text-align: right; font-size: 11pt; }
+        .print-sheet th:first-child, .print-sheet td:first-child { text-align: left; }
+        .print-sheet thead th { background: #eee; }
+        .print-sheet td.tot, .print-sheet th.tot { font-weight: 700; }
+        .print-sheet h2 { font-size: 12pt; margin: 12pt 0 5pt; }
+        .print-sheet p, .print-sheet li { font-size: 10.5pt; line-height: 1.5; }
+        .print-sheet ul { margin: 0 0 8pt; padding-left: 16pt; }
+        .print-sheet p { margin: 0 0 5pt; }
+      }
+    </style>
+  </head>
+  <body data-filter="all">
+    <main>
+      <div class="screen-only">
+        <header class="report-head">
+          <h1>Loop Report</h1>
+          <p>Sunday, November 15, 2026 <span class="sep">·</span> Baseline snapshot <span class="sep">·</span> Split by TAIG ITS / TAIG2K / The Hive</p>
+        </header>
+
+        <section class="cards" id="cards" aria-label="Headline numbers"></section>
+
+        <div class="filterbar" role="group" aria-label="Filter by bucket">
+          <span class="flabel">Bucket</span>
+          <button class="fbtn" data-set-filter="all" aria-pressed="true">All buckets</button>
+          <button class="fbtn" data-set-filter="its" aria-pressed="false"><span class="dot dot-its"></span>TAIG ITS</button>
+          <button class="fbtn" data-set-filter="taig2k" aria-pressed="false"><span class="dot dot-taig2k"></span>TAIG2K</button>
+          <button class="fbtn" data-set-filter="hive" aria-pressed="false"><span class="dot dot-hive"></span>The Hive</button>
+        </div>
+
+        <h2 class="section-title">The five groups</h2>
+        <div class="charts">
+          <div class="panel">
+            <h3>Groups × bucket</h3>
+            <p class="sub">Each bar is one group, stacked by bucket. Bar length is to scale; the number at the end is the group total.</p>
+            <div class="legend">
+              <span><span class="dot dot-its"></span>TAIG ITS</span>
+              <span><span class="dot dot-taig2k"></span>TAIG2K</span>
+              <span><span class="dot dot-hive"></span>The Hive</span>
+            </div>
+            <div id="bars"></div>
+            <table class="counts" id="countsTable" aria-label="Group counts by bucket"></table>
+          </div>
+
+          <div class="panel">
+            <h3 id="donutTitle">The open pile — 60</h3>
+            <p class="sub" id="donutSub">Open loops by where they stand.</p>
+            <div class="donut-wrap">
+              <svg class="donut-svg" id="donut" viewBox="0 0 200 200" role="img" aria-label="Donut chart of the 60 open loops"></svg>
+              <div class="donut-legend" id="donutLegend"></div>
+            </div>
+            <p class="donut-note" id="donutNote"></p>
+          </div>
+        </div>
+
+        <h2 class="section-title">How the numbers reconcile</h2>
+        <div class="recon">
+          <p><span class="eq">Open 60</span> = untouched 33 + touched 27. The touched 27 = close to closing 15 + touched but not close 12.</p>
+          <p><span class="eq">Closed today 31</span> = created + closed today 28 + 3 that started earlier:</p>
+          <ul>
+            <li>ISRC verified (The Hive)</li>
+            <li>Veteran fair reminder (TAIG2K)</li>
+            <li>Clerge tree-cutting draft (TAIG ITS)</li>
+          </ul>
+          <p>One loop was created today and died today: the Josh plan PDF — built, stopped, on disk undelivered. It is counted in Opened today (parked), not in any closed count.</p>
+        </div>
+
+        <h2 class="section-title">Every loop, by group and bucket</h2>
+        <div id="lists"></div>
+
+        <footer class="notes">
+          <p><strong>George note:</strong> a George portfolio URL loop was added at 6:53 PM and would make the open total 61 — it overlaps the George email loop already counted in Close to closing, so it is not double-counted. Open stays 60.</p>
+          <p>Source: baseline snapshot, Nov 15, 2026. Printing this page gives a one-page summary for the notebook.</p>
+        </footer>
+      </div>
+
+      <!-- Print one-pager (print only) -->
+      <div class="print-sheet" aria-hidden="true">
+        <h1>Loop Report</h1>
+        <p class="pdate">Sunday, November 15, 2026 — baseline snapshot</p>
+        <p class="headline">Open 60 &nbsp;·&nbsp; Closed today 31 &nbsp;·&nbsp; Opened today 21 &nbsp;·&nbsp; Created + closed 28 &nbsp;·&nbsp; Close to closing 15 &nbsp;·&nbsp; Untouched 33</p>
+        <table>
+          <thead>
+            <tr><th>Group</th><th>TAIG ITS</th><th>TAIG2K</th><th>The Hive</th><th class="tot">Total</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Closed today</td><td>3</td><td>11</td><td>17</td><td class="tot">31</td></tr>
+            <tr><td>Opened today</td><td>1</td><td>7</td><td>13</td><td class="tot">21</td></tr>
+            <tr><td>Created + closed today</td><td>2</td><td>10</td><td>16</td><td class="tot">28</td></tr>
+            <tr><td>Close to closing</td><td>3</td><td>6</td><td>6</td><td class="tot">15</td></tr>
+            <tr><td>Untouched</td><td>7</td><td>13</td><td>13</td><td class="tot">33</td></tr>
+          </tbody>
+        </table>
+        <h2>The open pile — 60</h2>
+        <ul>
+          <li>Untouched: 33 (TAIG ITS 7 · TAIG2K 13 · The Hive 13)</li>
+          <li>Close to closing: 15 (TAIG ITS 3 · TAIG2K 6 · The Hive 6)</li>
+          <li>Touched, not close: 12 (bucket split not recorded in the snapshot)</li>
+        </ul>
+        <h2>Reconciliation</h2>
+        <p>Open 60 = untouched 33 + touched 27. Touched 27 = close to closing 15 + touched but not close 12.</p>
+        <p>Closed today 31 = created + closed 28 + 3 started earlier: ISRC verified (Hive), veteran fair reminder (TAIG2K), Clerge tree-cutting draft (ITS).</p>
+        <p>Created and died today: the Josh plan PDF — built, stopped, on disk undelivered; counted in Opened today (parked).</p>
+        <p>George portfolio URL loop (added 6:53 PM) overlaps the George email loop in Close to closing — not double-counted; open stays 60, not 61.</p>
+      </div>
+    </main>
+
+    <script>
+      // ---- Data: transcribed from the baseline snapshot, Nov 15, 2026 ----
+      // Counts are derived from these item lists, so bucket sums always
+      // add to group totals.
+      var BUCKETS = [
+        { id: "its",    name: "TAIG ITS" },
+        { id: "taig2k", name: "TAIG2K" },
+        { id: "hive",   name: "The Hive" }
+      ];
+
+      var GROUPS = [
+        {
+          id: "closed", name: "Closed today",
+          items: {
+            its: ["Runway bubble", "Business plan rule", "Clerge tree-cutting draft"],
+            taig2k: ["Drippy check + pie chart", "Jay album on Drippy", "Music store MVP live", "Branding rename", "Catalog landing live", "Turkey giveaway + 276 count", "ERA answer", "Card watch started", "Week-ahead", "Veteran fair reminder", "T-Mobile check"],
+            hive: ["Jay venues", "Jay platforms + text", "ISRC explained", "ISRC prompt", "ISRC verified", "Stomp To chart plan", "Luminate forms read", "Others like Luminate", "Chart-services doc", "Jay map read-back", "Luminate prep sheet", "19 platform bubbles", "Josh promo research", "Josh platform text", "Josh map read-back", "Josh illustration", "Hive Playbook + Rule 1"]
+          }
+        },
+        {
+          id: "opened", name: "Opened today",
+          items: {
+            its: ["Clerge tree-cutting reply"],
+            taig2k: ["Mobile check", "Payments", "Multi-artist + genre", "Landing catalog", "T-Mobile offer", "Card hunt", "Rick reply send"],
+            hive: ["Luminate missing bits", "Dec 4–10 lock", "Karma ISRC", "Mediabase / SoundExchange / PRO", "Josh platform pick", "Kaiber trial", "Christmas pipeline", "Myth pitch", "Josh map image", "\u201CXVIs\u201D", "Nebula Tracking", "Josh reply send", "Josh plan PDF (parked)"]
+          }
+        },
+        {
+          id: "createdClosed", name: "Created + closed today",
+          items: {
+            its: ["Runway", "Business plan rule"],
+            taig2k: ["Drippy check", "Album on Drippy", "MVP live", "Branding rename", "Catalog landing", "Turkey giveaway", "ERA answer", "Card watch", "Week-ahead", "T-Mobile check"],
+            hive: ["Jay venues", "Jay platforms + text", "ISRC explained", "ISRC prompt", "Chart plan", "Luminate forms", "Others like Luminate", "Chart doc", "Jay map read-back", "Prep sheet", "Platform bubbles", "Josh research", "Josh platform text", "Josh map read-back", "Josh illustration", "Playbook"]
+          }
+        },
+        {
+          id: "close", name: "Close to closing",
+          items: {
+            its: ["Clerge reply", "Mo site link", "Clerge card pick"],
+            taig2k: ["Multi-artist + genre", "Mobile check", "George email", "Rick reply", "Fair registration", "Galaxy map"],
+            hive: ["Luminate filing", "Dec 4–10 lock", "Single pick", "Josh reply", "Platform text", "Stargirl login"]
+          }
+        },
+        {
+          id: "untouched", name: "Untouched",
+          items: {
+            its: ["VBOC outcome", "27 plan items", "\u201C1 for vboc\u201D", "Madison", "All Spa guy", "Ashley demo", "Stadium retrofit"],
+            taig2k: ["Mobile check", "Payments", "T-Mobile offer", "Card hunt", "Suddath", "$17/hr", "Shelly", "Notebook list", "GPT Live", "WiFi", "Series rename", "Series on tree", "Law / spark"],
+            hive: ["Karma ISRC", "Josh map image", "\u201CXVIs\u201D", "Nebula Tracking", "PIO decider", "Mo THC", "9:30 member", "Stargirl role", "Article day", "Tiger Records", "Starke trip", "Suno plan", "PSIS gaps"]
+          }
+        }
+      ];
+
+      // Open pile by status (from the snapshot's reconciliation).
+      var OPEN_TOTAL = 60;
+      var OPEN_STATUS = [
+        { id: "untouched", name: "Untouched", count: 33, cls: "var(--st-untouched)" },
+        { id: "close",     name: "Close to closing", count: 15, cls: "var(--st-close)" },
+        { id: "touched",   name: "Touched, not close", count: 12, cls: "var(--st-touched)" }
+      ];
+
+      function groupTotal(g) {
+        return BUCKETS.reduce(function (s, b) { return s + g.items[b.id].length; }, 0);
+      }
+      function groupById(id) {
+        for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i].id === id) return GROUPS[i];
+        return null;
+      }
+      function esc(s) {
+        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
+      var filter = "all";
+
+      // ---- Headline cards ----
+      function renderCards() {
+        var html = "";
+        // Open card: split by status, not bucket (snapshot gives no bucket split for the whole 60).
+        html += '<div class="card"><div class="big num">60</div><div class="label">Open loops</div><div class="splits">'
+          + '<div class="split-row"><span class="dot dot-untouched"></span>Untouched<b class="num">33</b></div>'
+          + '<div class="split-row"><span class="dot dot-close"></span>Close to closing<b class="num">15</b></div>'
+          + '<div class="split-row"><span class="dot dot-touched"></span>Touched, not close<b class="num">12</b></div>'
+          + "</div></div>";
+        GROUPS.forEach(function (g) {
+          html += '<div class="card"><div class="big num">' + groupTotal(g) + '</div><div class="label">' + esc(g.name) + '</div><div class="splits">';
+          BUCKETS.forEach(function (b) {
+            html += '<div class="split-row row-' + b.id + '"><span class="dot dot-' + b.id + '"></span>' + esc(b.name) + '<b class="num">' + g.items[b.id].length + "</b></div>";
+          });
+          html += "</div></div>";
+        });
+        document.getElementById("cards").innerHTML = html;
+      }
+
+      // ---- Stacked bars + counts table ----
+      function renderBars() {
+        var active = BUCKETS.filter(function (b) { return filter === "all" || b.id === filter; });
+        var max = 0;
+        GROUPS.forEach(function (g) {
+          var t = active.reduce(function (s, b) { return s + g.items[b.id].length; }, 0);
+          if (t > max) max = t;
+        });
+        var html = "";
+        GROUPS.forEach(function (g) {
+          var total = active.reduce(function (s, b) { return s + g.items[b.id].length; }, 0);
+          html += '<div class="bar-row"><div class="gname">' + esc(g.name) + '</div><div class="bar-track">';
+          active.forEach(function (b) {
+            var n = g.items[b.id].length;
+            var w = max ? (n / max) * 100 : 0;
+            var showNum = w >= 9;
+            html += '<div class="seg seg-' + b.id + '" style="width:' + w.toFixed(2) + '%" title="' + esc(b.name) + ": " + n + '">' + (showNum ? n : "") + "</div>";
+          });
+          html += '</div><div class="gtotal num">' + total + "</div></div>";
+        });
+        document.getElementById("bars").innerHTML = html;
+
+        var t = '<thead><tr><th>Group</th>'
+          + BUCKETS.map(function (b) { return '<th class="' + (filter === b.id ? "hl" : "") + '">' + esc(b.name) + "</th>"; }).join("")
+          + '<th class="tot">Total</th></tr></thead><tbody>';
+        GROUPS.forEach(function (g) {
+          t += "<tr><td>" + esc(g.name) + "</td>"
+            + BUCKETS.map(function (b) { return '<td class="num ' + (filter === b.id ? "hl" : "") + '">' + g.items[b.id].length + "</td>"; }).join("")
+            + '<td class="tot num">' + groupTotal(g) + "</td></tr>";
+        });
+        t += "</tbody>";
+        document.getElementById("countsTable").innerHTML = t;
+      }
+
+      // ---- Donut ----
+      function donutSVG(segments, centerNum, centerLabel) {
+        var r = 78, c = 2 * Math.PI * r, start = 0, parts = "";
+        var total = segments.reduce(function (s, x) { return s + x.count; }, 0);
+        segments.forEach(function (s) {
+          var len = total ? (s.count / total) * c : 0;
+          var draw = Math.max(len - 2.5, 0);
+          parts += '<circle cx="100" cy="100" r="' + r + '" fill="none" stroke="' + s.cls + '" stroke-width="30" stroke-dasharray="' + draw.toFixed(2) + " " + (c - draw).toFixed(2) + '" stroke-dashoffset="' + (-start).toFixed(2) + '" transform="rotate(-90 100 100)"></circle>';
+          start += len;
+        });
+        parts += '<text x="100" y="98" text-anchor="middle" class="donut-center-num num">' + centerNum + "</text>";
+        parts += '<text x="100" y="120" text-anchor="middle" class="donut-center-lab">' + centerLabel + "</text>";
+        return parts;
+      }
+
+      function renderDonut() {
+        var svg = document.getElementById("donut");
+        var legend = document.getElementById("donutLegend");
+        var note = document.getElementById("donutNote");
+        var title = document.getElementById("donutTitle");
+        var sub = document.getElementById("donutSub");
+        if (filter === "all") {
+          title.textContent = "The open pile — 60";
+          sub.textContent = "Open loops by where they stand.";
+          svg.innerHTML = donutSVG(OPEN_STATUS, "60", "open loops");
+          var total = 60;
+          legend.innerHTML = OPEN_STATUS.map(function (s) {
+            return '<div class="dl-row"><span class="dot" style="background:' + s.cls + '"></span>' + esc(s.name)
+              + '<span class="pct num">' + Math.round((s.count / total) * 100) + '%</span><b class="num">' + s.count + "</b></div>";
+          }).join("");
+          note.textContent = "Untouched and close-to-closing are split by bucket in the lists below. The 12 touched-but-not-close loops are not split by bucket in the snapshot.";
+        } else {
+          var b = BUCKETS.filter(function (x) { return x.id === filter; })[0];
+          var un = groupById("untouched").items[filter].length;
+          var cl = groupById("close").items[filter].length;
+          var segs = [
+            { name: "Untouched", count: un, cls: "var(--st-untouched)" },
+            { name: "Close to closing", count: cl, cls: "var(--st-close)" }
+          ];
+          var sub2 = un + cl;
+          title.textContent = "Open pile — " + b.name;
+          sub.textContent = "Untouched vs. close to closing for this bucket.";
+          svg.innerHTML = donutSVG(segs, String(sub2), "known open");
+          legend.innerHTML = segs.map(function (s) {
+            return '<div class="dl-row"><span class="dot" style="background:' + s.cls + '"></span>' + esc(s.name)
+              + '<span class="pct num">' + (sub2 ? Math.round((s.count / sub2) * 100) : 0) + '%</span><b class="num">' + s.count + "</b></div>";
+          }).join("");
+          note.textContent = "The 12 touched-but-not-close loops are not split by bucket in the snapshot, so they can't be shown per bucket.";
+        }
+      }
+
+      // ---- Item lists ----
+      function renderLists() {
+        var html = "";
+        GROUPS.forEach(function (g) {
+          var shown = BUCKETS.filter(function (b) { return filter === "all" || b.id === filter; });
+          var total = shown.reduce(function (s, b) { return s + g.items[b.id].length; }, 0);
+          html += '<section class="group"><div class="group-head"><h3>' + esc(g.name) + '</h3><span class="gtot num">' + total + (filter === "all" ? " loops" : " in this bucket") + '</span></div><div class="bucket-grid">';
+          shown.forEach(function (b) {
+            var items = g.items[b.id];
+            html += '<div class="bucket"><h4 class="h-' + b.id + '"><span class="dot dot-' + b.id + '"></span>' + esc(b.name) + '<span class="bcount num">' + items.length + "</span></h4>";
+            if (items.length) {
+              html += "<ul>" + items.map(function (it) { return "<li>" + esc(it) + "</li>"; }).join("") + "</ul>";
+            } else {
+              html += '<div class="empty">Nothing in this bucket.</div>';
+            }
+            html += "</div>";
+          });
+          html += "</div></section>";
+        });
+        document.getElementById("lists").innerHTML = html;
+      }
+
+      function applyFilter() {
+        document.body.setAttribute("data-filter", filter);
+        var btns = document.querySelectorAll("[data-set-filter]");
+        for (var i = 0; i < btns.length; i++) {
+          btns[i].setAttribute("aria-pressed", btns[i].getAttribute("data-set-filter") === filter ? "true" : "false");
+        }
+        renderBars();
+        renderDonut();
+        renderLists();
+      }
+
+      document.addEventListener("click", function (e) {
+        var t = e.target;
+        while (t && t !== document) {
+          if (t.getAttribute && t.getAttribute("data-set-filter")) {
+            filter = t.getAttribute("data-set-filter");
+            applyFilter();
+            return;
+          }
+          t = t.parentNode;
+        }
+      });
+
+      renderCards();
+      applyFilter();
+    </script>
+  </body>
+</html>
