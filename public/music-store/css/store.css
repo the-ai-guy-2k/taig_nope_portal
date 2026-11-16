@@ -11,18 +11,19 @@ body {
   line-height: 1.5;
 }
 img { max-width: 100%; display: block; }
-a { color: #e8a33d; }
+a { color: #CDA140; }
 h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
 .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
 .muted { color: #a8a29a; }
 .small { font-size: .85rem; }
 /* Top bar */
+/* Topbar — navy, so the white/gold mark sits on the logo's own palette. */
 .topbar {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(18, 16, 14, .94);
-  border-bottom: 1px solid #2e2a26;
+  background: rgba(24, 41, 65, .94);
+  border-bottom: 1px solid #2a3f5f;
 }
 .topbar-inner {
   max-width: 1080px;
@@ -44,7 +45,7 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
   align-items: center;
   gap: 10px;
 }
-.wordmark span { color: #e8a33d; }
+.wordmark span { color: #CDA140; }
 .brand-mark {
   height: 30px;
   width: auto;
@@ -53,7 +54,7 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
 .topbar-spacer { flex: 1; }
 .cart-btn {
   position: relative;
-  background: #e8a33d;
+  background: #CDA140;
   color: #1a1409;
   border: none;
   border-radius: 999px;
@@ -96,7 +97,7 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
   line-height: 1.02;
   letter-spacing: .01em;
 }
-.masthead h1 span { color: #e8a33d; }
+.masthead h1 span { color: #CDA140; }
 .masthead-logo {
   width: min(340px, 78vw);
   height: auto;
@@ -112,8 +113,8 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
 /* Featured banner */
 .banner {
   margin-top: 28px;
-  background: #1c1917;
-  border: 1px solid #2e2a26;
+  background: #182941;
+  border: 1px solid #2a3f5f;
   border-radius: 16px;
   padding: 20px;
   display: grid;
@@ -126,15 +127,15 @@ h1, h2, h3, .display { font-family: Georgia, "Times New Roman", serif; }
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: 10px;
-  background: #2e2a26;
+  background: #2a3f5f;
 }
 .banner h2 { margin: 0 0 4px; font-size: 1.7rem; line-height: 1.15; }
-.banner .artist { color: #e8a33d; font-weight: 600; margin: 0 0 8px; }
+.banner .artist { color: #CDA140; font-weight: 600; margin: 0 0 8px; }
 .banner .meta { margin: 0 0 16px; }
 .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
 .btn {
   display: inline-block;
-  background: #e8a33d;
+  background: #CDA140;
   color: #1a1409;
   border: none;
   border-radius: 999px;
@@ -170,8 +171,8 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   font-size: .92rem;
   cursor: pointer;
 }
-.genre-chip:hover { border-color: #e8a33d; }
-.genre-chip.active { background: #e8a33d; border-color: #e8a33d; color: #1a1409; font-weight: 700; }
+.genre-chip:hover { border-color: #CDA140; }
+.genre-chip.active { background: #CDA140; border-color: #CDA140; color: #1a1409; font-weight: 700; }
 [data-genre][hidden] { display: none; }
 
 /* Catalog cards */
@@ -181,8 +182,8 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   gap: 16px;
 }
 .card {
-  background: #1c1917;
-  border: 1px solid #2e2a26;
+  background: #182941;
+  border: 1px solid #2a3f5f;
   border-radius: 14px;
   padding: 18px;
   display: flex;
@@ -198,7 +199,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: 8px;
-  background: #2e2a26;
+  background: #2a3f5f;
 }
 
 /* Roster */
@@ -206,8 +207,8 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 .roster-slot {
   flex: 1 1 200px;
   max-width: 340px;
-  background: #1c1917;
-  border: 1px solid #2e2a26;
+  background: #182941;
+  border: 1px solid #2a3f5f;
   border-radius: 14px;
   padding: 18px;
   text-align: center;
@@ -215,7 +216,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 .roster-slot .num {
   font-family: Georgia, serif;
   font-size: 2rem;
-  color: #e8a33d;
+  color: #CDA140;
   line-height: 1;
 }
 .roster-slot h3 { margin: 8px 0 2px; }
@@ -229,8 +230,8 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   gap: 16px;
 }
 .why div {
-  background: #1c1917;
-  border: 1px solid #2e2a26;
+  background: #182941;
+  border: 1px solid #2a3f5f;
   border-radius: 14px;
   padding: 18px;
 }
@@ -256,8 +257,8 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 }
 .notice {
   margin-top: 12px;
-  background: rgba(232, 163, 61, .14);
-  border: 1px solid #e8a33d;
+  background: rgba(205, 161, 64, .14);
+  border: 1px solid #CDA140;
   border-radius: 10px;
   padding: 10px 14px;
 }
@@ -272,11 +273,11 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   align-items: start;
 }
 .album-hero h1 { margin: 0 0 4px; font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.1; }
-.album-hero .artist { color: #e8a33d; font-weight: 600; margin: 0 0 10px; font-size: 1.1rem; }
+.album-hero .artist { color: #CDA140; font-weight: 600; margin: 0 0 10px; font-size: 1.1rem; }
 .formats { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
 .format {
-  background: #1c1917;
-  border: 1px solid #2e2a26;
+  background: #182941;
+  border: 1px solid #2a3f5f;
   border-radius: 12px;
   padding: 14px 16px;
   min-width: 180px;
@@ -289,17 +290,17 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   list-style: none;
   margin: 0;
   padding: 0;
-  border: 1px solid #2e2a26;
+  border: 1px solid #2a3f5f;
   border-radius: 14px;
   overflow: hidden;
-  background: #1c1917;
+  background: #182941;
 }
 .track {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border-top: 1px solid #2e2a26;
+  border-top: 1px solid #2a3f5f;
   flex-wrap: wrap;
 }
 .track:first-child { border-top: none; }
@@ -316,19 +317,19 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   font-size: .85rem;
   line-height: 1;
 }
-.track-play:hover { background: rgba(232, 163, 61, .14); }
-.track.is-playing { background: rgba(232, 163, 61, .14); }
+.track-play:hover { background: rgba(205, 161, 64, .14); }
+.track.is-playing { background: rgba(205, 161, 64, .14); }
 .track-title { font-weight: 600; flex: 1 1 160px; min-width: 0; }
 .track-dur { color: #a8a29a; font-size: .95rem; }
-.preview-readout { color: #e8a33d; font-size: .85rem; white-space: nowrap; }
+.preview-readout { color: #CDA140; font-size: .85rem; white-space: nowrap; }
 .preview-readout[hidden] { display: none; }
 .tag {
   display: inline-block;
   font-size: .7rem;
   letter-spacing: .06em;
   text-transform: uppercase;
-  color: #e8a33d;
-  border: 1px solid #e8a33d;
+  color: #CDA140;
+  border: 1px solid #CDA140;
   border-radius: 999px;
   padding: 1px 7px;
   margin-left: 8px;
@@ -353,8 +354,8 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   right: 0;
   bottom: 0;
   width: min(380px, 92vw);
-  background: #1c1917;
-  border-left: 1px solid #2e2a26;
+  background: #182941;
+  border-left: 1px solid #2a3f5f;
   z-index: 51;
   display: flex;
   flex-direction: column;
@@ -367,7 +368,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  border-bottom: 1px solid #2e2a26;
+  border-bottom: 1px solid #2a3f5f;
 }
 .drawer header h2 { margin: 0; font-size: 1.25rem; }
 .drawer-close {
@@ -386,7 +387,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   align-items: center;
   gap: 10px;
   padding: 10px 0;
-  border-bottom: 1px solid #2e2a26;
+  border-bottom: 1px solid #2a3f5f;
 }
 .cart-item .name { flex: 1; min-width: 0; }
 .cart-item .name small { display: block; color: #a8a29a; }
@@ -408,7 +409,7 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
   text-decoration: underline;
   font-size: .85rem;
 }
-.drawer footer { padding: 16px; border-top: 1px solid #2e2a26; }
+.drawer footer { padding: 16px; border-top: 1px solid #2a3f5f; }
 .cart-total {
   display: flex;
   justify-content: space-between;
@@ -419,10 +420,13 @@ section > h2 { margin: 0 0 4px; font-size: 1.5rem; }
 .drawer footer .btn { width: 100%; text-align: center; }
 
 /* Footer */
+/* Footer — navy panel, matching the masthead and signup bookends. */
 footer {
   margin-top: 56px;
-  border-top: 1px solid #2e2a26;
-  padding: 24px 0 40px;
+  background: #182941;
+  border: 1px solid #2a3f5f;
+  border-radius: 14px;
+  padding: 24px;
   color: #a8a29a;
   font-size: .9rem;
 }

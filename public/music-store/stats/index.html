@@ -8,23 +8,23 @@
 <link rel="stylesheet" href="/music-store/css/store.css">
 <style>
   .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 20px; }
-  .stat-card { background: #1c1917; border: 1px solid #2e2a26; border-radius: 14px; padding: 18px; }
-  .stat-card .num { font-family: Georgia, "Times New Roman", serif; font-size: 2.2rem; color: #e8a33d; line-height: 1.1; }
+  .stat-card { background: #182941; border: 1px solid #2a3f5f; border-radius: 14px; padding: 18px; }
+  .stat-card .num { font-family: Georgia, "Times New Roman", serif; font-size: 2.2rem; color: #CDA140; line-height: 1.1; }
   .stat-card .lbl { color: #a8a29a; font-size: .9rem; margin-top: 2px; }
   .stat-card .sub { color: #a8a29a; font-size: .8rem; margin-top: 6px; }
   .range-row { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; align-items: center; }
   .range-row .muted { margin-left: auto; }
-  .chart { display: flex; align-items: flex-end; gap: 3px; height: 150px; margin-top: 16px; padding: 12px 12px 0; background: #1c1917; border: 1px solid #2e2a26; border-radius: 14px; }
-  .chart .bar { flex: 1; background: #e8a33d; border-radius: 3px 3px 0 0; min-height: 2px; }
+  .chart { display: flex; align-items: flex-end; gap: 3px; height: 150px; margin-top: 16px; padding: 12px 12px 0; background: #182941; border: 1px solid #2a3f5f; border-radius: 14px; }
+  .chart .bar { flex: 1; background: #CDA140; border-radius: 3px 3px 0 0; min-height: 2px; }
   .chart .bar.plays { background: #8a7a5c; }
   .chart-legend { display: flex; gap: 18px; margin-top: 8px; color: #a8a29a; font-size: .85rem; }
   .chart-legend .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
   .top-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 16px; }
-  .top-list { background: #1c1917; border: 1px solid #2e2a26; border-radius: 14px; padding: 18px; }
+  .top-list { background: #182941; border: 1px solid #2a3f5f; border-radius: 14px; padding: 18px; }
   .top-list h3 { margin: 0 0 10px; font-size: 1.05rem; }
   .top-list ol { margin: 0; padding-left: 22px; }
   .top-list li { padding: 3px 0; display: flex; justify-content: space-between; gap: 12px; }
-  .top-list li .count { color: #e8a33d; font-weight: 700; white-space: nowrap; }
+  .top-list li .count { color: #CDA140; font-weight: 700; white-space: nowrap; }
   .top-list .empty { color: #a8a29a; }
   @media (max-width: 720px) {
     .stat-cards { grid-template-columns: repeat(2, 1fr); }
@@ -67,7 +67,7 @@
     <p class="section-sub muted">Page views each day. The darker bars are preview plays the same day.</p>
     <div class="chart" id="chart"><p class="loading">Loading the chart…</p></div>
     <div class="chart-legend">
-      <span><span class="swatch" style="background:#e8a33d"></span>Visits</span>
+      <span><span class="swatch" style="background:#CDA140"></span>Visits</span>
       <span><span class="swatch" style="background:#8a7a5c"></span>Preview plays</span>
     </div>
   </section>
