@@ -9,6 +9,7 @@ COPY src ./src
 COPY views ./views
 COPY public ./public
 COPY data ./data
+COPY scripts ./scripts
 
 RUN mkdir -p /app/nebula_local && chown -R node:node /app
 
