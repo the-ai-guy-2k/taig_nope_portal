@@ -5,6 +5,7 @@ const jobOrderRoutes = require('./jobOrders');
 const musicStoreRoutes = require('./musicStore');
 const placeholderRoutes = require('./placeholders');
 const planningRoutes = require('./planning');
+const sportsReportRoutes = require('./sportsReport');
 
 module.exports = {
   dashboardRoutes,
@@ -12,4 +13,5 @@ module.exports = {
   musicStoreRoutes,
   placeholderRoutes,
   planningRoutes,
+  sportsReportRoutes,
 };

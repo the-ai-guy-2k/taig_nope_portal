@@ -6,6 +6,7 @@ const {
   musicStoreRoutes,
   placeholderRoutes,
   planningRoutes,
+  sportsReportRoutes,
 } = require('./routes');
 const { recordEvent } = require('./services/musicStoreDb');
 
@@ -34,6 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/', dashboardRoutes);
 app.use('/job-orders', jobOrderRoutes);
 app.use('/', musicStoreRoutes);
+app.use('/', sportsReportRoutes);
 app.use('/', placeholderRoutes);
 app.use('/', planningRoutes);
 
