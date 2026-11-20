@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tag Hub — TAIG</title>
+<style>
+  :root { --navy:#182941; --gold:#CDA140; --cream:#F5F1E8; --ink:#1c2b3a; --muted:#5b6b7c; --line:#d8d2c4; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; padding:0; height:100%; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--ink); background:var(--cream); }
+  #app { display:flex; height:100vh; }
+  /* ---- sidebar ---- */
+  #side { width:248px; flex:0 0 248px; background:var(--navy); color:#fff; display:flex; flex-direction:column; overflow-y:auto; }
+  #side .brand { padding:18px 18px 10px; border-bottom:1px solid rgba(255,255,255,.14); }
+  #side .brand h1 { margin:0; font-size:22px; letter-spacing:.5px; }
+  #side .brand h1 span { color:var(--gold); }
+  #side .brand p { margin:4px 0 0; font-size:12px; color:#b9c4d0; }
+  #side nav { padding:10px 0 16px; flex:1; }
+  #side .nav-label { padding:14px 18px 5px; font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--gold); }
+  #side a { display:block; padding:8px 18px; color:#e8edf2; text-decoration:none; font-size:14px; line-height:1.35; }
+  #side a:hover { background:rgba(255,255,255,.08); }
+  #side a.active { background:rgba(205,161,64,.22); border-left:3px solid var(--gold); color:#fff; }
+  #side a.sub { padding-left:34px; font-size:13px; color:#c3ced9; }
+  #side a.filed { padding-left:34px; font-size:13px; color:#c3ced9; }
+  #side a.filed::before { content:"· "; color:var(--gold); }
+  #side .note { padding:12px 18px; font-size:12px; color:#93a2b1; border-top:1px solid rgba(255,255,255,.14); }
+  /* ---- main ---- */
+  #main { flex:1; display:flex; flex-direction:column; min-width:0; }
+  #topbar { background:#fff; border-bottom:1px solid var(--line); padding:10px 16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  #crumb { font-size:14px; font-weight:600; color:var(--navy); }
+  #deeplink { flex:1; min-width:220px; font-size:12px; padding:6px 8px; border:1px solid var(--line); border-radius:4px; color:var(--muted); background:var(--cream); }
+  #copyBtn { font-size:12px; padding:6px 12px; border:1px solid var(--navy); background:var(--navy); color:#fff; border-radius:4px; cursor:pointer; }
+  #copyBtn:hover { background:#243a52; }
+  #pane { flex:1; position:relative; min-height:0; }
+  #viewer { width:100%; height:100%; border:0; display:block; background:#fff; }
+  #storeview { position:absolute; inset:0; overflow-y:auto; padding:24px; display:none; background:var(--cream); }
+  #storeview.show { display:block; }
+  #viewer.hide { display:none; }
+  .wrap { max-width:860px; margin:0 auto; }
+  .wrap h2 { color:var(--navy); margin:0 0 4px; font-size:24px; }
+  .wrap .lede { color:var(--muted); margin:0 0 20px; font-size:14px; }
+  .group-h { color:var(--navy); border-bottom:2px solid var(--gold); padding-bottom:4px; margin:26px 0 12px; font-size:17px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin-bottom:12px; }
+  .card h3 { margin:0 0 6px; color:var(--navy); font-size:16px; }
+  .card h3 a { color:var(--navy); text-decoration:none; }
+  .card h3 a:hover { text-decoration:underline; }
+  .card p.truth { margin:0 0 10px; font-size:14px; line-height:1.5; }
+  .card .meta { font-size:12px; color:var(--muted); }
+  .card .meta b { color:var(--navy); }
+  .card .links { margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .card .links a.open { font-size:13px; color:var(--navy); font-weight:600; }
+  .card .links button { font-size:12px; padding:4px 10px; border:1px solid var(--navy); background:#fff; color:var(--navy); border-radius:4px; cursor:pointer; }
+  .revs { margin-top:12px; border-top:1px dashed var(--line); padding-top:10px; }
+  .revs h4 { margin:0 0 6px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); }
+  .rev { font-size:13px; line-height:1.5; margin-bottom:6px; }
+  .rev .tag { display:inline-block; background:var(--gold); color:var(--navy); font-size:11px; font-weight:700; padding:1px 7px; border-radius:10px; margin-right:6px; }
+  .rev s { color:var(--muted); }
+  .empty { color:var(--muted); font-size:14px; }
+  @media (max-width:760px) {
+    #app { flex-direction:column; }
+    #side { width:100%; flex:0 0 auto; max-height:38vh; }
+    #main { flex:1; min-height:0; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="side">
+    <div class="brand"><h1>Tag <span>Hub</span></h1><p>TAIG — one place for the four.</p></div>
+    <nav id="nav"></nav>
+    <div class="note">The Hive may ask you to sign in — sign in once, it remembers you.<br><br>When you ask Muse for something in here, he points you to the exact spot instead of answering in chat. That is the rule.</div>
+  </aside>
+  <div id="main">
+    <div id="topbar">
+      <span id="crumb">Tag Hub</span>
+      <input id="deeplink" readonly value="">
+      <button id="copyBtn" type="button">Copy link</button>
+    </div>
+    <div id="pane">
+      <iframe id="viewer" title="Tag Hub viewer"></iframe>
+      <div id="storeview"><div class="wrap" id="storewrap"></div></div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var HUB = "https://taigtsp.duckdns.org";
+  var BUBBLES = [
+    { id:"business-overview", label:"Business overview", url:HUB+"/business-dashboard/",
+      subs:[
+        { label:"Today with Muse", anchor:"today" },
+        { label:"Needs your word", anchor:"needs" },
+        { label:"Jobs board", anchor:"jobs" },
+        { label:"Conversations", anchor:"conversations" },
+        { label:"Business money", anchor:"money" },
+        { label:"Stadium build opportunities", storeSub:"Stadium build opportunities" }
+      ] },
+    { id:"calendar", label:"TAIG Calendar", url:HUB+"/taig-calendar/",
+      subs:[ { label:"Appointments", storeSub:"Appointments" } ] },
+    { id:"loops", label:"Loop report", url:HUB+"/loop-report/",
+      subs:[
+        { label:"The five groups — today", anchor:"groupsTitle" },
+        { label:"Every loop, by group and bucket", anchor:"lists" },
+        { label:"History — day by day", anchor:"trend" },
+        { label:"Close to closing", storeSub:"Close to closing" }
+      ] },
+    { id:"hive", label:"The Hive", url:HUB+"/hive-portal/",
+      subs:[ { label:"TagSpeed PIO #39", href:HUB+"/hive-portal/u/tee/pio/pio/view?id=39" } ] }
+  ];
+  var store = { objects: [] };
+  var nav = document.getElementById("nav");
+  var viewer = document.getElementById("viewer");
+  var storeview = document.getElementById("storeview");
+  var storewrap = document.getElementById("storewrap");
+  var crumb = document.getElementById("crumb");
+  var deeplink = document.getElementById("deeplink");
+
+  function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""); }
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function bubble(id){ for (var i=0;i<BUBBLES.length;i++) if (BUBBLES[i].id===id) return BUBBLES[i]; return null; }
+  function objById(id){ for (var i=0;i<store.objects.length;i++) if (store.objects[i].id===id) return store.objects[i]; return null; }
+
+  function buildNav(activeBubble){
+    var h = '<div class="nav-label">Tag Hub</div>';
+    h += '<a href="#/today" data-route="today">Today in Tag Hub</a>';
+    BUBBLES.forEach(function (b){
+      h += '<div class="nav-label">'+esc(b.label)+'</div>';
+      h += '<a href="#/'+b.id+'" data-bubble="'+b.id+'"'+(activeBubble===b.id?' class="active"':"")+'>'+esc(b.label)+'</a>';
+      b.subs.forEach(function (s){
+        if (s.storeSub) {
+          h += '<a class="sub" href="#/'+b.id+'/'+slug(s.storeSub)+'">'+esc(s.label)+'</a>';
+        } else if (s.href) {
+          h += '<a class="sub" href="#/hive/pio/39">'+esc(s.label)+'</a>';
+        } else {
+          h += '<a class="sub" href="#/'+b.id+'/'+s.anchor+'">'+esc(s.label)+'</a>';
+        }
+      });
+      store.objects.filter(function (o){ return o.bubble===b.id; }).forEach(function (o){
+        h += '<a class="filed" href="#/object/'+o.id+'">'+esc(o.title)+'</a>';
+      });
+    });
+    nav.innerHTML = h;
+  }
+
+  function cardHTML(o){
+    var h = '<div class="card"><h3><a href="#/object/'+o.id+'">'+esc(o.title)+'</a></h3>';
+    h += '<p class="truth">'+esc(o.truth)+'</p>';
+    h += '<div class="meta"><b>'+esc(bubble(o.bubble)?bubble(o.bubble).label:o.bubble)+'</b> · '+esc(o.subItem)+' · Source: '+esc(o.source)+' · Updated '+esc(o.updated)+'</div>';
+    h += '<div class="links"><a class="open" href="'+esc(o.link)+'" target="_blank" rel="noopener">Open the spot →</a>';
+    h += '<button type="button" data-copy="'+HUB+'/tag-hub/#/object/'+o.id+'">Copy deep link</button></div>';
+    if (o.revisions && o.revisions.length) {
+      h += '<div class="revs"><h4>Corrections — history kept</h4>';
+      o.revisions.forEach(function (r){
+        h += '<div class="rev"><span class="tag">'+esc(r.kind||"correction")+'</span>'+esc(r.date||"")+' — was <s>'+esc(r.from||"")+'</s> → now <b>'+esc(r.to||"")+'</b>'+(r.note?' — '+esc(r.note):"")+'</div>';
+      });
+      h += '</div>';
+    }
+    h += '</div>';
+    return h;
+  }
+
+  function showStore(html, crumbText){
+    viewer.classList.add("hide");
+    storeview.classList.add("show");
+    storewrap.innerHTML = html;
+    crumb.textContent = crumbText;
+    deeplink.value = location.href;
+  }
+  function showFrame(src, crumbText){
+    storeview.classList.remove("show");
+    viewer.classList.remove("hide");
+    if (viewer.getAttribute("src") !== src) viewer.setAttribute("src", src);
+    crumb.textContent = crumbText;
+    deeplink.value = location.href;
+  }
+
+  function renderToday(){
+    var h = '<h2>Today in Tag Hub</h2><p class="lede">What changed, per object. Saved here on Drippy first — updates and repairs land on the same object, corrections replace the value and keep the history.</p>';
+    if (!store.objects.length) { h += '<p class="empty">Nothing filed yet.</p>'; }
+    BUBBLES.forEach(function (b){
+      var objs = store.objects.filter(function (o){ return o.bubble===b.id; });
+      if (!objs.length) return;
+      h += '<div class="group-h">'+esc(b.label)+'</div>';
+      objs.forEach(function (o){ h += cardHTML(o); });
+    });
+    showStore(h, "Tag Hub / Today in Tag Hub");
+  }
+  function renderObject(id){
+    var o = objById(id);
+    if (!o) { renderToday(); return; }
+    var b = bubble(o.bubble);
+    var h = '<h2>'+esc(o.title)+'</h2><p class="lede">'+esc(b?b.label:o.bubble)+' · '+esc(o.subItem)+'</p>';
+    h += cardHTML(o);
+    h += '<p><a href="#/today">← Back to Today in Tag Hub</a> · <a href="#/'+o.bubble+'">Open '+esc(b?b.label:o.bubble)+'</a></p>';
+    showStore(h, "Tag Hub / "+(b?b.label:o.bubble)+" / "+o.title);
+  }
+  function renderFiltered(bid, subSlug){
+    var b = bubble(bid);
+    var objs = store.objects.filter(function (o){ return o.bubble===bid && slug(o.subItem)===subSlug; });
+    var label = objs.length ? objs[0].subItem : subSlug;
+    var h = '<h2>'+esc(label)+'</h2><p class="lede">'+esc(b?b.label:bid)+' — filed here, under this bubble.</p>';
+    if (!objs.length) h += '<p class="empty">Nothing filed under this yet.</p>';
+    objs.forEach(function (o){ h += cardHTML(o); });
+    if (b) h += '<p><a href="#/'+bid+'">Open '+esc(b.label)+' →</a></p>';
+    showStore(h, "Tag Hub / "+(b?b.label:bid)+" / "+label);
+  }
+
+  function route(){
+    var raw = (location.hash||"").replace(/^#\/?/,"");
+    var parts = raw.split("/").filter(Boolean);
+    if (!parts.length) { renderToday(); buildNav(null); return; }
+    if (parts[0]==="today") { renderToday(); buildNav(null); return; }
+    if (parts[0]==="object" && parts[1]) { renderObject(parts[1]); buildNav(null); return; }
+    var b = bubble(parts[0]);
+    if (!b) { renderToday(); buildNav(null); return; }
+    if (parts.length===1) { showFrame(b.url, "Tag Hub / "+b.label); buildNav(b.id); return; }
+    if (b.id==="hive" && parts[1]==="pio" && parts[2]) {
+      showFrame(HUB+"/hive-portal/u/tee/pio/pio/view?id="+parts[2], "Tag Hub / The Hive / PIO #"+parts[2]);
+      buildNav(b.id); return;
+    }
+    var second = parts[1];
+    var storeMatch = store.objects.some(function (o){ return o.bubble===b.id && slug(o.subItem)===second; });
+    if (storeMatch) { renderFiltered(b.id, second); buildNav(b.id); return; }
+    var anchorKnown = b.subs.some(function (s){ return s.anchor===second; });
+    if (anchorKnown) { showFrame(b.url+"#"+second, "Tag Hub / "+b.label); buildNav(b.id); return; }
+    showFrame(b.url, "Tag Hub / "+b.label); buildNav(b.id);
+  }
+
+  document.addEventListener("click", function (e){
+    var t = e.target;
+    if (t && t.getAttribute && t.getAttribute("data-copy")) {
+      var txt = t.getAttribute("data-copy");
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(function(){ t.textContent = "Copied"; setTimeout(function(){ t.textContent = "Copy deep link"; }, 1500); });
+      } else {
+        var tmp = document.createElement("input"); tmp.value = txt; document.body.appendChild(tmp); tmp.select();
+        try { document.execCommand("copy"); t.textContent = "Copied"; } catch (err) {}
+        document.body.removeChild(tmp);
+      }
+    }
+  });
+  document.getElementById("copyBtn").addEventListener("click", function (){
+    var btn = this;
+    var txt = deeplink.value || location.href;
+    function done(){ btn.textContent = "Copied"; setTimeout(function(){ btn.textContent = "Copy link"; }, 1500); }
+    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(txt).then(done); }
+    else { deeplink.select(); try { document.execCommand("copy"); } catch (err) {} done(); }
+  });
+
+  fetch("store.json").then(function (r){ return r.json(); }).then(function (j){
+    store = j; route();
+  }).catch(function (){
+    store = { objects: [] }; route();
+  });
+  window.addEventListener("hashchange", route);
+})();
+</script>
+</body>
+</html>
