@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Way I Use AI — Tee</title>
+<style>
+  :root { --navy:#182941; --gold:#CDA140; --cream:#F5F1E8; --paper:#FFFDF7; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--cream); color:var(--navy); font-family:Georgia,'Times New Roman',serif; line-height:1.55; }
+  .wrap { max-width:760px; margin:0 auto; padding:0 20px 60px; }
+  header { text-align:center; padding:48px 0 8px; }
+  header .kicker { font-family:Arial,Helvetica,sans-serif; letter-spacing:3px; font-size:12px; color:var(--gold); text-transform:uppercase; }
+  h1 { font-size:44px; line-height:1.1; margin:12px 0; }
+  h1 em { color:var(--gold); font-style:normal; }
+  .sub { font-size:19px; max-width:560px; margin:0 auto; }
+  .rule { width:64px; height:4px; background:var(--gold); margin:28px auto; border-radius:2px; }
+  section { background:var(--paper); border:2px solid var(--navy); border-radius:14px; padding:28px 26px; margin-top:28px; }
+  section h2 { font-size:26px; margin-bottom:4px; }
+  section h2 span { color:var(--gold); }
+  .tag { font-family:Arial,Helvetica,sans-serif; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); }
+  p { font-size:17px; margin-top:12px; }
+  p b { color:var(--navy); }
+  .doodle { display:block; margin:20px auto 6px; max-width:100%; height:auto; }
+  .cap { text-align:center; font-family:Arial,Helvetica,sans-serif; font-size:13px; color:#5a6b7d; margin-bottom:4px; }
+  ul.links { list-style:none; margin-top:16px; font-family:Arial,Helvetica,sans-serif; font-size:15px; }
+  ul.links li { margin-top:8px; }
+  ul.links a { color:var(--navy); text-decoration:underline; text-decoration-color:var(--gold); text-decoration-thickness:2px; text-underline-offset:3px; }
+  ul.links a:hover { color:var(--gold); }
+  .steps { counter-reset:s; list-style:none; margin-top:14px; }
+  .steps li { counter-increment:s; font-size:17px; margin-top:10px; padding-left:34px; position:relative; }
+  .steps li::before { content:counter(s); position:absolute; left:0; top:1px; width:24px; height:24px; border:2px solid var(--gold); border-radius:50%; text-align:center; line-height:22px; font-family:Arial,Helvetica,sans-serif; font-size:13px; font-weight:bold; color:var(--gold); }
+  .rules { list-style:none; margin-top:14px; }
+  .rules li { font-size:17px; margin-top:10px; padding-left:28px; position:relative; }
+  .rules li::before { content:"—"; position:absolute; left:0; color:var(--gold); font-weight:bold; }
+  footer { text-align:center; margin-top:36px; font-family:Arial,Helvetica,sans-serif; font-size:13px; color:#5a6b7d; }
+  footer a { color:var(--navy); }
+  @media (max-width:560px){ h1{font-size:34px} section{padding:22px 18px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">Plain AI — no hype</div>
+  <h1>The Way <em>I</em> Use AI</h1>
+  <p class="sub">AI is a tool inside my system. It is not the system. This page is the map of how it all fits.</p>
+  <div class="rule"></div>
+  <!-- HERO DOODLE: Tee talks, the system answers, everything connects -->
+  <svg class="doodle" width="560" height="220" viewBox="0 0 560 220" fill="none" stroke="#182941" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- stick figure Tee -->
+    <circle cx="90" cy="70" r="22"/>
+    <path d="M90 92 L90 150 M90 108 L62 128 M90 108 L118 128 M90 150 L70 196 M90 150 L110 196"/>
+    <text x="90" y="215" text-anchor="middle" font-family="Arial" font-size="14" fill="#182941" stroke="none">TEE</text>
+    <!-- speech bubble -->
+    <path d="M150 40 Q150 28 164 28 L268 28 Q282 28 282 40 L282 66 Q282 78 268 78 L196 78 L176 96 L180 78 L164 78 Q150 78 150 66 Z"/>
+    <text x="216" y="58" text-anchor="middle" font-family="Arial" font-size="15" fill="#182941" stroke="none">talk to it plain</text>
+    <!-- arrows to boxes -->
+    <path d="M300 55 L340 55" stroke="#CDA140" stroke-width="4"/><path d="M340 55 l-10 -6 M340 55 l-10 6" stroke="#CDA140" stroke-width="4"/>
+    <path d="M300 90 L330 130" stroke="#CDA140" stroke-width="4"/><path d="M330 130 l-12 -2 M330 130 l-3 -12" stroke="#CDA140" stroke-width="4"/>
+    <!-- boxes -->
+    <rect x="350" y="34" width="180" height="44" rx="8"/>
+    <text x="440" y="62" text-anchor="middle" font-family="Arial" font-size="15" fill="#182941" stroke="none">MUSE — TIM</text>
+    <rect x="350" y="96" width="180" height="44" rx="8"/>
+    <text x="440" y="124" text-anchor="middle" font-family="Arial" font-size="15" fill="#182941" stroke="none">THE HIVE</text>
+    <rect x="350" y="158" width="180" height="44" rx="8"/>
+    <text x="440" y="186" text-anchor="middle" font-family="Arial" font-size="15" fill="#182941" stroke="none">THE TREE + JOBS</text>
+    <text x="300" y="215" text-anchor="middle" font-family="Arial" font-size="13" fill="#CDA140" stroke="none">one system, three doors</text>
+  </svg>
+  <p class="cap">Talk plain. The system does the rest.</p>
+</header>
+
+<section>
+  <div class="tag">Where it comes from</div>
+  <h2><span>1.</span> Nebula</h2>
+  <!-- DOODLE: Nebula hub with spokes -->
+  <svg class="doodle" width="520" height="190" viewBox="0 0 520 190" fill="none" stroke="#182941" stroke-width="3" stroke-linecap="round">
+    <circle cx="260" cy="95" r="42" stroke="#CDA140" stroke-width="4"/>
+    <text x="260" y="101" text-anchor="middle" font-family="Arial" font-size="15" font-weight="bold" fill="#182941" stroke="none">NEBULA</text>
+    <path d="M222 72 L150 40 M222 118 L150 152 M298 72 L370 40 M298 118 L370 152 M260 53 L260 18 M260 137 L260 172"/>
+    <circle cx="140" cy="34" r="20"/><text x="140" y="39" text-anchor="middle" font-family="Arial" font-size="11" fill="#182941" stroke="none">talk</text>
+    <circle cx="140" cy="158" r="20"/><text x="140" y="163" text-anchor="middle" font-family="Arial" font-size="11" fill="#182941" stroke="none">work</text>
+    <circle cx="380" cy="34" r="20"/><text x="380" y="39" text-anchor="middle" font-family="Arial" font-size="11" fill="#182941" stroke="none">plan</text>
+    <circle cx="380" cy="158" r="20"/><text x="380" y="39" text-anchor="middle" font-family="Arial" font-size="11" fill="#182941" stroke="none" opacity="0">.</text>
+    <text x="380" y="163" text-anchor="middle" font-family="Arial" font-size="11" fill="#182941" stroke="none">build</text>
+    <circle cx="260" cy="14" r="16"/><text x="260" y="18" text-anchor="middle" font-family="Arial" font-size="10" fill="#182941" stroke="none">me</text>
+    <circle cx="260" cy="176" r="16"/><text x="260" y="180" text-anchor="middle" font-family="Arial" font-size="10" fill="#182941" stroke="none">us</text>
+  </svg>
+  <p class="cap">One hub. Everything I do runs through it.</p>
+  <p><b>Nebula is my system.</b> I talk to it the way I talk to a person — plain words, no tech talk. A non-technical operator can run it the same way. It holds how I work: the plans, the projects, the rules. Everything on this page is a door into Nebula, not a separate thing.</p>
+  <p>I built it so the system carries the work, not my memory. If it is not written down in the system, it does not exist yet.</p>
+</section>
+
+<section>
+  <div class="tag">The system I created</div>
+  <h2><span>2.</span> Muse — my right hand</h2>
+  <!-- DOODLE: house with rooms -->
+  <svg class="doodle" width="520" height="200" viewBox="0 0 520 200" fill="none" stroke="#182941" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- house -->
+    <path d="M60 110 L260 30 L460 110"/>
+    <path d="M80 100 L80 185 L440 185 L440 100"/>
+    <path d="M250 185 L250 130 L270 130 L270 185"/>
+    <!-- rooms -->
+    <rect x="100" y="120" width="120" height="50" rx="6"/>
+    <text x="160" y="150" text-anchor="middle" font-family="Arial" font-size="13" fill="#182941" stroke="none">MAIN CHAT — TIM</text>
+    <rect x="300" y="120" width="120" height="50" rx="6"/>
+    <text x="360" y="143" text-anchor="middle" font-family="Arial" font-size="13" fill="#182941" stroke="none">BUILD ROOMS</text>
+    <text x="360" y="161" text-anchor="middle" font-family="Arial" font-size="11" fill="#182941" stroke="none">one per project</text>
+    <!-- roof label -->
+    <text x="260" y="80" text-anchor="middle" font-family="Arial" font-size="14" fill="#CDA140" stroke="none">MY HOUSE</text>
+  </svg>
+  <p class="cap">One house. Every project gets its own room.</p>
+  <p><b>Tim is my Muse in the app.</b> The main chat is him — my right hand. Every build gets its own side chat, its own room, so nothing bleeds into anything else. The tree is the map on the wall: every bubble is a project, a client, a loop, and it moves when the work moves.</p>
+  <p>While I am away, scheduled jobs keep working: the tree refreshes every 15 minutes, email gets triaged every hour, the stadium gets watched every Monday. I come back to work that is already done, not a pile of catching up.</p>
+  <ul class="links">
+    <li><a href="https://taigtsp.duckdns.org/loop-report/">Loop Report</a> — every loop, counted the same way every day</li>
+    <li><a href="https://taigtsp.duckdns.org/taig-calendar/">TAIG Calendar</a> — everything on the calendar, in one place</li>
+  </ul>
+</section>
+
+<section>
+  <div class="tag">My own AI agent — the hood version</div>
+  <h2><span>3.</span> The hood agent</h2>
+  <!-- DOODLE: the loop — comment, watch, reply, read -->
+  <svg class="doodle" width="560" height="240" viewBox="0 0 560 240" fill="none" stroke="#182941" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- step boxes -->
+    <rect x="20" y="20" width="150" height="70" rx="8"/>
+    <text x="95" y="50" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#182941" stroke="none">1. I COMMENT</text>
+    <text x="95" y="72" text-anchor="middle" font-family="Arial" font-size="12" fill="#182941" stroke="none">on a PIO</text>
+    <rect x="390" y="20" width="150" height="70" rx="8"/>
+    <text x="465" y="50" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#182941" stroke="none">2. WATCH READS</text>
+    <text x="465" y="72" text-anchor="middle" font-family="Arial" font-size="12" fill="#182941" stroke="none">every 2 hours</text>
+    <rect x="390" y="150" width="150" height="70" rx="8"/>
+    <text x="465" y="180" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#182941" stroke="none">3. TIM REPLIES</text>
+    <text x="465" y="202" text-anchor="middle" font-family="Arial" font-size="12" fill="#182941" stroke="none">on the PIO itself</text>
+    <rect x="20" y="150" width="150" height="70" rx="8"/>
+    <text x="95" y="180" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#182941" stroke="none">4. I READ IT</text>
+    <text x="95" y="202" text-anchor="middle" font-family="Arial" font-size="12" fill="#182941" stroke="none">in the Hive</text>
+    <!-- arrows -->
+    <path d="M170 55 L390 55" stroke="#CDA140" stroke-width="4"/><path d="M390 55 l-12 -7 M390 55 l-12 7" stroke="#CDA140" stroke-width="4"/>
+    <path d="M465 90 L465 150" stroke="#CDA140" stroke-width="4"/><path d="M465 150 l-7 -12 M465 150 l7 -12" stroke="#CDA140" stroke-width="4"/>
+    <path d="M390 185 L170 185" stroke="#CDA140" stroke-width="4"/><path d="M170 185 l12 -7 M170 185 l12 7" stroke="#CDA140" stroke-width="4"/>
+    <path d="M95 150 L95 90" stroke="#CDA140" stroke-width="4"/><path d="M95 90 l-7 12 M95 90 l7 12" stroke="#CDA140" stroke-width="4"/>
+  </svg>
+  <p class="cap">Comment. Watch. Reply. Read. Round and round.</p>
+  <p><b>This is my own AI agent, hood version.</b> I go to the Hive, drop a thought on a project, and the watch picks it up and answers me right there on the project. I never have to open the Muse app. It is a second front door to Tim — async, on my own stuff, in my own house.</p>
+  <p>It gives feedback, planning, and ideas. That is the lane. It never starts a build on its own — that is still my call. And it posts as Tim, never as me.</p>
+  <ul class="links">
+    <li><a href="https://taigtsp.duckdns.org/hive-portal/u/tee/pio/pio/view?id=24">PIO #24 — PIA</a> — where the first replies landed</li>
+    <li><a href="https://taigtsp.duckdns.org/hive-portal/u/tee/pio/pio/view?id=32">PIO #32 — TIM FROM TEXAS</a> — same, second one</li>
+  </ul>
+</section>
+
+<section>
+  <div class="tag">Comment-driven AI</div>
+  <h2><span>4.</span> The Hive</h2>
+  <!-- DOODLE: PIO card with comments + N new badge -->
+  <svg class="doodle" width="520" height="210" viewBox="0 0 520 210" fill="none" stroke="#182941" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- PIO card -->
+    <rect x="90" y="20" width="340" height="170" rx="10"/>
+    <rect x="110" y="38" width="200" height="26" rx="6" stroke="#CDA140" stroke-width="3"/>
+    <text x="210" y="56" text-anchor="middle" font-family="Arial" font-size="13" font-weight="bold" fill="#182941" stroke="none">A PROJECT IDEA (PIO)</text>
+    <!-- N new badge -->
+    <circle cx="400" cy="50" r="24" fill="#CDA140" stroke="#CDA140"/>
+    <text x="400" y="56" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#FFFDF7" stroke="none">2 new</text>
+    <!-- comment bubbles -->
+    <path d="M120 84 Q120 76 130 76 L300 76 Q310 76 310 84 L310 100 Q310 108 300 108 L150 108 L138 120 L140 108 L130 108 Q120 108 120 100 Z"/>
+    <text x="215" y="96" text-anchor="middle" font-family="Arial" font-size="12" fill="#182941" stroke="none">Tee: here's the idea…</text>
+    <path d="M180 130 Q180 122 190 122 L380 122 Q390 122 390 130 L390 146 Q390 154 380 154 L210 154 L198 166 L200 154 L190 154 Q180 154 180 146 Z"/>
+    <text x="285" y="142" text-anchor="middle" font-family="Arial" font-size="12" fill="#182941" stroke="none">Tim: here's my take…</text>
+    <text x="260" y="182" text-anchor="middle" font-family="Arial" font-size="12" fill="#CDA140" stroke="none">new comments sit at the top</text>
+  </svg>
+  <p class="cap">The project is the conversation.</p>
+  <p><b>The Hive is where ideas live as PIOs</b> — Project Idea Objects. Every PIO has the same five bubbles: Intent, Current Truth, Path to Intent, To-do, Comments. The comments are where the work happens: I write, Tim answers, members weigh in.</p>
+  <p>When something is new, the PIO says so — a "New comments" panel at the top, and an "N new" badge on the card, so I can see what is waiting without opening everything. It clears when I open it. Even my own updates count.</p>
+  <ul class="links">
+    <li><a href="https://taigtsp.duckdns.org/hive-portal/">The Hive Central</a> — the portal itself</li>
+  </ul>
+</section>
+
+<section>
+  <div class="tag">The engineering underneath</div>
+  <h2><span>5.</span> Drippy — my own server</h2>
+  <!-- DOODLE: server box with lines to services -->
+  <svg class="doodle" width="520" height="200" viewBox="0 0 520 200" fill="none" stroke="#182941" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- server -->
+    <rect x="200" y="60" width="120" height="90" rx="8"/>
+    <circle cx="222" cy="82" r="6" fill="#CDA140" stroke="#CDA140"/>
+    <path d="M240 82 L300 82 M240 105 L300 105 M240 128 L300 128"/>
+    <text x="260" y="172" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#182941" stroke="none">DRIPPY</text>
+    <!-- lines out -->
+    <path d="M200 80 L120 40 M200 105 L120 105 M200 130 L120 168 M320 80 L400 40 M320 105 L400 105 M320 130 L400 168" stroke="#CDA140" stroke-width="3"/>
+    <circle cx="110" cy="36" r="16"/><text x="110" y="41" text-anchor="middle" font-family="Arial" font-size="10" fill="#182941" stroke="none">Hive</text>
+    <circle cx="110" cy="105" r="16"/><text x="110" y="109" text-anchor="middle" font-family="Arial" font-size="10" fill="#182941" stroke="none">DIME</text>
+    <circle cx="110" cy="172" r="16"/><text x="110" y="176" text-anchor="middle" font-family="Arial" font-size="10" fill="#182941" stroke="none">PSIS</text>
+    <circle cx="410" cy="36" r="16"/><text x="410" y="41" text-anchor="middle" font-family="Arial" font-size="10" fill="#182941" stroke="none">Store</text>
+    <circle cx="410" cy="105" r="16"/><text x="410" y="109" text-anchor="middle" font-family="Arial" font-size="10" fill="#182941" stroke="none">Sports</text>
+    <circle cx="410" cy="172" r="16"/><text x="410" y="176" text-anchor="middle" font-family="Arial" font-size="10" fill="#182941" stroke="none">Loops</text>
+  </svg>
+  <p class="cap">One box. Everything I build lives on it.</p>
+  <p><b>Everything runs on my own server, Drippy.</b> The Hive, the music store, the sports report, DIME, PSIS, the calendar, the loop report — all of it lives there, all of it mine. GitHub holds the code; the server pulls it. Nothing I care about lives in a chat window — chat is for talking, the server is for keeping.</p>
+  <ul class="links">
+    <li><a href="https://muse.ai/s/drippy-websites-xgy7nxtfxexxxheo/6uhnfYq3flqrRp1BEcM4X9YOZyXcNF-NfQt7WFkWuQE">Drippy Websites</a> — all 22 services, one directory</li>
+    <li><a href="https://taigtsp.duckdns.org/dime/">DIME</a> — the sports model</li>
+    <li><a href="https://taigtsp.duckdns.org/psis/">PSIS / Diamond IQ</a> — pitch sequences</li>
+    <li><a href="https://taigtsp.duckdns.org/sports-report/">Sports Report</a> — straight takes, next fixtures</li>
+    <li><a href="https://taigtsp.duckdns.org/music-store/">TAIG Online Music Store</a> — direct to fans</li>
+    <li><a href="https://taigtsp.duckdns.org/resumes/">My portfolio</a> — me and my goals</li>
+  </ul>
+</section>
+
+<section>
+  <div class="tag">How it extends</div>
+  <h2><span>6.</span> The rules that grow it</h2>
+  <!-- DOODLE: gate with TEE SAYS GO sign -->
+  <svg class="doodle" width="420" height="170" viewBox="0 0 420 170" fill="none" stroke="#182941" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- gate posts + door -->
+    <path d="M80 150 L80 30 M340 150 L340 30 M80 30 L340 30"/>
+    <path d="M150 150 L150 60 L270 60 L270 150"/>
+    <rect x="160" y="88" width="100" height="34" rx="6" stroke="#CDA140" stroke-width="3"/>
+    <text x="210" y="110" text-anchor="middle" font-family="Arial" font-size="13" font-weight="bold" fill="#182941" stroke="none">TEE SAYS GO</text>
+    <path d="M60 150 L360 150"/>
+    <text x="210" y="42" text-anchor="middle" font-family="Arial" font-size="12" fill="#CDA140" stroke="none">nothing passes without it</text>
+  </svg>
+  <p class="cap">The gate is the rule. Everything else is just work.</p>
+  <ol class="rules">
+    <li><b>Nothing builds without my go.</b> Feedback first, builds second. The agent advises; I decide.</li>
+    <li><b>One build, one room, one check.</b> Every build gets its own window and a verification sheet before it ships.</li>
+    <li><b>Scope creep needs my word.</b> If a job wants to grow, it stops and asks first.</li>
+    <li><b>Plain words, no hype.</b> If it is not good, I say so. If I say it is good, I mean it.</li>
+    <li><b>The system carries it.</b> If it is not in Nebula, the tree, or a PIO, it does not exist yet.</li>
+  </ol>
+  <p>That is how it extends: one idea at a time, through the same gate, into the same system. The system gets bigger. The rules stay the same.</p>
+</section>
+
+<footer>
+  Built by Tee + Tim · <a href="https://taigtsp.duckdns.org/hive-portal/">The Hive</a> · <a href="https://muse.ai/s/drippy-websites-xgy7nxtfxexxxheo/6uhnfYq3flqrRp1BEcM4X9YOZyXcNF-NfQt7WFkWuQE">Drippy Websites</a><br>
+  November 2026 — plain AI, my way.
+</footer>
+
+</div>
+</body>
+</html>
