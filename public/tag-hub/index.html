@@ -36,7 +36,7 @@
   #storeview { position:absolute; inset:0; overflow-y:auto; padding:24px; display:none; background:var(--cream); }
   #storeview.show { display:block; }
   #viewer.hide { display:none; }
-  .wrap { max-width:860px; margin:0 auto; }
+  .wrap { max-width:1020px; margin:0 auto; }
   .wrap h2 { color:var(--navy); margin:0 0 4px; font-size:24px; }
   .wrap .lede { color:var(--muted); margin:0 0 20px; font-size:14px; }
   .group-h { color:var(--navy); border-bottom:2px solid var(--gold); padding-bottom:4px; margin:26px 0 12px; font-size:17px; }
@@ -56,6 +56,42 @@
   .rev .tag { display:inline-block; background:var(--gold); color:var(--navy); font-size:11px; font-weight:700; padding:1px 7px; border-radius:10px; margin-right:6px; }
   .rev s { color:var(--muted); }
   .empty { color:var(--muted); font-size:14px; }
+  /* ---- landing ---- */
+  .landing { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:20px; align-items:start; }
+  .panel { background:#fff; border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin-bottom:16px; }
+  .panel h3 { margin:0 0 4px; color:var(--navy); font-size:17px; }
+  .panel .sub { margin:0 0 12px; font-size:12px; color:var(--muted); }
+  .panel .foot { margin:12px 0 0; font-size:13px; }
+  .panel .foot a { color:var(--navy); font-weight:600; }
+  .cal-frame { width:100%; height:440px; border:1px solid var(--line); border-radius:6px; background:#fff; }
+  .attn-group { margin-bottom:14px; }
+  .attn-group h4 { margin:0 0 8px; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--navy); }
+  .attn-item { padding:10px 0; border-top:1px solid var(--line); }
+  .attn-item:first-of-type { border-top:0; }
+  .attn-item a.t { color:var(--navy); font-weight:600; font-size:14px; text-decoration:none; }
+  .attn-item a.t:hover { text-decoration:underline; }
+  .attn-item p { margin:4px 0 0; font-size:13px; color:var(--muted); line-height:1.45; }
+  .sport-sub { margin:16px 0 8px; font-size:14px; color:var(--navy); border-bottom:1px solid var(--line); padding-bottom:4px; }
+  .sport-sub:first-of-type { margin-top:0; }
+  .fixture { padding:8px 0; border-top:1px solid var(--line); font-size:14px; line-height:1.45; }
+  .fixture:first-of-type { border-top:0; }
+  .fixture b { color:var(--navy); }
+  .fixture .when { color:var(--muted); font-size:13px; }
+  .news-item { padding:8px 0; border-top:1px solid var(--line); font-size:14px; line-height:1.45; }
+  .news-item:first-of-type { border-top:0; }
+  .news-item a { color:var(--navy); text-decoration:none; font-weight:600; }
+  .news-item a:hover { text-decoration:underline; }
+  .news-item .src { color:var(--muted); font-size:12px; }
+  .tile { display:block; background:#fff; border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin-bottom:12px; text-decoration:none; }
+  .tile:hover { border-color:var(--gold); }
+  .tile b { display:block; color:var(--navy); font-size:15px; }
+  .tile .date { display:block; color:var(--gold); font-size:12px; font-weight:700; margin-top:2px; }
+  .tile .latest { display:block; color:var(--muted); font-size:13px; margin-top:6px; line-height:1.4; }
+  .port-card { display:block; background:var(--navy); border-radius:8px; padding:16px; margin-bottom:16px; text-decoration:none; }
+  .port-card b { display:block; color:#fff; font-size:16px; }
+  .port-card span { display:block; color:#b9c4d0; font-size:13px; margin-top:4px; line-height:1.45; }
+  .port-card .go { display:block; color:var(--gold); font-size:13px; font-weight:700; margin-top:8px; }
+  @media (max-width:900px) { .landing { grid-template-columns:1fr; } }
   @media (max-width:760px) {
     #app { flex-direction:column; }
     #side { width:100%; flex:0 0 auto; max-height:38vh; }
@@ -86,7 +122,7 @@
 (function () {
   var HUB = "https://taigtsp.duckdns.org";
   var BUBBLES = [
-    { id:"business-overview", label:"Business overview", url:HUB+"/business-dashboard/",
+    { id:"business-overview", label:"Business overview", tile:"Business review", url:HUB+"/business-dashboard/",
       subs:[
         { label:"Today with Muse", anchor:"today" },
         { label:"Needs your word", anchor:"needs" },
@@ -95,19 +131,37 @@
         { label:"Business money", anchor:"money" },
         { label:"Stadium build opportunities", storeSub:"Stadium build opportunities" }
       ] },
-    { id:"calendar", label:"TAIG Calendar", url:HUB+"/taig-calendar/",
+    { id:"calendar", label:"TAIG Calendar", tile:"TAIG Calendar", url:HUB+"/taig-calendar/",
       subs:[ { label:"Appointments", storeSub:"Appointments" } ] },
-    { id:"loops", label:"Loop report", url:HUB+"/loop-report/",
+    { id:"loops", label:"Loop report", tile:"Loop report", url:HUB+"/loop-report/",
       subs:[
         { label:"The five groups — today", anchor:"groupsTitle" },
         { label:"Every loop, by group and bucket", anchor:"lists" },
         { label:"History — day by day", anchor:"trend" },
         { label:"Close to closing", storeSub:"Close to closing" }
       ] },
-    { id:"hive", label:"The Hive", url:HUB+"/hive-portal/",
+    { id:"hive", label:"The Hive", tile:"My hive account", url:HUB+"/hive-portal/",
       subs:[ { label:"TagSpeed PIO #39", href:HUB+"/hive-portal/u/tee/pio/pio/view?id=39" } ] }
   ];
+  var LEAGUES = [
+    { sport:"soccer", league:"eng.1", label:"Premier League" },
+    { sport:"soccer", league:"esp.1", label:"La Liga" },
+    { sport:"soccer", league:"ita.1", label:"Serie A" },
+    { sport:"football", league:"nfl", label:"NFL" },
+    { sport:"football", league:"college-football", label:"College Football" }
+  ];
+  var TEAMS = [
+    { name:"Chelsea", sport:"soccer", league:"eng.1", id:"363" },
+    { name:"Leeds United", sport:"soccer", league:"eng.1", id:"357" },
+    { name:"Manchester United", sport:"soccer", league:"eng.1", id:"360" },
+    { name:"Barcelona", sport:"soccer", league:"esp.1", id:"83" },
+    { name:"AC Milan", sport:"soccer", league:"ita.1", id:"103" },
+    { name:"Como", sport:"soccer", league:"ita.1", id:"2572" },
+    { name:"Jacksonville Jaguars", sport:"football", league:"nfl", id:"30" },
+    { name:"NC State Wolfpack", sport:"football", league:"college-football", id:"152" }
+  ];
   var store = { objects: [] };
+  var sportsCache = null, sportsLoading = false;
   var nav = document.getElementById("nav");
   var viewer = document.getElementById("viewer");
   var storeview = document.getElementById("storeview");
@@ -119,10 +173,16 @@
   function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
   function bubble(id){ for (var i=0;i<BUBBLES.length;i++) if (BUBBLES[i].id===id) return BUBBLES[i]; return null; }
   function objById(id){ for (var i=0;i<store.objects.length;i++) if (store.objects[i].id===id) return store.objects[i]; return null; }
+  function fmtDate(iso){
+    if (!iso) return "";
+    var d = new Date(iso.length===10 ? iso+"T12:00:00" : iso);
+    if (isNaN(d)) return iso;
+    return d.toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric", timeZone:"America/New_York" });
+  }
 
   function buildNav(activeBubble){
     var h = '<div class="nav-label">Tag Hub</div>';
-    h += '<a href="#/today" data-route="today">Today in Tag Hub</a>';
+    h += '<a href="#/landing" data-route="landing">Landing</a>';
     BUBBLES.forEach(function (b){
       h += '<div class="nav-label">'+esc(b.label)+'</div>';
       h += '<a href="#/'+b.id+'" data-bubble="'+b.id+'"'+(activeBubble===b.id?' class="active"':"")+'>'+esc(b.label)+'</a>';
@@ -174,24 +234,164 @@
     deeplink.value = location.href;
   }
 
-  function renderToday(){
-    var h = '<h2>Today in Tag Hub</h2><p class="lede">What changed, per object. Saved here on Drippy first — updates and repairs land on the same object, corrections replace the value and keep the history.</p>';
-    if (!store.objects.length) { h += '<p class="empty">Nothing filed yet.</p>'; }
-    BUBBLES.forEach(function (b){
-      var objs = store.objects.filter(function (o){ return o.bubble===b.id; });
-      if (!objs.length) return;
-      h += '<div class="group-h">'+esc(b.label)+'</div>';
-      objs.forEach(function (o){ h += cardHTML(o); });
+  /* ---------- sports: personal feed, direct from ESPN in the browser.
+     The public Sports Report stays news-off (v12) — this touches nothing there. ---------- */
+  function fetchJSON(url, ms){
+    var c = new AbortController();
+    var t = setTimeout(function(){ c.abort(); }, ms || 8000);
+    return fetch(url, { signal:c.signal }).then(function (r){
+      clearTimeout(t);
+      if (!r.ok) throw new Error("HTTP "+r.status);
+      return r.json();
+    }).catch(function (e){ clearTimeout(t); throw e; });
+  }
+  function loadSports(){
+    if (sportsCache || sportsLoading) return;
+    sportsLoading = true;
+    var newsJobs = LEAGUES.map(function (L){
+      return fetchJSON("https://site.api.espn.com/apis/site/v2/sports/"+L.sport+"/"+L.league+"/news?limit=6")
+        .then(function (d){ return { league:L, articles:(d.articles||[]).slice(0,6) }; })
+        .catch(function (){ return { league:L, articles:[], failed:true }; });
     });
-    showStore(h, "Tag Hub / Today in Tag Hub");
+    var teamJobs = TEAMS.map(function (T){
+      return fetchJSON("https://site.api.espn.com/apis/site/v2/sports/"+T.sport+"/"+T.league+"/teams/"+T.id+"/schedule")
+        .then(function (d){ return { team:T, next:nextFixture(d) }; })
+        .catch(function (){ return { team:T, next:null, failed:true }; });
+    });
+    Promise.all([Promise.all(newsJobs), Promise.all(teamJobs)]).then(function (res){
+      sportsCache = { news:res[0], teams:res[1] };
+      sportsLoading = false;
+      paintSports();
+    }).catch(function (){
+      sportsCache = { news:[], teams:[] };
+      sportsLoading = false;
+      paintSports();
+    });
+  }
+  function nextFixture(d){
+    try {
+      var evs = d.events || [];
+      var now = Date.now();
+      for (var i=0;i<evs.length;i++){
+        var ev = evs[i];
+        var dt = new Date(ev.date).getTime();
+        if (isNaN(dt) || dt < now - 86400000) continue;
+        var comp = (ev.competitions||[])[0] || {};
+        var cs = comp.competitors || [];
+        var home = null, away = null;
+        cs.forEach(function (c){ if (c.homeAway==="home") home=c; if (c.homeAway==="away") away=c; });
+        if (!home || !away) continue;
+        return { date:ev.date,
+          home:(home.team||{}).displayName||"", away:(away.team||{}).displayName||"",
+          comp:((comp.details||{}).league||"") || ev.seasonType || "" };
+      }
+    } catch (e) {}
+    return null;
+  }
+  function fmtWhen(iso){
+    try {
+      var d = new Date(iso);
+      return d.toLocaleString("en-US", { weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit", timeZone:"America/New_York" });
+    } catch (e) { return iso; }
+  }
+  function paintSports(){
+    var el;
+    if (!sportsCache) return;
+    el = document.getElementById("sport-teams");
+    if (el) {
+      var h = "";
+      sportsCache.teams.forEach(function (t){
+        if (t.next) {
+          h += '<div class="fixture"><b>'+esc(t.next.away)+' vs '+esc(t.next.home)+'</b><br><span class="when">'+esc(fmtWhen(t.next.date))+(t.next.comp?' · '+esc(t.next.comp):"")+'</span></div>';
+        } else {
+          h += '<div class="fixture"><b>'+esc(t.team.name)+'</b><br><span class="when">Next fixture not loaded — check connection.</span></div>';
+        }
+      });
+      el.innerHTML = h || '<p class="empty">No fixtures loaded.</p>';
+    }
+    el = document.getElementById("sport-leagues");
+    if (el) {
+      var g = "";
+      sportsCache.news.forEach(function (n){
+        g += '<div class="sport-sub">'+esc(n.league.label)+'</div>';
+        if (!n.articles.length) { g += '<p class="empty">No headlines loaded.</p>'; return; }
+        n.articles.slice(0,3).forEach(function (a){
+          var href = (a.links && a.links.web && a.links.web.href) || "#";
+          g += '<div class="news-item"><a href="'+esc(href)+'" target="_blank" rel="noopener">'+esc(a.headline||"")+'</a></div>';
+        });
+      });
+      el.innerHTML = g || '<p class="empty">No headlines loaded.</p>';
+    }
+    el = document.getElementById("sport-latest");
+    if (el) {
+      var all = [];
+      sportsCache.news.forEach(function (n){
+        (n.articles||[]).forEach(function (a){
+          all.push({ h:a.headline||"", href:(a.links&&a.links.web&&a.links.web.href)||"#", pub:a.published||"", league:n.league.label });
+        });
+      });
+      all.sort(function (a,b){ return new Date(b.pub) - new Date(a.pub); });
+      var m = "";
+      all.slice(0,8).forEach(function (a){
+        m += '<div class="news-item"><a href="'+esc(a.href)+'" target="_blank" rel="noopener">'+esc(a.h)+'</a><br><span class="src">'+esc(a.league)+(a.pub?' · '+esc(fmtDate(a.pub)):"")+'</span></div>';
+      });
+      el.innerHTML = m || '<p class="empty">No headlines loaded — check connection.</p>';
+    }
+  }
+
+  /* ---------- landing ---------- */
+  function latestFor(bid){
+    var objs = store.objects.filter(function (o){ return o.bubble===bid; });
+    if (!objs.length) return null;
+    objs.sort(function (a,b){ return (b.updated||"") < (a.updated||"") ? -1 : 1; });
+    return objs[0];
+  }
+  function renderLanding(){
+    var attn = store.objects.filter(function (o){ return o.needsAttention; });
+    var h = '<h2>Tag Hub</h2><p class="lede">Your landing — calendar, what needs you, your sports, and your portfolios.</p>';
+    h += '<div class="landing"><div>';
+    h += '<div class="panel"><h3>TAIG Calendar</h3><p class="sub">Your calendar, right here.</p>';
+    h += '<iframe class="cal-frame" src="'+HUB+'/taig-calendar/" title="TAIG Calendar"></iframe>';
+    h += '<p class="foot"><a href="#/calendar">Open full calendar →</a></p></div>';
+    h += '<div class="panel"><h3>The things that need my attention</h3><p class="sub">Close-to-closing, grouped by bubble. Open one and it takes you to the exact spot.</p>';
+    if (!attn.length) { h += '<p class="empty">Nothing needs you right now.</p>'; }
+    BUBBLES.forEach(function (b){
+      var items = attn.filter(function (o){ return o.bubble===b.id; });
+      if (!items.length) return;
+      h += '<div class="attn-group"><h4>'+esc(b.label)+'</h4>';
+      items.forEach(function (o){
+        h += '<div class="attn-item"><a class="t" href="#/object/'+o.id+'">'+esc(o.title)+'</a><p>'+esc(o.attentionNote||o.truth)+'</p></div>';
+      });
+      h += '</div>';
+    });
+    h += '</div>';
+    h += '<div class="panel"><h3>Latest sports news</h3><p class="sub">Just for you — the public Sports Report stays news-off. Headlines link out to ESPN.</p>';
+    h += '<div class="sport-sub">My teams — next up</div><div id="sport-teams"><p class="empty">Loading fixtures…</p></div>';
+    h += '<div class="sport-sub">My sports</div><div id="sport-leagues"><p class="empty">Loading headlines…</p></div>';
+    h += '<div class="sport-sub">Latest sports news</div><div id="sport-latest"><p class="empty">Loading headlines…</p></div>';
+    h += '</div>';
+    h += '</div><div>';
+    h += '<a class="port-card" href="'+HUB+'/resumes/" target="_blank" rel="noopener"><b>Portfolios</b><span>Sanil D. Tison — Resume · Me and My Goals. The portfolio you send employers.</span><span class="go">Open portfolios →</span></a>';
+    h += '<div class="panel"><h3>The other main bubbles</h3><p class="sub">Tiles, with dates.</p>';
+    ["business-overview","loops","hive"].forEach(function (bid){
+      var b = bubble(bid);
+      var latest = latestFor(bid);
+      var date = latest ? fmtDate(latest.updated) : "";
+      h += '<a class="tile" href="#/'+bid+'"><b>'+esc(b.tile)+'</b><span class="date">'+(date?("Updated "+esc(date)):"")+'</span>'+(latest?'<span class="latest">'+esc(latest.title)+'</span>':"")+'</a>';
+    });
+    h += '</div>';
+    h += '</div></div>';
+    showStore(h, "Tag Hub / Landing");
+    loadSports();
+    if (sportsCache) paintSports();
   }
   function renderObject(id){
     var o = objById(id);
-    if (!o) { renderToday(); return; }
+    if (!o) { renderLanding(); return; }
     var b = bubble(o.bubble);
     var h = '<h2>'+esc(o.title)+'</h2><p class="lede">'+esc(b?b.label:o.bubble)+' · '+esc(o.subItem)+'</p>';
     h += cardHTML(o);
-    h += '<p><a href="#/today">← Back to Today in Tag Hub</a> · <a href="#/'+o.bubble+'">Open '+esc(b?b.label:o.bubble)+'</a></p>';
+    h += '<p><a href="#/landing">← Back to Landing</a> · <a href="#/'+o.bubble+'">Open '+esc(b?b.label:o.bubble)+'</a></p>';
     showStore(h, "Tag Hub / "+(b?b.label:o.bubble)+" / "+o.title);
   }
   function renderFiltered(bid, subSlug){
@@ -208,11 +408,10 @@
   function route(){
     var raw = (location.hash||"").replace(/^#\/?/,"");
     var parts = raw.split("/").filter(Boolean);
-    if (!parts.length) { renderToday(); buildNav(null); return; }
-    if (parts[0]==="today") { renderToday(); buildNav(null); return; }
+    if (!parts.length || parts[0]==="landing" || parts[0]==="today") { renderLanding(); buildNav(null); return; }
     if (parts[0]==="object" && parts[1]) { renderObject(parts[1]); buildNav(null); return; }
     var b = bubble(parts[0]);
-    if (!b) { renderToday(); buildNav(null); return; }
+    if (!b) { renderLanding(); buildNav(null); return; }
     if (parts.length===1) { showFrame(b.url, "Tag Hub / "+b.label); buildNav(b.id); return; }
     if (b.id==="hive" && parts[1]==="pio" && parts[2]) {
       showFrame(HUB+"/hive-portal/u/tee/pio/pio/view?id="+parts[2], "Tag Hub / The Hive / PIO #"+parts[2]);
