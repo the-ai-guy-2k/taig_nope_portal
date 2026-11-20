@@ -18,6 +18,7 @@
   section { background:var(--paper); border:2px solid var(--navy); border-radius:14px; padding:28px 26px; margin-top:28px; }
   section h2 { font-size:26px; margin-bottom:4px; }
   section h2 span { color:var(--gold); }
+  section h3 { font-size:19px; margin-top:22px; }
   .tag { font-family:Arial,Helvetica,sans-serif; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); }
   p { font-size:17px; margin-top:12px; }
   p b { color:var(--navy); }
@@ -269,6 +270,55 @@
   </ol>
   <p><b>The pattern is real, just not here before.</b> Other agents do the commenter/responder thing in public: PostFast answers social comments through Claude and ChatGPT, Discourse forums have AI bots that triage and reply, and AthenaOS runs a bot that watches forum threads and posts back. The closest match to mine is AthenaOS. The difference: those are commercial tools that answer in minutes. Mine is DIY and self-hosted, and it checks every 2 hours. Slower by design, and it is mine.</p>
   <p><b>The ceiling is level 4</b> — builds that start on approval, several agents working their own lanes, answers the second something happens instead of every 2 hours, serving many people, improving itself. This setup deliberately stops at advice until I say go. That is not a missing piece. It is the rule.</p>
+</section>
+
+<section>
+  <div class="tag">The road ahead</div>
+  <h2><span>8.</span> The road to level 4</h2>
+  <!-- DOODLE: the PIO state chain — idea to done -->
+  <svg class="doodle" width="560" height="150" viewBox="0 0 560 150" fill="none" stroke="#182941" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- state boxes -->
+    <rect x="8" y="55" width="96" height="46" rx="8"/>
+    <text x="56" y="83" text-anchor="middle" font-family="Arial" font-size="13" font-weight="bold" fill="#182941" stroke="none">IDEA</text>
+    <rect x="118" y="55" width="96" height="46" rx="8"/>
+    <text x="166" y="83" text-anchor="middle" font-family="Arial" font-size="12" font-weight="bold" fill="#182941" stroke="none">PROPOSED</text>
+    <rect x="228" y="55" width="96" height="46" rx="8" stroke="#CDA140" stroke-width="4"/>
+    <text x="276" y="83" text-anchor="middle" font-family="Arial" font-size="12" font-weight="bold" fill="#182941" stroke="none">APPROVED</text>
+    <rect x="338" y="55" width="96" height="46" rx="8"/>
+    <text x="386" y="83" text-anchor="middle" font-family="Arial" font-size="12" font-weight="bold" fill="#182941" stroke="none">BUILDING</text>
+    <rect x="448" y="55" width="96" height="46" rx="8"/>
+    <text x="496" y="83" text-anchor="middle" font-family="Arial" font-size="13" font-weight="bold" fill="#182941" stroke="none">DONE</text>
+    <!-- arrows -->
+    <path d="M104 78 L118 78" stroke="#CDA140" stroke-width="4"/><path d="M118 78 l-8 -5 M118 78 l-8 5" stroke="#CDA140" stroke-width="4"/>
+    <path d="M214 78 L228 78" stroke="#CDA140" stroke-width="4"/><path d="M228 78 l-8 -5 M228 78 l-8 5" stroke="#CDA140" stroke-width="4"/>
+    <path d="M324 78 L338 78" stroke="#CDA140" stroke-width="4"/><path d="M338 78 l-8 -5 M338 78 l-8 5" stroke="#CDA140" stroke-width="4"/>
+    <path d="M434 78 L448 78" stroke="#CDA140" stroke-width="4"/><path d="M448 78 l-8 -5 M448 78 l-8 5" stroke="#CDA140" stroke-width="4"/>
+    <!-- gate label -->
+    <text x="276" y="38" text-anchor="middle" font-family="Arial" font-size="12" fill="#CDA140" stroke="none">TEE SAYS GO</text>
+  </svg>
+  <p class="cap">The PIO stays the unit of work. It just gains states.</p>
+
+  <h3>The paths to level 4</h3>
+  <p><b>First, the correction: the scale tops out at 4.</b> There is no level 5 on it — level 4 is the top. Five moves get there:</p>
+  <ol class="steps">
+    <li><b>Event-driven instead of polling.</b> React the second a comment lands (webhooks, push) instead of the 2-hour check.</li>
+    <li><b>Approval-gated building.</b> The watcher proposes, Tee approves in the Hive, then a builder agent does the work. Advice becomes doing. This is the big one.</li>
+    <li><b>Split the lanes.</b> Watcher, builder, checker — each with a narrow job — instead of one watcher doing everything.</li>
+    <li><b>More than one user.</b> Serve the team, with permissions for who can do what.</li>
+    <li><b>Self-improving.</b> The system learns from what Tee accepts and rejects, and gets sharper.</li>
+  </ol>
+
+  <h3>How today's setup grows into it</h3>
+  <p><b>Do not rebuild anything. Just add states.</b> The PIO stays the unit of work, the comment stays the front door. Each PIO gets a state: idea, proposed, approved, building, done. Every agent action traces back to a PIO comment, so the Hive stays the audit trail.</p>
+  <p>The lanes stay separate, with narrow write scopes: the watcher only writes comments, the builder only builds when there is an approval, the checker only verifies. Built that way, level 4 is turning on the next lane when Tee is ready — not a rebuild.</p>
+
+  <h3>How far off we are</h3>
+  <p><b>Halfway — and the hard half is done.</b> The loop is built, the trust is built, the Hive is home. What is missing is plumbing and permission. Plumbing: real-time triggers instead of the 2-hour tick, and a builder lane that can actually do work. Permission: Tee deciding the agent can build when he approves it in the Hive. The thinking part is there. The doing part is not wired yet.</p>
+
+  <h3>The $200 budget</h3>
+  <p><b>Level 4 is not mostly a money problem.</b> The Droplet is already paid for ($18 a month now), and the level-4 moves that matter — trigger bridge, faster checks, builder lane, approval flow — all run on the box already paid for. They cost tokens and time, not dollars.</p>
+  <p>$200 one-time covers the small stuff — a domain or two, maybe a second little server for isolation — but it does not buy autonomy. What it does buy is the cheap path to close: real-time triggers, approval-gated builds, lanes split apart. Full level 4 — a swarm shipping code on its own, serving a whole team — needs ongoing token spend and time, not a one-time $200.</p>
+  <p>If the $200 is monthly instead of one-time, that is a different story: it covers a bigger box and a Muse subscription with room to spare. But one-time, you can get close. The last mile is Tee's call on trust, not his wallet.</p>
 </section>
 
 <footer>
