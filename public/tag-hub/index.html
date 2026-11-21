@@ -27,6 +27,9 @@
   /* ---- main ---- */
   #main { flex:1; display:flex; flex-direction:column; min-width:0; }
   #topbar { background:#fff; border-bottom:1px solid var(--line); padding:10px 16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  #menuBtn { display:none; }
+  #closeBtn { display:none; }
+  #scrim { display:none; }
   #crumb { font-size:14px; font-weight:600; color:var(--navy); }
   #deeplink { flex:1; min-width:220px; font-size:12px; padding:6px 8px; border:1px solid var(--line); border-radius:4px; color:var(--muted); background:var(--cream); }
   #copyBtn { font-size:12px; padding:6px 12px; border:1px solid var(--navy); background:var(--navy); color:#fff; border-radius:4px; cursor:pointer; }
@@ -94,7 +97,12 @@
   @media (max-width:900px) { .landing { grid-template-columns:1fr; } }
   @media (max-width:760px) {
     #app { flex-direction:column; }
-    #side { width:100%; flex:0 0 auto; max-height:38vh; }
+    #menuBtn { display:block; font-size:20px; line-height:1; padding:6px 10px; border:1px solid var(--navy); background:#fff; color:var(--navy); border-radius:4px; cursor:pointer; }
+    #side { width:280px; max-width:85vw; flex:0 0 auto; max-height:none; position:fixed; top:0; left:0; bottom:0; z-index:30; transform:translateX(-102%); transition:transform .22s ease; box-shadow:0 0 24px rgba(0,0,0,.35); }
+    #side.open { transform:translateX(0); }
+    #side .brand { position:relative; padding-right:48px; }
+    #closeBtn { display:block; position:absolute; top:14px; right:10px; background:none; border:0; color:#fff; font-size:20px; line-height:1; cursor:pointer; padding:4px 8px; }
+    #scrim.show { display:block; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:20; }
     #main { flex:1; min-height:0; }
   }
 </style>
@@ -102,12 +110,14 @@
 <body>
 <div id="app">
   <aside id="side">
-    <div class="brand"><h1>Tag <span>Hub</span></h1><p>TAIG — one place for the four.</p></div>
+    <div class="brand"><h1>Tag <span>Hub</span></h1><p>TAIG — one place for the four.</p><button id="closeBtn" type="button" aria-label="Close menu">✕</button></div>
     <nav id="nav"></nav>
     <div class="note">The Hive may ask you to sign in — sign in once, it remembers you.<br><br>When you ask Muse for something in here, he points you to the exact spot instead of answering in chat. That is the rule.</div>
   </aside>
+  <div id="scrim"></div>
   <div id="main">
     <div id="topbar">
+      <button id="menuBtn" type="button" aria-label="Open menu">☰</button>
       <span id="crumb">Tag Hub</span>
       <input id="deeplink" readonly value="">
       <button id="copyBtn" type="button">Copy link</button>
@@ -163,6 +173,23 @@
   var store = { objects: [] };
   var sportsCache = null, sportsLoading = false;
   var nav = document.getElementById("nav");
+  var side = document.getElementById("side");
+  var scrim = document.getElementById("scrim");
+  var menuBtn = document.getElementById("menuBtn");
+  var closeBtn = document.getElementById("closeBtn");
+
+  /* ---------- mobile menu: nav hides behind the hamburger (mobile only) ---------- */
+  function isMobile(){ return window.innerWidth <= 760; }
+  function openMenu(){ side.classList.add("open"); scrim.classList.add("show"); }
+  function closeMenu(){ side.classList.remove("open"); scrim.classList.remove("show"); }
+  if (menuBtn) menuBtn.addEventListener("click", openMenu);
+  if (closeBtn) closeBtn.addEventListener("click", closeMenu);
+  if (scrim) scrim.addEventListener("click", closeMenu);
+  document.addEventListener("keydown", function (e){ if (e.key === "Escape") closeMenu(); });
+  if (nav) nav.addEventListener("click", function (e){
+    var a = e.target && e.target.closest ? e.target.closest("a") : null;
+    if (a && isMobile()) closeMenu();
+  });
   var viewer = document.getElementById("viewer");
   var storeview = document.getElementById("storeview");
   var storewrap = document.getElementById("storewrap");
@@ -406,6 +433,7 @@
   }
 
   function route(){
+    if (isMobile()) closeMenu();
     var raw = (location.hash||"").replace(/^#\/?/,"");
     var parts = raw.split("/").filter(Boolean);
     if (!parts.length || parts[0]==="landing" || parts[0]==="today") { renderLanding(); buildNav(null); return; }
