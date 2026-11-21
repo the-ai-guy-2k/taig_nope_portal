@@ -10,3 +10,4 @@ Rebranded Nov 16, 2026 from Mo's PC Repairs and Sales — company name, tagline 
 - Featured inventory links to Mo's live Facebook Marketplace listings.
 - No phone or email on the site — Mo has none on record. Contact is via Facebook Marketplace.
 - Deploy: push here, then on the Droplet `git pull` + `docker build` + restart `nope-portal` (see DEPLOY.md).
+- Updated Nov 21, 2026: added Latitude 5410 ($200), Latitude 9510 2-in-1 ($300), Latitude 5580 ($160) — all listed Nov 20, 2026, with Mo's actual listing photos. The ThinkPad L490 listing is no longer retrievable on Marketplace; left on the site pending Mo's word (Tee's rule: site stays as current truth until Mo updates him).
