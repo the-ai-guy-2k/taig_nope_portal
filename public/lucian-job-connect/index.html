@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lucian Job Connect — Jobs in Saint Lucia</title>
+<style>
+  :root { --navy:#182941; --gold:#CDA140; --paper:#f7f4ec; --ink:#1d2733; --muted:#5c6b7a; --line:#d8d2c2; --white:#fff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--paper); color:var(--ink); }
+  header { background:var(--navy); color:#fff; padding:22px 16px 18px; }
+  header h1 { margin:0; font-size:26px; }
+  header h1 span { color:var(--gold); }
+  header p { margin:6px 0 0; color:#cdd6e0; font-size:15px; }
+  main { max-width:880px; margin:0 auto; padding:16px 14px 48px; }
+  .tabs { display:flex; gap:8px; margin:18px 0 14px; flex-wrap:wrap; }
+  .tabs button { border:2px solid var(--navy); background:#fff; color:var(--navy); padding:10px 16px; border-radius:999px; font-size:15px; cursor:pointer; }
+  .tabs button.active { background:var(--navy); color:#fff; }
+  .tabs button.active b { color:var(--gold); }
+  .card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:12px; }
+  .card h3 { margin:0 0 4px; font-size:18px; }
+  .meta { color:var(--muted); font-size:13px; margin:2px 0 8px; }
+  .tag { display:inline-block; background:#efe6cc; border:1px solid var(--gold); color:#6b5416; border-radius:999px; padding:2px 9px; font-size:12px; margin:2px 3px 2px 0; }
+  .tag.ai { background:#e4eaf1; border-color:var(--navy); color:var(--navy); }
+  .badge { display:inline-block; background:var(--gold); color:#fff; border-radius:4px; padding:1px 7px; font-size:11px; font-weight:700; letter-spacing:.4px; }
+  .badge.sample { background:#8a97a5; }
+  label { display:block; font-weight:600; margin:12px 0 4px; font-size:14px; }
+  input[type=text], input[type=email], input[type=tel], select, textarea { width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; font-size:15px; font-family:inherit; background:#fff; }
+  textarea { min-height:110px; resize:vertical; }
+  .hint { color:var(--muted); font-size:13px; margin-top:4px; }
+  .checks { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .checks label { display:inline-flex; align-items:center; gap:6px; font-weight:400; border:1px solid var(--line); border-radius:999px; padding:6px 11px; margin:0; cursor:pointer; background:#fff; }
+  .checks input { accent-color:var(--navy); }
+  .btn { background:var(--navy); color:#fff; border:none; padding:12px 20px; border-radius:10px; font-size:15px; cursor:pointer; margin-top:14px; }
+  .btn.gold { background:var(--gold); color:#fff; }
+  .btn.small { padding:8px 14px; font-size:14px; margin-top:8px; }
+  .btn:disabled { opacity:.55; cursor:default; }
+  .msg { padding:12px; border-radius:10px; margin:10px 0; font-size:15px; display:none; }
+  .msg.ok { display:block; background:#e5f2e4; border:1px solid #7fb069; }
+  .msg.err { display:block; background:#fbe9e7; border:1px solid #c0392b; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; }
+  .row > div { flex:1; min-width:200px; }
+  .contact { background:#f0ead6; border:1px solid var(--gold); border-radius:10px; padding:12px; margin-top:10px; font-size:15px; }
+  .score { font-weight:700; color:var(--navy); }
+  footer { text-align:center; color:var(--muted); font-size:13px; padding:20px 10px 30px; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Lucian Job <span>Connect</span></h1>
+  <p>Jobs in Saint Lucia, plain and simple. Employers post. Workers get seen. The connection is made.</p>
+</header>
+<main>
+  <div class="tabs">
+    <button id="tab-jobs" class="active" onclick="showTab('jobs')">Find work</button>
+    <button id="tab-post" onclick="showTab('post')">Post a job</button>
+    <button id="tab-workers" onclick="showTab('workers')">Workers</button>
+  </div>
+
+  <section id="view-jobs">
+    <div class="card">
+      <div class="row">
+        <div>
+          <label for="f-industry">Industry</label>
+          <select id="f-industry"><option value="">All industries</option></select>
+        </div>
+        <div>
+          <label for="f-tag">Tag</label>
+          <select id="f-tag"><option value="">All tags</option></select>
+        </div>
+      </div>
+      <label for="f-search">Search</label>
+      <input type="text" id="f-search" placeholder="Try cook, driver, cleaner..." oninput="renderJobs()">
+    </div>
+    <div id="job-list"></div>
+  </section>
+
+  <section id="view-post" class="hidden">
+    <div class="card">
+      <h3>Post a job</h3>
+      <p class="meta">Free while we get going. No payments in this version.</p>
+      <div class="msg" id="post-msg"></div>
+      <label for="p-industry">Industry</label>
+      <select id="p-industry"></select>
+      <label for="p-position">Position</label>
+      <input type="text" id="p-position" maxlength="100" placeholder="e.g. Hotel Housekeeper">
+      <label for="p-description">Job description</label>
+      <textarea id="p-description" maxlength="2000" placeholder="What is the work, day to day? Hours? Where? Anything they must have?" oninput="previewTags()"></textarea>
+      <div class="hint">Tags the description suggests: <span id="ai-tags"><i>type a description to see them</i></span></div>
+      <label>More tags (pick any that fit)</label>
+      <div class="checks" id="p-tags"></div>
+      <div class="row">
+        <div>
+          <label for="p-name">Your name</label>
+          <input type="text" id="p-name" maxlength="100" placeholder="Your name or business name">
+        </div>
+        <div>
+          <label for="p-phone">Phone (WhatsApp is fine)</label>
+          <input type="tel" id="p-phone" maxlength="40" placeholder="+1 758 ...">
+        </div>
+      </div>
+      <label for="p-email">Email (if no phone)</label>
+      <input type="email" id="p-email" maxlength="120" placeholder="you@example.com">
+      <label><input type="checkbox" id="p-resume-required"> This job needs a resume</label>
+      <p class="hint">Workers see the job, not your phone or email, until you both connect.</p>
+      <button class="btn" onclick="submitJob()">Post this job</button>
+    </div>
+  </section>
+
+  <section id="view-workers" class="hidden">
+    <div class="card">
+      <h3>Join as a worker</h3>
+      <p class="meta">No resume needed — most people get work by word of mouth here. If a job needs a resume, you can add one.</p>
+      <div class="msg" id="worker-msg"></div>
+      <label for="w-name">Your name</label>
+      <input type="text" id="w-name" maxlength="100" placeholder="Your full name">
+      <div class="row">
+        <div>
+          <label for="w-phone">Phone (WhatsApp is fine)</label>
+          <input type="tel" id="w-phone" maxlength="40" placeholder="+1 758 ...">
+        </div>
+        <div>
+          <label for="w-email">Email (if no phone)</label>
+          <input type="email" id="w-email" maxlength="120" placeholder="you@example.com">
+        </div>
+      </div>
+      <label>Your skills (pick all that apply)</label>
+      <div class="checks" id="w-skills"></div>
+      <label for="w-resume">Resume — optional (PDF or Word, under 5 MB)</label>
+      <input type="file" id="w-resume" accept=".pdf,.doc,.docx">
+      <div class="hint" id="w-resume-info"></div>
+      <p class="hint">Employers see your name and skills, not your phone or email, until you both connect.</p>
+      <button class="btn" onclick="submitWorker()">Join Lucian Job Connect</button>
+    </div>
+    <h3>Workers looking for work</h3>
+    <div id="worker-list"></div>
+  </section>
+
+  <section id="view-matches" class="hidden">
+    <div class="card">
+      <button class="btn small" onclick="backFromMatches()">&larr; Back</button>
+      <h3 id="matches-title">Matches</h3>
+      <div id="matches-body"></div>
+    </div>
+  </section>
+</main>
+<footer>MVP — no payments, no accounts. Listings marked SAMPLE are examples, not real jobs. Built for Saint Lucia by TAIG.</footer>
+
+<script>
+var TAGS = { industries: [], skills: [] };
+var JOBS = [];
+var WORKERS = [];
+var KEYWORDS = {
+  'cooking': ['cook','chef','kitchen','food prep','bake','baker'],
+  'cleaning': ['clean','janitor','maid'],
+  'housekeeping': ['housekeep','hotel room','change linen','guesthouse'],
+  'driving': ['driver','drive','chauffeur','licence','license'],
+  'delivery': ['delivery','courier','deliver'],
+  'customer-service': ['customer','front desk','reception','guest'],
+  'cash-handling': ['cashier','cash','till','checkout','pos'],
+  'carpentry': ['carpenter','wood','cabinet'],
+  'plumbing': ['plumber','plumbing','pipe'],
+  'electrical': ['electrician','electrical','wiring'],
+  'painting': ['painter','painting'],
+  'gardening': ['garden','landscap','lawn','grounds'],
+  'fishing': ['fish','fisher','boat crew'],
+  'farming': ['farm','agriculture','harvest','crop'],
+  'front-desk': ['front desk','receptionist','concierge'],
+  'tour-guide': ['tour guide','tour'],
+  'bartending': ['bartender','bar'],
+  'waiting': ['waiter','waitress','server','serving'],
+  'security': ['security','guard'],
+  'caregiving': ['caregiver','elderly','nurse aide','home care'],
+  'childcare': ['child','babysit','nanny','daycare'],
+  'teaching': ['teach','tutor','teacher'],
+  'computer-skills': ['computer','data entry','typing','excel','office software'],
+  'social-media': ['social media','marketing','content'],
+  'sales': ['sales','sell','retail assistant'],
+  'warehouse': ['warehouse','stock','inventory'],
+  'mechanic': ['mechanic','vehicle repair','auto repair'],
+  'welding': ['weld'],
+  'sewing': ['sew','tailor','seamstress'],
+  'construction-general': ['construction','labour','labor','site work','mason','concrete','build'],
+  'hospitality': ['hotel','resort','guesthouse']
+};
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+function tagChips(tags, aiTags) {
+  return (tags || []).map(function (t) {
+    var cls = (aiTags && aiTags.indexOf(t) !== -1) ? 'tag ai' : 'tag';
+    return '<span class="' + cls + '">' + esc(t) + '</span>';
+  }).join('');
+}
+function api(path, opts) {
+  return fetch(path, opts).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Something went wrong.'); return j; }); });
+}
+function showMsg(id, text, ok) {
+  var el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'msg ' + (ok ? 'ok' : 'err');
+}
+function showTab(name) {
+  ['jobs', 'post', 'workers', 'matches'].forEach(function (t) {
+    document.getElementById('view-' + t).classList.toggle('hidden', t !== name);
+    var btn = document.getElementById('tab-' + t);
+    if (btn) btn.classList.toggle('active', t === name);
+  });
+  if (name === 'jobs') renderJobs();
+  if (name === 'workers') renderWorkers();
+}
+function backFromMatches() { showTab('jobs'); renderJobs(); }
+
+function suggestTags(text) {
+  var hay = String(text || '').toLowerCase(), out = [];
+  Object.keys(KEYWORDS).forEach(function (tag) {
+    if (KEYWORDS[tag].some(function (w) { return hay.indexOf(w) !== -1; })) out.push(tag);
+  });
+  return out.slice(0, 8);
+}
+function previewTags() {
+  var text = document.getElementById('p-position').value + ' ' +
+    document.getElementById('p-industry').value + ' ' +
+    document.getElementById('p-description').value;
+  var tags = suggestTags(text);
+  document.getElementById('ai-tags').innerHTML = tags.length
+    ? tags.map(function (t) { return '<span class="tag ai">' + esc(t) + '</span>'; }).join('')
+    : '<i>nothing spotted yet — keep describing the work</i>';
+}
+
+function renderJobs() {
+  var ind = document.getElementById('f-industry').value;
+  var tag = document.getElementById('f-tag').value;
+  var q = document.getElementById('f-search').value.toLowerCase();
+  var list = JOBS.filter(function (j) {
+    if (ind && j.industry !== ind) return false;
+    if (tag && j.tags.indexOf(tag) === -1) return false;
+    if (q && (j.position + ' ' + j.description + ' ' + j.industry).toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+  var html = list.length ? '' : '<div class="card">No jobs match that yet. Try another tag, or post the job yourself.</div>';
+  list.forEach(function (j) {
+    html += '<div class="card"><h3>' + esc(j.position) + ' ' + (j.sample ? '<span class="badge sample">SAMPLE</span>' : '') + '</h3>'
+      + '<div class="meta">' + esc(j.industry) + ' &middot; posted ' + esc(new Date(j.createdAt).toLocaleDateString()) + (j.resumeRequired ? ' &middot; resume required' : '') + '</div>'
+      + '<p>' + esc(j.description) + '</p>'
+      + '<div>' + tagChips(j.tags, j.tagsAi) + '</div>'
+      + '<button class="btn small" onclick="showJobMatches(\'' + esc(j.id) + '\')">See matching workers</button>'
+      + '</div>';
+  });
+  document.getElementById('job-list').innerHTML = html;
+}
+
+function renderWorkers() {
+  var html = WORKERS.length ? '' : '<div class="card">No workers yet. Be the first to join.</div>';
+  WORKERS.forEach(function (w) {
+    html += '<div class="card"><h3>' + esc(w.name) + ' ' + (w.sample ? '<span class="badge sample">SAMPLE</span>' : '') + '</h3>'
+      + '<div>' + w.skills.map(function (s) { return '<span class="tag">' + esc(s) + '</span>'; }).join('') + '</div>'
+      + (w.hasResume ? '<div class="meta">Resume on file' + (w.resumeName ? ' (' + esc(w.resumeName) + ')' : '') + '</div>' : '')
+      + '<button class="btn small" onclick="showWorkerMatches(\'' + esc(w.id) + '\')">See matching jobs</button>'
+      + '</div>';
+  });
+  document.getElementById('worker-list').innerHTML = html;
+}
+
+function showJobMatches(jobId) {
+  api('/api/lucian/matches?jobId=' + encodeURIComponent(jobId)).then(function (res) {
+    showTab('matches');
+    document.getElementById('matches-title').textContent = 'Workers for: ' + res.job.position;
+    var html = res.workers.length ? '' : '<p>No workers match this job yet. Share the job and check back.</p>';
+    res.workers.forEach(function (m) {
+      html += '<div class="card"><h3>' + esc(m.worker.name) + ' <span class="score">' + m.score + ' shared tag' + (m.score === 1 ? '' : 's') + '</span></h3>'
+        + '<div>' + tagChips(m.sharedTags) + '</div>'
+        + '<button class="btn small gold" onclick="connectAsEmployer(\'' + esc(res.job.id) + '\',\'' + esc(m.worker.id) + '\', this)">Connect — show contact</button>'
+        + '<div class="contact hidden"></div></div>';
+    });
+    document.getElementById('matches-body').innerHTML = html;
+  }).catch(function (e) { alert(e.message); });
+}
+
+function showWorkerMatches(workerId) {
+  api('/api/lucian/matches?workerId=' + encodeURIComponent(workerId)).then(function (res) {
+    showTab('matches');
+    document.getElementById('matches-title').textContent = 'Jobs for: ' + res.worker.name;
+    var html = res.jobs.length ? '' : '<p>No jobs match these skills yet. Check back — new jobs land here first.</p>';
+    res.jobs.forEach(function (m) {
+      html += '<div class="card"><h3>' + esc(m.job.position) + ' <span class="score">' + m.score + ' shared tag' + (m.score === 1 ? '' : 's') + '</span></h3>'
+        + '<div class="meta">' + esc(m.job.industry) + (m.job.resumeRequired ? ' &middot; resume required' : '') + '</div>'
+        + '<p>' + esc(m.job.description) + '</p>'
+        + '<div>' + tagChips(m.sharedTags) + '</div>'
+        + '<button class="btn small gold" onclick="connectAsWorker(\'' + esc(m.job.id) + '\',\'' + esc(res.worker.id) + '\', this)">I\'m interested — show contact</button>'
+        + '<div class="contact hidden"></div></div>';
+    });
+    document.getElementById('matches-body').innerHTML = html;
+  }).catch(function (e) { alert(e.message); });
+}
+
+function connectAsEmployer(jobId, workerId, btn) {
+  btn.disabled = true;
+  api('/api/lucian/connect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jobId: jobId, workerId: workerId, role: 'employer' }) })
+    .then(function (res) {
+      var box = btn.parentElement.querySelector('.contact');
+      var o = res.otherSide;
+      box.innerHTML = '<b>' + esc(o.name) + '</b><br>Phone: ' + esc(o.phone || '—') + '<br>Email: ' + esc(o.email || '—')
+        + (o.hasResume && o.resumeDataUrl ? '<br><a href="' + o.resumeDataUrl + '" download="' + esc(o.resumeName || 'resume') + '">Download resume</a>' : '')
+        + '<br><span class="hint">Introduction recorded. Reach out and talk.</span>';
+      box.classList.remove('hidden');
+      btn.textContent = 'Connected';
+    })
+    .catch(function (e) { alert(e.message); btn.disabled = false; });
+}
+
+function connectAsWorker(jobId, workerId, btn) {
+  btn.disabled = true;
+  api('/api/lucian/connect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jobId: jobId, workerId: workerId, role: 'worker' }) })
+    .then(function (res) {
+      var box = btn.parentElement.querySelector('.contact');
+      var o = res.otherSide;
+      box.innerHTML = '<b>' + esc(o.name) + '</b><br>Phone: ' + esc(o.phone || '—') + '<br>Email: ' + esc(o.email || '—')
+        + '<br><span class="hint">Introduction recorded. Reach out and talk.</span>';
+      box.classList.remove('hidden');
+      btn.textContent = 'Connected';
+    })
+    .catch(function (e) { alert(e.message); btn.disabled = false; });
+}
+
+function checkedValues(containerId) {
+  return Array.prototype.slice.call(document.querySelectorAll('#' + containerId + ' input:checked')).map(function (el) { return el.value; });
+}
+
+function submitJob() {
+  var body = {
+    industry: document.getElementById('p-industry').value,
+    position: document.getElementById('p-position').value,
+    description: document.getElementById('p-description').value,
+    tagsSelected: checkedValues('p-tags'),
+    contactName: document.getElementById('p-name').value,
+    contactPhone: document.getElementById('p-phone').value,
+    contactEmail: document.getElementById('p-email').value,
+    resumeRequired: document.getElementById('p-resume-required').checked
+  };
+  api('/api/lucian/jobs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .then(function (res) {
+      showMsg('post-msg', 'Job posted. Workers with matching skills will see it.', true);
+      JOBS.unshift(res.job);
+      document.getElementById('p-position').value = '';
+      document.getElementById('p-description').value = '';
+      previewTags();
+    })
+    .catch(function (e) { showMsg('post-msg', e.message, false); });
+}
+
+function readResumeFile() {
+  return new Promise(function (resolve) {
+    var input = document.getElementById('w-resume');
+    if (!input.files || !input.files[0]) return resolve(null);
+    var file = input.files[0];
+    document.getElementById('w-resume-info').textContent = file.name + ' — ' + Math.round(file.size / 1024) + ' KB';
+    var reader = new FileReader();
+    reader.onload = function () { resolve({ name: file.name, type: file.type, dataUrl: reader.result }); };
+    reader.onerror = function () { resolve(null); };
+    reader.readAsDataURL(file);
+  });
+}
+
+function submitWorker() {
+  readResumeFile().then(function (resume) {
+    var body = {
+      name: document.getElementById('w-name').value,
+      contactPhone: document.getElementById('w-phone').value,
+      contactEmail: document.getElementById('w-email').value,
+      skills: checkedValues('w-skills'),
+      resume: resume
+    };
+    return api('/api/lucian/workers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  })
+  .then(function (res) {
+    showMsg('worker-msg', 'Welcome in, ' + res.worker.name + '. Employers with matching jobs will see you.', true);
+    WORKERS.unshift(res.worker);
+    renderWorkers();
+    document.getElementById('w-name').value = '';
+  })
+  .catch(function (e) { showMsg('worker-msg', e.message, false); });
+}
+
+function loadAll() {
+  api('/api/lucian/tags').then(function (res) {
+    TAGS = res;
+    document.getElementById('f-industry').innerHTML = '<option value="">All industries</option>' + res.industries.map(function (i) { return '<option>' + esc(i) + '</option>'; }).join('');
+    document.getElementById('f-tag').innerHTML = '<option value="">All tags</option>' + res.skills.map(function (s) { return '<option>' + esc(s) + '</option>'; }).join('');
+    document.getElementById('p-industry').innerHTML = res.industries.map(function (i) { return '<option>' + esc(i) + '</option>'; }).join('');
+    document.getElementById('p-tags').innerHTML = res.skills.map(function (s) { return '<label><input type="checkbox" value="' + esc(s) + '"> ' + esc(s) + '</label>'; }).join('');
+    document.getElementById('w-skills').innerHTML = res.skills.map(function (s) { return '<label><input type="checkbox" value="' + esc(s) + '"> ' + esc(s) + '</label>'; }).join('');
+    document.getElementById('f-industry').addEventListener('change', renderJobs);
+    document.getElementById('f-tag').addEventListener('change', renderJobs);
+  }).catch(function () { /* tags load failed — forms still render */ });
+  api('/api/lucian/jobs').then(function (res) { JOBS = res.jobs; renderJobs(); });
+  api('/api/lucian/workers').then(function (res) { WORKERS = res.workers; renderWorkers(); });
+}
+loadAll();
+</script>
+</body>
+</html>

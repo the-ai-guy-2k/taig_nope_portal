@@ -3,6 +3,7 @@ const express = require('express');
 const {
   dashboardRoutes,
   jobOrderRoutes,
+  lucianJobConnectRoutes,
   musicStoreRoutes,
   placeholderRoutes,
   planningRoutes,
@@ -29,11 +30,12 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(path.join(__dirname, '..', 'public')));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); /* Lucian Job Connect resumes arrive as base64 in JSON. */
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/', dashboardRoutes);
 app.use('/job-orders', jobOrderRoutes);
+app.use('/', lucianJobConnectRoutes);
 app.use('/', musicStoreRoutes);
 app.use('/', sportsReportRoutes);
 app.use('/', placeholderRoutes);
