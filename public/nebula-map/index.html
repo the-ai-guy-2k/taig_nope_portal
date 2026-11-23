@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nebula — the plan, as bubbles</title>
+<style>
+  :root { --navy:#182941; --gold:#CDA140; --paper:#ffffff; --ink:#182941; --muted:#5c6b7a; --line:#d8d2c2; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; height:100%; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--paper); color:var(--ink); overflow:hidden; }
+  header { position:fixed; top:0; left:0; right:0; z-index:10; background:#fff; border-bottom:2px solid var(--navy); padding:12px 16px 10px; display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; }
+  header h1 { margin:0; font-size:22px; color:var(--navy); }
+  header h1 span { color:var(--gold); }
+  header p { margin:4px 0 0; color:var(--muted); font-size:13px; max-width:640px; }
+  .head-right { margin-left:auto; text-align:right; font-size:13px; color:var(--muted); }
+  .head-right b { color:var(--navy); font-size:20px; }
+  #controls { position:fixed; left:16px; top:96px; z-index:10; display:flex; flex-direction:column; gap:8px; }
+  #controls button { width:44px; height:44px; font-size:20px; border:2px solid var(--navy); background:#fff; color:var(--navy); border-radius:10px; cursor:pointer; }
+  #controls button:hover { background:var(--navy); color:#fff; }
+  #controls button.wide { width:auto; padding:0 12px; font-size:14px; height:40px; }
+  #map-wrap { position:fixed; inset:0; top:78px; }
+  svg { width:100%; height:100%; display:block; touch-action:none; cursor:grab; }
+  svg:active { cursor:grabbing; }
+  .edge { stroke:var(--navy); stroke-width:1.5; opacity:.45; }
+  .xlink { stroke:var(--gold); stroke-width:2; stroke-dasharray:6 5; fill:none; opacity:.9; }
+  .bubble { fill:#fff; stroke:var(--navy); stroke-width:2; cursor:pointer; }
+  .bubble.new { stroke:var(--gold); stroke-width:3.5; }
+  .bubble.center { fill:var(--navy); stroke:var(--gold); stroke-width:3; }
+  .bubble.branch { fill:#eef1f5; }
+  .blabel { fill:var(--navy); text-anchor:middle; pointer-events:none; font-weight:600; }
+  .blabel.center { fill:#fff; }
+  .blabel.branch { font-weight:700; }
+  #panel { position:fixed; right:16px; top:96px; z-index:10; width:320px; max-width:calc(100vw - 32px); background:#fff; border:2px solid var(--navy); border-radius:12px; padding:16px; display:none; box-shadow:0 6px 24px rgba(24,41,65,.18); }
+  #panel h2 { margin:0 0 6px; font-size:19px; color:var(--navy); }
+  #panel .src { display:inline-block; font-size:12px; font-weight:700; border-radius:999px; padding:2px 10px; margin-bottom:10px; }
+  #panel .src.map { background:#e4eaf1; color:var(--navy); }
+  #panel .src.update, #panel .src.napkin { background:#f5e9c8; color:#6b5416; }
+  #panel p { margin:0 0 10px; font-size:15px; line-height:1.5; }
+  #panel a { color:var(--navy); font-weight:700; }
+  #panel .close { position:absolute; top:8px; right:10px; border:none; background:none; font-size:20px; cursor:pointer; color:var(--muted); }
+  #legend { position:fixed; left:16px; bottom:14px; z-index:10; background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px 12px; font-size:13px; color:var(--muted); }
+  #legend b { color:var(--navy); }
+  .sw { display:inline-block; width:12px; height:12px; border-radius:50%; border:2px solid var(--navy); vertical-align:-1px; margin-right:4px; }
+  .sw.gold { border-color:var(--gold); }
+  footer { position:fixed; right:16px; bottom:14px; z-index:10; font-size:13px; color:var(--muted); background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px 12px; }
+  footer a { color:var(--navy); font-weight:700; }
+  @media (max-width:700px){ header p{ display:none; } #panel{ top:auto; bottom:14px; right:16px; left:16px; width:auto; } }
+  @media print {
+    header, #controls, #panel, #legend, footer { display:none !important; }
+    #map-wrap { position:static; inset:auto; }
+    html, body { overflow:visible; }
+    svg { width:100vw; height:100vh; }
+  }
+  @page { size: 36in 24in landscape; margin: 0; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Nebula <span>— the plan, as bubbles</span></h1>
+    <p>Nov 13 hand-drawn map, reproduced digitally, plus everything since — the napkin, the PIOs, today's calls. Everything runs off Nebula. Click a bubble for its note. Best on a tablet or laptop.</p>
+  </div>
+  <div class="head-right"><b id="node-count">…</b><br>bubbles on this map<br>tree 428 · Hive 108 PIOs</div>
+</header>
+<div id="controls">
+  <button id="zin" title="Zoom in">+</button>
+  <button id="zout" title="Zoom out">−</button>
+  <button id="fit" class="wide" title="Fit whole map">Fit</button>
+</div>
+<div id="map-wrap"><svg id="map"><g id="vp"></g></svg></div>
+<aside id="panel">
+  <button class="close" id="pclose" title="Close">×</button>
+  <h2 id="ptitle"></h2>
+  <span class="src" id="psrc"></span>
+  <p id="pnote"></p>
+  <p id="plink"></p>
+</aside>
+<div id="legend"><b>Legend</b> &nbsp; <span class="sw"></span>Nov 13 map &nbsp; <span class="sw gold"></span>new / updated Nov 23 &nbsp; <span style="color:var(--gold); font-weight:700;">┄</span> cross-link</div>
+<footer>Sources: Nov 13 notebook map v4 · Nov 23 napkin · morning updates list · <a href="nebula-map.pdf">Download large-format PDF</a></footer>
+<script>
+const NODES = [
+// id, label, parent, note, source(map|update|napkin), pio#
+["nebula","Nebula",null,"Everything runs off Nebula. Tee's AI operator setup — the system that works his projects — with TAIG2K, TAIG ITS, and the Hive branching off it. Grown from the 'Nebula AI' bubble on the Nov 13 map.","map",null],
+// ---- TAIG2K ----
+["taig2k","TAIG2K","nebula","Personal / umbrella. Tee himself, his background, his own projects — job hunt, books, DIME, Diamond IQ, the AI RFC.","map",null],
+["me","Me — Sanil Dale Tison","taig2k","Tee. 14 years US Navy, 24 years in IT. The map starts here.","map",null],
+["navy","14 years US Navy","me","2002–2016. Five years ejection-seat maintainer, nine years IT specialist.","map",null],
+["ame","5 years Ejection seat maintainer","navy","F/A-18 ejection seats.","map",null],
+["fa18","Worked on F/A-18 jets","ame","","map",null],
+["flightdeck","Worked on flight deck","fa18","","map",null],
+["cvn71","CVN 71","flightdeck","USS Theodore Roosevelt.","map",null],
+["itspec","9 years IT specialist","navy","","map",null],
+["nightshift","Night shift supervisor, ejection seat shop","itspec","4 personnel.","map",null],
+["safety","Safety inspector","itspec","Maintenance actions performed on ejection seats.","map",null],
+["supduties","Supervisor — all technical and personal duties","itspec","","map",null],
+["sicily","NCTS Sicily","supduties","21 personnel.","map",null],
+["bahrain","NCTS Bahrain","supduties","5 personnel.","map",null],
+["it24","Combined 24 years in IT","me","Navy IT plus civilian IT — the skill base TAIG ITS sells.","map",null],
+["devops","DevOps engineer","it24","","map",null],
+["programmer","Programmer","it24","","map",null],
+["python","Python","programmer","","map",null],
+["network","Network Engineer","it24","","map",null],
+["desktop","Desktop Support","it24","","map",null],
+["winlin","Windows + Linux","desktop","","map",null],
+["itauto","IT Automation","it24","","map",null],
+["ansible","Ansible","itauto","","map",null],
+["scripts","Scripts","itauto","","map",null],
+["aiworkflow","AI workflow engineer","it24","","map",null],
+["itsys","IT system engineer","it24","","map",null],
+["maturity","AI experience maturity","taig2k","Tee's scale, 1–5. He rates 3.5. RFC v2.2 live on GitHub (MIT). IG + FB posts live. Reddit post live, zero traction so far. IETF draft paperwork done — filing decision open.","update",49],
+["diamond","Diamond IQ","taig2k","SaaS pivot Nov 18 — multi-tenant, $11/mo per team. Juicers are the proving ground. PSIS is a feature inside it.","update",null],
+["dime","DIME","taig2k","NFL 50-56-2, down $1,160. College 39-34-2, up $160. Display edit done — waiting on Tee's dime-dashboard repo.","update",null],
+["housing","Housing","taig2k","Budget $1,200 rent + $300 utilities = $1,500/mo. Household $5,025 in / $4,097 out.","update",null],
+["hrblock","H&R Block","taig2k","Tax appt Nov 23, 2 PM, Roxanne, 9394 Arlington Expy. Bring 2025 paystub. H&R Block's 2:29 PM email says Nov 30, 2 PM instead — date conflict, Tee to confirm with the office.","update",null],
+["counsel","Counseling","taig2k","New appt Tue Nov 24, 2 PM, New Life Counseling East, Angela.","update",null],
+["freeinputs","Free inputs","taig2k","TAIG Classics (public-domain books), NASA nebula images, open-source MSP stack, open baseball data for PSIS.","update",null],
+["deadsaas","Dead SaaS revival","taig2k","Wunderlist, Google Reader, Rdio, Inbox, Sunrise — great products killed by bad management or marketing, each with an Intent line.","update",null],
+// ---- TAIG ITS ----
+["taigits","TAIG ITS — The AI Guy IT Solutions","nebula","The business. MSP + fix-first IT. $79 / $119 / $179 per user a month.","map",null],
+["msp","MSP prices LOCKED","taigits","$79 / $119 / $179 per user a month, $100/hr project work, $500/mo minimum. Onboarding waived for founding clients.","update",null],
+["script","Meeting script","taigits","30-minute talk track — problem to close. Delivered Nov 22.","update",null],
+["infra","Infra budget","taigits","$100/mo, 60/40 ops/security.","update",null],
+["warrior","Warrior Rising","taigits","Plan locked (13 pp), $6,000 ask. Phase 2 class Dec 7–8. Angle is fear tiers — Jay + Roger as proof.","update",null],
+["gh","G&H Tires","taigits","Off the comms list (Nov 16). Jay's statement letter substitutes for the customer letter.","update",null],
+["digit","Dig It","taigits","New active client (Nov 23). Exchange for now, pays later. Fridays are client-report days again.","update",null],
+["jags","Jaguars pitches ON HOLD","taigits","All active pitches paused Nov 23. Build reports (vendor doors, JSEB) keep coming.","update",null],
+["atlantic","Atlantic","taigits","2nd interview passed Nov 18. Application + correction sent Nov 19. Waiting on Wendy's drug-test email.","update",null],
+["george","George / MilTalent","taigits","Pitch written Nov 20. Tee sends it himself — version pick open.","update",null],
+["securepro","Securepro","taigits","Resume tailored Nov 21 — DSO Specialist, $120–150K. Date overlaps still open.","update",null],
+["mo","Mo — PC Repair & Sales","taigits","Partnership Nov 13. Mo heads PC Repair and Sales (Abbar Tech). 5% referrals each way. Site live with 6 laptops.","update",null],
+["clerge","Clerge Payless","taigits","Promo marketing client. 60 years old. Lawn, cleaning, pressure washing, moving. $40 front & back. Pro cards being redone.","update",null],
+["musty","Musty","taigits","Mustaphar Felicien — Tee's high-school friend in St. Lucia. Partner AND client: on the agenda for talking points in both the client lane and the partner lane. Runs the St. Lucia radio connection for Jay. Has all the ISRC codes.","napkin",110],
+["client","Client","musty","Musty as a client of TAIG ITS — Tee still sees him as a client mentally, even though he's a partner.","napkin",null],
+["connections","Connections","musty","Musty's connections — the link from St. Lucia into Promotional.","napkin",null],
+["promo","Promotional","connections","Three lanes: Music, Software Products, Software Services. PIO #115.","napkin",115],
+["promomusic","Music","promo","","napkin",null],
+["promosoft","Software Products","promo","","napkin",null],
+["promosvc","Software Services","promo","","napkin",null],
+// ---- THE HIVE ----
+["hive","The Hive","nebula","The team — art-and-science incubator. Jay + Josh first. THC is its portal.","map",null],
+["hivemembers","Hive Members","hive","","map",null],
+["tech","Tech","hivemembers","","map",null],
+["techpio","Tech PIO","tech","A PIO that becomes a product. Runs through Nebula — see the gold link to the center.","map",null],
+["pioproduct","PIO made into a Product or service","nebula","A PIO, worked through Nebula, becomes a product or service. (From the Nov 13 map — re-homed on the center Nebula; it sat under Tech PIO there.)","map",null],
+["promomarkets","TAIG Promo markets it","pioproduct","","map",null],
+["itsmktg","TAIG ITS marketing dept.","promomarkets","Drawn as a box on the Nov 13 map.","map",null],
+["finds","Finds","pioproduct","","map",null],
+["hivemember","Hive member","finds","","map",null],
+["thc","The Hive Central Portal","hive","THC — the Hive's home. 108 live PIOs, all public (Nov 23).","map",1],
+["science","Science","thc","","map",null],
+["robotics","Robotics","science","","map",null],
+["art","Art","thc","","map",null],
+["music","Music","art","","map",null],
+["jay","Jay","music","Jay Garrett — country music singer/songwriter. 7 albums. Releasing one now. 'Something We Can Stomp To' — ISRC confirmed. Luminate both forms filed Nov 20. Dec 4–10 push week not locked yet.","map",10],
+["josh","Josh","music","Joshua Stephenson — heavy metal singer/songwriter. 24 songs. 1st album release next year.","map",null],
+["cott","COTT — Crumbs on the Table","hive","The label. Jay + Josh first.","map",null],
+["musicpromo","Musical promotion in St. Lucia","cott","Jay/Josh music release + exposure in St. Lucia via Musty — radio connection, ISRC codes from CD Baby. PIO #113.","napkin",113],
+["musicrel","Music release","musicpromo","Jay's releases, promoted in St. Lucia.","napkin",null],
+["musicexp","Music Exposure","musicpromo","Josh's exposure, promoted in St. Lucia.","napkin",null],
+["pios","PIOs — 108 live","hive","108 live PIOs, all public (Nov 23). GitHub ideas added Nov 22 — 58 PIOs #51–108. Next id 116.","update",null],
+["taghub","Tag Hub","hive","Live Nov 20 — one site holding Business overview, Calendar, Loop report, and the Hive.","update",null],
+["hiverestructure","Hive restructure","hive","Spaces, PIO comments watch every 2 hours.","update",null],
+["jaxradio","JAX Southern Rock Radio","hive","James Gatlin. Jay's music on it. Tee called Nov 23, left a message. Jay calling too.","update",null],
+["ljc","Lucian Job Connect","hive","PIO #110. St. Lucia job board. MVP live Nov 22.","update",110],
+["giggit","Giggit","hive","PIO #111. Musty's Caribbean gig-work platform. MVP + photo + closest-first matching live Nov 22. TaskRabbit is the model.","update",111],
+["openup","What other things this can open up for us","giggit","Open question — on PIO #111 as a to-do.","napkin",111],
+["security","Current infra — security concerns","giggit","Security goes in at implementation, probably V2, before public exposure. Goal: Saint Lucia government backing. Testing deliberately runs WITHOUT security, so an operational blockage is known to be operational. (To-do on PIO #111.)","napkin",111],
+["opps","Opportunities in providing service to St. Lucia","giggit","Umbrella for St. Lucia services beyond Giggit and Lucian Job Connect. PIO #114.","napkin",114],
+["drifter","Drifter","hive","PIO #112. Same-day quick job, fair pay. Separate from Giggit.","update",112],
+["survive","Can You Survive My Life","hive","PIO #109. A life timeline as a challenge — walk it, make the calls, compare.","update",109],
+["aiop","AI Operator ideas","hive","PIOs #43–48 — service, consumer version, Social AI, Impossible Exposure, golf caddy, Hood Meta Glasses.","update",43],
+["tsr","Sports Report v14","hive","News off, Weekend Preview, 8 teams.","update",null],
+["stadium","Stadium","hive","Monday reports running. Titans Nov 29, 1 PM (pitch on hold). FF&E RFP closed Nov 16. Network primes awarded. JSEB is the door.","update",null],
+["loop","Loop Report","hive","Baseline Nov 15. Nov 20 count: 129 open, 101 untouched.","update",null],
+];
+// gold dashed cross-links: [from, to] — links the hand-drawn maps show that aren't parent/child here
+const XLINKS = [
+  ["techpio","nebula"],
+  ["giggit","taig2k"],
+  ["musicpromo","musty"],
+  ["hivemembers","josh"],
+];
+const WEDGE = { taig2k:{c:245,span:0}, taigits:{c:0,span:0}, hive:{c:115,span:0}, pioproduct:{c:115,span:0} };
+const byId = {}; NODES.forEach(n => byId[n[0]] = {id:n[0], label:n[1], parent:n[2], note:n[3], src:n[4], pio:n[5], kids:[]});
+NODES.forEach(n => { if (n[2]) byId[n[2]].kids.push(byId[n[0]]); });
+const root = byId["nebula"];
+function leaves(n){ if(!n.kids.length) return 1; return n.kids.reduce((s,k)=>s+leaves(k),0); }
+// wedge spans proportional to leaf counts (pioproduct shares the Hive wedge)
+const branches = ["taig2k","taigits","hive"];
+const totalLeaves = branches.reduce((s,b)=>s+leaves(byId[b]),0) + leaves(byId["pioproduct"]);
+branches.forEach(b => { WEDGE[b].span = 360 * leaves(byId[b]) / (totalLeaves + leaves(byId["pioproduct"])*0 + totalLeaves); });
+WEDGE["taig2k"].span = 360 * leaves(byId["taig2k"]) / totalLeaves;
+WEDGE["taigits"].span = 360 * leaves(byId["taigits"]) / totalLeaves;
+WEDGE["hive"].span = 360 * (leaves(byId["hive"]) + leaves(byId["pioproduct"])) / totalLeaves;
+WEDGE["pioproduct"].span = WEDGE["hive"].span;
+// assign angles: walk leaves in order, each leaf gets an equal slice of its branch wedge
+function branchOf(n){ let x=n; while(x.parent && x.parent!=="nebula") x=byId[x.parent]; return x.id==="nebula" ? null : x.id; }
+function wedgeOf(n){ const b = branchOf(n); if(!b) return null; if(b==="pioproduct") return WEDGE["hive"]; return WEDGE[b]; }
+const leafAngle = {};
+(function assign(){
+  const order = [];
+  (function walk(n){ if(!n.kids.length){ order.push(n); return; } n.kids.forEach(walk); })(root);
+  // group consecutive leaves by branch (pioproduct leaves count as Hive)
+  const groups = {}; order.forEach(n => { const b = branchOf(n) || "pioproduct"; (groups[b]=groups[b]||[]).push(n); });
+  const centers = { taig2k:245, taigits:0, hive:115 };
+  Object.keys(groups).forEach(b => {
+    const w = WEDGE[b==="pioproduct"?"hive":b];
+    const c = centers[b==="pioproduct"?"hive":b];
+    const list = groups[b], span = w.span;
+    list.forEach((n,i) => { leafAngle[n.id] = c - span/2 + span*(i+0.5)/list.length; });
+  });
+})();
+function angleOf(n){
+  if(n.id==="nebula") return 0;
+  if(!n.kids.length) return leafAngle[n.id];
+  const a = n.kids.map(angleOf);
+  // circular mean, handling the 0/360 wrap for the ITS branch
+  let xs=0, ys=0; a.forEach(d => { const r=d*Math.PI/180; xs+=Math.cos(r); ys+=Math.sin(r); });
+  return Math.atan2(ys,xs)*180/Math.PI;
+}
+function depthOf(n){ let d=0, x=n; while(x.parent){ d++; x=byId[x.parent]; } return d; }
+function radiusOf(n){
+  const d = depthOf(n);
+  if(d===0) return 0;
+  return 300 + (d-1)*260;
+}
+function nodeR(n){
+  const d = depthOf(n);
+  if(d===0) return 78;
+  if(d===1) return 60;
+  if(d===2) return 50;
+  return Math.max(30, Math.min(58, 16 + n.label.length*1.0));
+}
+function pos(n){
+  const a = angleOf(n)*Math.PI/180, r = radiusOf(n);
+  return { x: r*Math.cos(a), y: r*Math.sin(a) };
+}
+// repulsion passes: same-depth nodes must not overlap
+NODES.forEach(n => { const p = pos(byId[n[0]]); byId[n[0]].x=p.x; byId[n[0]].y=p.y; byId[n[0]].a=angleOf(byId[n[0]]); byId[n[0]].r=nodeR(byId[n[0]]); });
+for(let it=0; it<80; it++){
+  let moved=false;
+  for(let i=0;i<NODES.length;i++) for(let j=i+1;j<NODES.length;j++){
+    const A=byId[NODES[i][0]], B=byId[NODES[j][0]];
+    if(depthOf(A)!==depthOf(B)) continue;
+    const dx=B.x-A.x, dy=B.y-A.y, d=Math.hypot(dx,dy);
+    const min=A.r+B.r+10;
+    if(d<min){
+      // coincident centers (d==0) have no direction — push apart horizontally
+      const ux = d<1 ? 1 : dx/d, uy = d<1 ? 0 : dy/d;
+      const push=(min-(d<1?0:d))/2;
+      A.x-=ux*push; A.y-=uy*push; B.x+=ux*push; B.y+=uy*push; moved=true;
+    }
+  }
+  if(!moved) break;
+}
+// ---- render ----
+const svg = document.getElementById("map"), vp = document.getElementById("vp");
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+function wrapText(label, r, fs){
+  const maxChars = Math.max(6, Math.floor((r*1.55)/(fs*0.56)));
+  const words = label.split(" "), lines=[]; let cur="";
+  words.forEach(w => {
+    if((cur+" "+w).trim().length > maxChars && cur){ lines.push(cur.trim()); cur=w; }
+    else cur = (cur+" "+w).trim();
+  });
+  if(cur) lines.push(cur);
+  return lines.slice(0,4);
+}
+// edges
+NODES.forEach(n => {
+  const c = byId[n[0]];
+  if(!c.parent) return;
+  const p = byId[c.parent];
+  vp.appendChild(el("line",{x1:p.x,y1:p.y,x2:c.x,y2:c.y,class:"edge"}));
+});
+XLINKS.forEach(([a,b]) => {
+  const A=byId[a], B=byId[b], mx=(A.x+B.x)/2, my=(A.y+B.y)/2 - 120;
+  vp.appendChild(el("path",{d:`M ${A.x} ${A.y} Q ${mx} ${my} ${B.x} ${B.y}`,class:"xlink"}));
+});
+// bubbles
+NODES.forEach(n => {
+  const c = byId[n[0]], d = depthOf(c);
+  const fs = d===0?19 : d===1?15 : d===2?13 : 11.5;
+  const g = el("g",{});
+  const circ = el("circle",{cx:c.x, cy:c.y, r:c.r, class:"bubble"+(d===0?" center":d===1?" branch":"")+(c.src!=="map"?" new":"")});
+  g.appendChild(circ);
+  const lines = wrapText(c.label, c.r, fs);
+  const lh = fs*1.18, y0 = c.y - (lines.length-1)*lh/2 + fs*0.35;
+  lines.forEach((t,i) => {
+    const tx = el("text",{x:c.x, y:y0+i*lh, class:"blabel"+(d===0?" center":d===1?" branch":""), "font-size":fs});
+    tx.textContent = t; g.appendChild(tx);
+  });
+  g.addEventListener("click", ev => { ev.stopPropagation(); showPanel(c); });
+  vp.appendChild(g);
+});
+document.getElementById("node-count").textContent = NODES.length;
+const SRCNAME = {map:"Nov 13 map — as drawn", update:"Update — Nov 21–23", napkin:"Napkin — Nov 23"};
+function showPanel(c){
+  document.getElementById("ptitle").textContent = c.label;
+  const s = document.getElementById("psrc"); s.textContent = SRCNAME[c.src]; s.className = "src "+c.src;
+  document.getElementById("pnote").textContent = c.note || "As drawn on the map — no note added.";
+  document.getElementById("plink").innerHTML = c.pio ? `<a href="https://taigtsp.duckdns.org/hive-portal/u/timhive/pio/pio/view?id=${c.pio}" target="_blank" rel="noopener">Open PIO #${c.pio} in the Hive →</a>` : "";
+  document.getElementById("panel").style.display = "block";
+}
+document.getElementById("pclose").addEventListener("click", ()=> document.getElementById("panel").style.display="none");
+svg.addEventListener("click", ()=> document.getElementById("panel").style.display="none");
+// ---- pan / zoom ----
+let view = {x:0, y:0, k:1};
+function applyView(){ vp.setAttribute("transform", `translate(${view.x} ${view.y}) scale(${view.k})`); }
+function fit(){
+  const r = svg.getBoundingClientRect();
+  const k = Math.min(r.width/4200, r.height/4200)*0.98;
+  view = {x: r.width/2 - 0, y: r.height/2 - 0, k};
+  // center: viewBox is -2100..2100 so translate to middle of screen
+  view.x = r.width/2; view.y = r.height/2;
+  applyView();
+}
+function zoomAt(cx, cy, factor){
+  const nk = Math.max(0.05, Math.min(8, view.k*factor));
+  const f = nk/view.k;
+  view.x = cx - (cx - view.x)*f; view.y = cy - (cy - view.y)*f; view.k = nk;
+  applyView();
+}
+document.getElementById("zin").addEventListener("click", ()=> zoomAt(svg.clientWidth/2, svg.clientHeight/2, 1.35));
+document.getElementById("zout").addEventListener("click", ()=> zoomAt(svg.clientWidth/2, svg.clientHeight/2, 1/1.35));
+document.getElementById("fit").addEventListener("click", fit);
+svg.addEventListener("wheel", ev => { ev.preventDefault(); const r=svg.getBoundingClientRect(); zoomAt(ev.clientX-r.left, ev.clientY-r.top, ev.deltaY<0?1.15:1/1.15); }, {passive:false});
+let drag=null;
+svg.addEventListener("pointerdown", ev => { drag={x:ev.clientX,y:ev.clientY,vx:view.x,vy:view.y}; svg.setPointerCapture(ev.pointerId); });
+svg.addEventListener("pointermove", ev => { if(!drag) return; view.x=drag.vx+(ev.clientX-drag.x); view.y=drag.vy+(ev.clientY-drag.y); applyView(); });
+svg.addEventListener("pointerup", ()=> drag=null);
+svg.addEventListener("pointercancel", ()=> drag=null);
+if(new URLSearchParams(location.search).has("print")){
+  document.querySelector("header").style.display="none";
+  document.getElementById("controls").style.display="none";
+  document.getElementById("legend").style.display="none";
+  document.querySelector("footer").style.display="none";
+  document.getElementById("map-wrap").style.top="0";
+  fit();
+} else {
+  fit();
+  window.addEventListener("resize", fit);
+}
+</script>
+</body>
+</html>
