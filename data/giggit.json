@@ -1,1 +1,211 @@
-{"giggers":[{"area":"Morne Fortune","createdAt":"2026-11-22T12:00:00.000Z","gigsCompleted":12,"id":"ggr-sample1","idNumber":"SAMPLE-ID-001","idType":"National ID","name":"Marta Joseph","parish":"Castries","phone":"+17584550001","pro":false,"ratingAvg":4.8,"ratingCount":5,"sample":true,"skills":["Cleaning","Housekeeping","Laundry & Ironing"],"tier":1},{"area":"Ciceron","createdAt":"2026-11-22T12:00:00.000Z","gigsCompleted":8,"id":"ggr-sample2","idNumber":"SAMPLE-ID-002","idType":"Driver’s Licence","name":"Kerwin Paul","parish":"Castries","phone":"+17584550002","pro":false,"ratingAvg":5.0,"ratingCount":3,"sample":true,"skills":["Gardening & Yard Work","Moving & Hauling"],"tier":1},{"area":"Castries Town","createdAt":"2026-11-22T12:00:00.000Z","gigsCompleted":4,"id":"ggr-sample3","idNumber":"SAMPLE-ID-003","idType":"National ID","name":"Alvina Charles","parish":"Castries","phone":"+17584550003","pro":false,"ratingAvg":4.5,"ratingCount":2,"sample":true,"skills":["Cooking & Catering","Event Help"],"tier":1}],"gigs":[{"area":"Morne Fortune","category":"Cleaning","completionCode":null,"createdAt":"2026-11-22T12:00:00.000Z","customerName":"Sample Customer","customerPhone":"+17584559901","description":"Deep clean of a 2-bedroom apartment in Morne Fortune — kitchen, bathrooms, floors. Bring your own supplies.","escrow":null,"giggerId":null,"giggerName":null,"giggerPhone":null,"id":"gig-sample1","parish":"Castries","priceEC":120,"ratings":[],"sample":true,"status":"open","title":"Deep clean 2-bed apartment","when":"Saturday morning"},{"acceptedAt":"2026-11-22T13:00:00.000Z","area":"Ciceron","category":"Gardening & Yard Work","completionCode":"481516","createdAt":"2026-11-22T12:00:00.000Z","customerName":"Sample Customer","customerPhone":"+17584559902","description":"Cut the front and back lawn and trim the hedges at a house in Ciceron. Tools provided by the customer.","escrow":{"amountEC":90,"commissionEC":null,"commissionRate":null,"payoutEC":null,"releaseAt":null,"releasedAt":null,"status":"held"},"giggerId":"ggr-sample2","giggerName":"Kerwin Paul","giggerPhone":"+17584550002","id":"gig-sample2","parish":"Castries","priceEC":90,"ratings":[],"sample":true,"status":"accepted","title":"Cut grass and trim hedges","when":"Weekday afternoon"},{"acceptedAt":"2026-11-20T13:00:00.000Z","area":"Castries Town","category":"Cooking & Catering","completedAt":"2026-11-21T14:00:00.000Z","completionCode":"234567","createdAt":"2026-11-20T12:00:00.000Z","customerName":"Sample Customer","customerPhone":"+17584559903","description":"Cook a Creole lunch for 10 people in Castries Town. Menu agreed with the customer on the call.","escrow":{"amountEC":200,"commissionEC":30,"commissionRate":0.15,"payoutEC":170,"releaseAt":"2026-11-21T15:00:00.000Z","releasedAt":"2026-11-21T15:00:00.000Z","status":"released"},"giggerId":"ggr-sample3","giggerName":"Alvina Charles","giggerPhone":"+17584550003","id":"gig-sample3","parish":"Castries","priceEC":200,"ratings":[{"at":"2026-11-21T16:00:00.000Z","by":"customer","comment":"Food was excellent, on time.","stars":5}],"sample":true,"status":"released","title":"Cook lunch for 10 — family gathering","when":"Sunday midday"}],"ledger":[{"amountEC":200,"at":"2026-11-20T13:00:00.000Z","gigId":"gig-sample3","giggerId":"ggr-sample3","id":"led-sample1","note":"Escrow held on accept","type":"hold"},{"amountEC":170,"at":"2026-11-21T15:00:00.000Z","gigId":"gig-sample3","giggerId":"ggr-sample3","id":"led-sample2","note":"Escrow released after dispute window","type":"release"},{"amountEC":30,"at":"2026-11-21T15:00:00.000Z","gigId":"gig-sample3","giggerId":"ggr-sample3","id":"led-sample3","note":"Giggit commission 15%","type":"fee"}],"pushSubscriptions":[],"ratings":[{"at":"2026-11-21T16:00:00.000Z","by":"customer","comment":"Food was excellent, on time.","gigId":"gig-sample3","id":"rat-sample1","stars":5}]}
+{
+  "giggers": [
+    {
+      "area": "Morne Fortune",
+      "createdAt": "2026-11-22T12:00:00.000Z",
+      "gigsCompleted": 12,
+      "id": "ggr-sample1",
+      "idNumber": "SAMPLE-ID-001",
+      "idType": "National ID",
+      "name": "Marta Joseph",
+      "parish": "Castries",
+      "phone": "+17584550001",
+      "pro": false,
+      "ratingAvg": 4.8,
+      "ratingCount": 5,
+      "sample": true,
+      "skills": [
+        "Cleaning",
+        "Housekeeping",
+        "Laundry & Ironing"
+      ],
+      "tier": 1,
+      "lat": 14.0027,
+      "lng": -60.9876
+    },
+    {
+      "area": "Ciceron",
+      "createdAt": "2026-11-22T12:00:00.000Z",
+      "gigsCompleted": 8,
+      "id": "ggr-sample2",
+      "idNumber": "SAMPLE-ID-002",
+      "idType": "Driver\u2019s Licence",
+      "name": "Kerwin Paul",
+      "parish": "Castries",
+      "phone": "+17584550002",
+      "pro": false,
+      "ratingAvg": 5.0,
+      "ratingCount": 3,
+      "sample": true,
+      "skills": [
+        "Gardening & Yard Work",
+        "Moving & Hauling"
+      ],
+      "tier": 1,
+      "lat": 14.014,
+      "lng": -60.994
+    },
+    {
+      "area": "Castries Town",
+      "createdAt": "2026-11-22T12:00:00.000Z",
+      "gigsCompleted": 4,
+      "id": "ggr-sample3",
+      "idNumber": "SAMPLE-ID-003",
+      "idType": "National ID",
+      "name": "Alvina Charles",
+      "parish": "Castries",
+      "phone": "+17584550003",
+      "pro": false,
+      "ratingAvg": 4.5,
+      "ratingCount": 2,
+      "sample": true,
+      "skills": [
+        "Cooking & Catering",
+        "Event Help"
+      ],
+      "tier": 1,
+      "lat": 14.01,
+      "lng": -60.993
+    }
+  ],
+  "gigs": [
+    {
+      "area": "Morne Fortune",
+      "category": "Cleaning",
+      "completionCode": null,
+      "createdAt": "2026-11-22T12:00:00.000Z",
+      "customerName": "Sample Customer",
+      "customerPhone": "+17584559901",
+      "description": "Deep clean of a 2-bedroom apartment in Morne Fortune \u2014 kitchen, bathrooms, floors. Bring your own supplies.",
+      "escrow": null,
+      "giggerId": null,
+      "giggerName": null,
+      "giggerPhone": null,
+      "id": "gig-sample1",
+      "parish": "Castries",
+      "priceEC": 120,
+      "ratings": [],
+      "sample": true,
+      "status": "open",
+      "title": "Deep clean 2-bed apartment",
+      "when": "Saturday morning",
+      "lat": 14.0027,
+      "lng": -60.9876,
+      "photo": null
+    },
+    {
+      "acceptedAt": "2026-11-22T13:00:00.000Z",
+      "area": "Ciceron",
+      "category": "Gardening & Yard Work",
+      "completionCode": "481516",
+      "createdAt": "2026-11-22T12:00:00.000Z",
+      "customerName": "Sample Customer",
+      "customerPhone": "+17584559902",
+      "description": "Cut the front and back lawn and trim the hedges at a house in Ciceron. Tools provided by the customer.",
+      "escrow": {
+        "amountEC": 90,
+        "commissionEC": null,
+        "commissionRate": null,
+        "payoutEC": null,
+        "releaseAt": null,
+        "releasedAt": null,
+        "status": "held"
+      },
+      "giggerId": "ggr-sample2",
+      "giggerName": "Kerwin Paul",
+      "giggerPhone": "+17584550002",
+      "id": "gig-sample2",
+      "parish": "Castries",
+      "priceEC": 90,
+      "ratings": [],
+      "sample": true,
+      "status": "accepted",
+      "title": "Cut grass and trim hedges",
+      "when": "Weekday afternoon",
+      "lat": 14.014,
+      "lng": -60.994,
+      "photo": null
+    },
+    {
+      "acceptedAt": "2026-11-20T13:00:00.000Z",
+      "area": "Castries Town",
+      "category": "Cooking & Catering",
+      "completedAt": "2026-11-21T14:00:00.000Z",
+      "completionCode": "234567",
+      "createdAt": "2026-11-20T12:00:00.000Z",
+      "customerName": "Sample Customer",
+      "customerPhone": "+17584559903",
+      "description": "Cook a Creole lunch for 10 people in Castries Town. Menu agreed with the customer on the call.",
+      "escrow": {
+        "amountEC": 200,
+        "commissionEC": 30,
+        "commissionRate": 0.15,
+        "payoutEC": 170,
+        "releaseAt": "2026-11-21T15:00:00.000Z",
+        "releasedAt": "2026-11-21T15:00:00.000Z",
+        "status": "released"
+      },
+      "giggerId": "ggr-sample3",
+      "giggerName": "Alvina Charles",
+      "giggerPhone": "+17584550003",
+      "id": "gig-sample3",
+      "parish": "Castries",
+      "priceEC": 200,
+      "ratings": [
+        {
+          "at": "2026-11-21T16:00:00.000Z",
+          "by": "customer",
+          "comment": "Food was excellent, on time.",
+          "stars": 5
+        }
+      ],
+      "sample": true,
+      "status": "released",
+      "title": "Cook lunch for 10 \u2014 family gathering",
+      "when": "Sunday midday",
+      "lat": 14.01,
+      "lng": -60.993,
+      "photo": null
+    }
+  ],
+  "ledger": [
+    {
+      "amountEC": 200,
+      "at": "2026-11-20T13:00:00.000Z",
+      "gigId": "gig-sample3",
+      "giggerId": "ggr-sample3",
+      "id": "led-sample1",
+      "note": "Escrow held on accept",
+      "type": "hold"
+    },
+    {
+      "amountEC": 170,
+      "at": "2026-11-21T15:00:00.000Z",
+      "gigId": "gig-sample3",
+      "giggerId": "ggr-sample3",
+      "id": "led-sample2",
+      "note": "Escrow released after dispute window",
+      "type": "release"
+    },
+    {
+      "amountEC": 30,
+      "at": "2026-11-21T15:00:00.000Z",
+      "gigId": "gig-sample3",
+      "giggerId": "ggr-sample3",
+      "id": "led-sample3",
+      "note": "Giggit commission 15%",
+      "type": "fee"
+    }
+  ],
+  "pushSubscriptions": [],
+  "ratings": [
+    {
+      "at": "2026-11-21T16:00:00.000Z",
+      "by": "customer",
+      "comment": "Food was excellent, on time.",
+      "gigId": "gig-sample3",
+      "id": "rat-sample1",
+      "stars": 5
+    }
+  ]
+}

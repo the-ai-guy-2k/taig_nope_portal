@@ -44,7 +44,7 @@ router.get('/api/giggit/meta', (req, res) => {
       note: '15% standard, 10% at 20+ gigs a month, 5% Giggit Pro.',
     },
     disputeWindowMinutes: store.DISPUTE_WINDOW_MS / 60000,
-    mvpNote: 'Castries pilot. Giggit Wallet is a simulated ledger in the MVP — no real money moves.',
+    mvpNote: 'Castries pilot. Photo on the gig request + closest-first matching by location are live. Giggit Wallet is a simulated ledger in the MVP — no real money moves.',
   });
 });
 
@@ -65,12 +65,44 @@ router.get('/api/giggit/gigs', (req, res) => {
   res.json({ gigs: store.listGigs({ status, parish, category }) });
 });
 
-router.post('/api/giggit/gigs', throttleWrites, (req, res) => {
+router.post('/api/giggit/gigs', throttleWrites, async (req, res) => {
+  let gig;
   try {
-    res.status(201).json({ gig: store.createGig(req.body || {}) });
+    gig = store.createGig(req.body || {});
   } catch (err) {
-    badRequest(res, err);
+    return badRequest(res, err);
   }
+  /* Closest-first (Musty's flow): rank the pool and ping the closest
+     gigger. The push attempt never blocks the post for long — 5s max. */
+  const ranked = store.matchesForGig(gig.id);
+  const closest = ranked && ranked.matches[0] ? ranked.matches[0] : null;
+  let notified = { notified: null, reason: 'No matching gigger in the pool yet.' };
+  try {
+    notified = await Promise.race([
+      store.notifyClosest(gig),
+      new Promise((resolve) => setTimeout(
+        () => resolve({ notified: null, reason: 'Push timed out — the gig is listed for them.' }), 5000)),
+    ]);
+  } catch (err) {
+    notified = { notified: null, reason: 'Push failed — the gig is listed for them.' };
+  }
+  return res.status(201).json({ gig, closest, notified });
+});
+
+router.get('/api/giggit/gigs/:id/matches', (req, res) => {
+  const ranked = store.matchesForGig(req.params.id);
+  if (!ranked) return res.status(404).json({ error: 'Gig not found.' });
+  return res.json(ranked);
+});
+
+/* Raw photo bytes, so <img src="…/photo"> works without bloating the
+   gig list JSON with base64. */
+router.get('/api/giggit/gigs/:id/photo', (req, res) => {
+  const photo = store.gigPhoto(req.params.id);
+  if (!photo) return res.status(404).end();
+  const base64 = String(photo.dataUrl.split(',')[1] || '');
+  const buf = Buffer.from(base64, 'base64');
+  res.type(photo.type).send(buf);
 });
 
 router.get('/api/giggit/gigs/:id', (req, res) => {
@@ -154,7 +186,8 @@ router.get('/api/giggit/push/vapid-public-key', (req, res) => {
 
 router.post('/api/giggit/push/subscribe', throttleWrites, (req, res) => {
   try {
-    res.json(store.savePushSubscription((req.body || {}).subscription || req.body || {}));
+    const body = req.body || {};
+    res.json(store.savePushSubscription(body.subscription || body, String(body.giggerId || '')));
   } catch (err) {
     badRequest(res, err);
   }

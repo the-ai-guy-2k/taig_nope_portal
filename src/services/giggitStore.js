@@ -123,6 +123,52 @@ function cleanMoney(value) {
   return Math.round(num * 100) / 100;
 }
 
+const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
+const PHOTO_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
+function cleanCoord(value, min, max) {
+  const num = Number(value);
+  if (!Number.isFinite(num) || num < min || num > max) return null;
+  return Math.round(num * 100000) / 100000;
+}
+
+function haversineKm(lat1, lng1, lat2, lng2) {
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return Math.round(2 * 6371 * Math.asin(Math.sqrt(a)) * 10) / 10;
+}
+
+function validatePhoto(photo) {
+  if (!photo) return null;
+  const dataUrl = String(photo.dataUrl || '');
+  const name = cleanText(photo.name, 120);
+  const type = String(photo.type || '');
+  const match = /^data:([^;]+);base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl);
+  if (!match || !PHOTO_TYPES.has(match[1]) || !PHOTO_TYPES.has(type)) {
+    throw new ValidationError('Photo must be a JPEG, PNG or WebP image.');
+  }
+  const bytes = Buffer.from(match[2], 'base64');
+  if (bytes.length > MAX_PHOTO_BYTES || bytes.length === 0) {
+    throw new ValidationError('Photo must be under 2 MB.');
+  }
+  return { name: name || 'photo', type: match[1], dataUrl };
+}
+
+function cleanLatLng(body) {
+  const hasLat = body.lat !== undefined && body.lat !== null && body.lat !== '';
+  const hasLng = body.lng !== undefined && body.lng !== null && body.lng !== '';
+  if (!hasLat && !hasLng) return { lat: null, lng: null };
+  const lat = hasLat ? cleanCoord(body.lat, -90, 90) : null;
+  const lng = hasLng ? cleanCoord(body.lng, -180, 180) : null;
+  if (lat === null || lng === null) {
+    throw new ValidationError('That location does not look right — use the “Use my location” button.');
+  }
+  return { lat, lng };
+}
+
 function loadSeed() {
   try {
     return JSON.parse(fs.readFileSync(SEED_PATH, 'utf8'));
@@ -224,6 +270,7 @@ function publicGigger(gigger) {
 
 function publicGig(gig, opts) {
   const showContacts = opts && opts.showContacts;
+  const includePhoto = opts && opts.includePhoto;
   const out = {
     id: gig.id,
     category: gig.category,
@@ -233,6 +280,9 @@ function publicGig(gig, opts) {
     area: gig.area,
     priceEC: gig.priceEC,
     priceGuide: PRICE_GUIDE[gig.category] || null,
+    hasPhoto: !!gig.photo,
+    lat: gig.lat != null ? gig.lat : null,
+    lng: gig.lng != null ? gig.lng : null,
     status: gig.status,
     giggerId: gig.giggerId || null,
     giggerName: gig.giggerName || null,
@@ -258,7 +308,14 @@ function publicGig(gig, opts) {
     out.customerPhone = gig.customerPhone;
     out.giggerPhone = gig.giggerPhone || null;
   }
+  if (includePhoto && gig.photo) out.photo = gig.photo;
   return out;
+}
+
+function gigPhoto(id) {
+  const state = load();
+  const gig = state.gigs.find((entry) => entry.id === id);
+  return gig && gig.photo ? gig.photo : null;
 }
 
 function validateGigger(body) {
@@ -281,7 +338,8 @@ function validateGigger(body) {
     ? [...new Set(body.skills.map((s) => cleanText(s, 40)).filter((s) => CATEGORIES.includes(s)))].slice(0, 8)
     : [];
   if (!skills.length) throw new ValidationError('Pick at least one skill.');
-  return { name, phone, parish, area, idType, idNumber, skills };
+  const { lat, lng } = cleanLatLng(body);
+  return { name, phone, parish, area, idType, idNumber, skills, lat, lng };
 }
 
 function validateGig(body) {
@@ -303,7 +361,9 @@ function validateGig(body) {
   const customerPhone = cleanText(body.customerPhone, 40);
   if (customerPhone.length < 7) throw new ValidationError('Give a phone number so the Gigger can reach you.');
   const when = cleanText(body.when, 120);
-  return { category, title, description, parish, area, priceEC, customerName, customerPhone, when };
+  const photo = validatePhoto(body.photo || null);
+  const { lat, lng } = cleanLatLng(body);
+  return { category, title, description, parish, area, priceEC, customerName, customerPhone, when, photo, lat, lng };
 }
 
 function createGigger(body) {
@@ -363,7 +423,68 @@ function getGig(id) {
   if (!gig) return null;
   /* Contacts are visible once a Gigger has accepted — both sides need
      each other to coordinate. Before that, numbers stay hidden. */
-  return publicGig(gig, { showContacts: gig.status !== 'open' });
+  return publicGig(gig, { showContacts: gig.status !== 'open', includePhoto: true });
+}
+
+/* Closest-first matching (Musty's notebook flow): rank the pool by skill
+   + parish, closest first. GPS distance when both sides shared a
+   location; same area next; same parish after that; no location last.
+   distanceKm is a real number only when both sides have GPS — otherwise
+   null, and the basis says why. */
+function matchesForGig(id) {
+  const state = load();
+  const gig = state.gigs.find((entry) => entry.id === id);
+  if (!gig) return null;
+  const ranked = state.giggers
+    .filter((gigger) => gigger.skills.includes(gig.category) && gigger.parish === gig.parish)
+    .map((gigger) => {
+      let distanceKm = null;
+      let basis = 'no-location';
+      let rank = 3000;
+      if (gig.lat != null && gig.lng != null && gigger.lat != null && gigger.lng != null) {
+        distanceKm = haversineKm(gig.lat, gig.lng, gigger.lat, gigger.lng);
+        basis = 'gps';
+        rank = distanceKm;
+      } else if (gig.area && gigger.area && gig.area.trim().toLowerCase() === gigger.area.trim().toLowerCase()) {
+        basis = 'same-area';
+        rank = 1000;
+      } else {
+        basis = 'same-parish';
+        rank = 2000;
+      }
+      return { gigger: publicGigger(gigger), distanceKm, basis, rank };
+    })
+    .sort((a, b) => a.rank - b.rank || a.gigger.name.localeCompare(b.gigger.name));
+  return {
+    gig: publicGig(gig),
+    matches: ranked.map((entry) => ({ gigger: entry.gigger, distanceKm: entry.distanceKm, basis: entry.basis })),
+  };
+}
+
+async function notifyClosest(gig) {
+  const ranked = matchesForGig(gig.id);
+  if (!ranked || !ranked.matches.length) {
+    return { notified: null, reason: 'No matching gigger in the pool yet.' };
+  }
+  const closest = ranked.matches[0];
+  const state = load();
+  const sub = state.pushSubscriptions.find((entry) => entry.giggerId === closest.gigger.id);
+  if (!sub) {
+    return { notified: null, reason: 'Closest gigger has no push subscription yet — the gig is listed for them.' };
+  }
+  try {
+    const webPush = require('web-push');
+    const keys = getVapidKeys();
+    webPush.setVapidDetails('mailto:taig2k@outlook.com', keys.publicKey, keys.privateKey);
+    await webPush.sendNotification(sub, JSON.stringify({
+      title: 'Giggit: new ' + gig.category + ' gig near you',
+      body: gig.title + ' — EC$' + Number(gig.priceEC).toFixed(2) + ', ' + (gig.area || gig.parish) + '. Open Giggit to accept.',
+      url: '/giggit/',
+    }));
+    return { notified: closest.gigger.id, giggerName: closest.gigger.name, distanceKm: closest.distanceKm, basis: closest.basis };
+  } catch (err) {
+    return { notified: null, reason: 'Push to the closest gigger failed — the gig is listed for them.' };
+  }
 }
 
 function findGigOrThrow(state, id) {
@@ -548,15 +669,17 @@ function getVapidKeys() {
   return keys;
 }
 
-function savePushSubscription(subscription) {
+function savePushSubscription(subscription, giggerId) {
   const endpoint = String((subscription && subscription.endpoint) || '');
   const keys = (subscription && subscription.keys) || {};
   if (!endpoint.startsWith('https://') || !keys.p256dh || !keys.auth) {
     throw new ValidationError('That push subscription does not look right.');
   }
+  const gid = cleanText(giggerId || '', 40);
   const state = load();
+  const linkedId = gid && state.giggers.some((entry) => entry.id === gid) ? gid : null;
   state.pushSubscriptions = state.pushSubscriptions.filter((entry) => entry.endpoint !== endpoint);
-  state.pushSubscriptions.unshift({ endpoint, keys, createdAt: nowIso() });
+  state.pushSubscriptions.unshift({ endpoint, keys, giggerId: linkedId, createdAt: nowIso() });
   save(state);
   return { saved: true, count: state.pushSubscriptions.length };
 }
@@ -581,6 +704,9 @@ module.exports = {
   createGig,
   listGigs,
   getGig,
+  gigPhoto,
+  matchesForGig,
+  notifyClosest,
   acceptGig,
   startGig,
   requestComplete,

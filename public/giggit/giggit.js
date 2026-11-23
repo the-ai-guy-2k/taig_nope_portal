@@ -86,6 +86,50 @@ function updateWhoAmI() {
   $('whoami-label').textContent = me ? (me.name + ' (Level ' + me.tier + ', ' + esc(me.parish) + ')') : 'nobody yet';
 }
 
+let pendingPhoto = null;
+
+function captureLocation(prefix) {
+  const status = $(prefix + '-loc-status');
+  if (!navigator.geolocation) {
+    status.textContent = 'Location is not available in this browser — matching falls back to area.';
+    return;
+  }
+  status.textContent = 'Getting your location…';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      $(prefix + '-lat').value = pos.coords.latitude;
+      $(prefix + '-lng').value = pos.coords.longitude;
+      status.textContent = 'Location saved (' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4) + ').';
+    },
+    () => { status.textContent = 'Could not get your location — matching falls back to area.'; },
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 },
+  );
+}
+
+function handlePhotoInput(event) {
+  const file = event.target.files && event.target.files[0];
+  const status = $('photo-status');
+  pendingPhoto = null;
+  $('photo-preview').classList.add('hidden');
+  if (!file) {
+    status.textContent = '';
+    return;
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    status.textContent = 'That photo is over 2 MB — pick a smaller one.';
+    event.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    pendingPhoto = { name: file.name, type: file.type, dataUrl: reader.result };
+    $('photo-preview').src = reader.result;
+    $('photo-preview').classList.remove('hidden');
+    status.textContent = 'Photo attached (' + Math.round(file.size / 1024) + ' KB).';
+  };
+  reader.readAsDataURL(file);
+}
+
 async function loadAll() {
   try {
     meta = await api('/api/giggit/meta');
@@ -96,6 +140,7 @@ async function loadAll() {
   buildForms();
   updateWhoAmI();
   renderGigs();
+  $('gig-photo').addEventListener('change', handlePhotoInput);
 }
 
 async function refreshData() {
@@ -145,6 +190,7 @@ function gigCard(g) {
     + '<div class="meta">' + esc(g.category) + ' • ' + esc(g.parish) + (g.area ? ' — ' + esc(g.area) : '')
     + (g.when ? ' • ' + esc(g.when) : '') + '</div>'
     + '<div class="price">EC$' + Number(g.priceEC).toFixed(2) + ' <small>per gig</small></div>'
+    + (g.hasPhoto ? '<img class="thumb small" src="/api/giggit/gigs/' + esc(g.id) + '/photo" alt="Photo of the problem" loading="lazy">' : '')
     + '<p>' + esc(g.description) + '</p>'
     + '<p><span class="status ' + esc(g.status) + '">' + esc(statusLabel(g.status)) + '</span>'
     + (g.giggerName ? ' • <b>' + esc(g.giggerName) + '</b>' : '') + '</p>'
@@ -224,6 +270,9 @@ async function openGig(id) {
   if (g.completionCode && (g.status === 'accepted' || g.status === 'in_progress' || g.status === 'completion_requested')) {
     html += '<p>Completion code (customer gives this to the Gigger when the work is done):<br><span class="code">' + esc(g.completionCode) + '</span></p>';
   }
+  if (g.hasPhoto) {
+    html += '<img class="thumb" src="/api/giggit/gigs/' + esc(g.id) + '/photo" alt="Photo of the problem">';
+  }
   if (g.status === 'open' && me && me.skills.includes(g.category)) {
     html += '<button class="btn sun" type="button" onclick="acceptGig(\'' + esc(g.id) + '\')">Accept this gig</button> ';
   }
@@ -257,9 +306,34 @@ async function openGig(id) {
     html += '<h3>Ratings</h3>' + g.ratings.map((r) =>
       '<p>★'.repeat(r.stars) + '☆'.repeat(5 - r.stars) + ' — ' + esc(r.by) + (r.comment ? ': ' + esc(r.comment) : '') + '</p>').join('');
   }
+  html += '<div id="matches-box"><p class="meta">Finding the closest Giggers…</p></div>';
   html += '<p><button class="btn ghost small" type="button" onclick="closeDetail()">Back to gigs</button></p></div>';
   $('gig-detail').innerHTML = html;
   $('gig-detail').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  renderMatches(id);
+}
+
+async function renderMatches(id) {
+  const box = $('matches-box');
+  if (!box) return;
+  try {
+    const data = await api('/api/giggit/gigs/' + encodeURIComponent(id) + '/matches');
+    if (!data.matches.length) {
+      box.innerHTML = '<p class="meta">No matching Gigger in the pool yet for this one.</p>';
+      return;
+    }
+    const me = giggers.find((entry) => entry.id === whoAmI);
+    let html = '';
+    if (me && data.matches[0].gigger.id === me.id && data.gig.status === 'open') {
+      html += '<div class="closest-banner"><b>You are the closest Gigger for this job.</b> It came to you first — accept it above.</div>';
+    }
+    html += '<h3>Closest first</h3>' + data.matches.map((m, i) =>
+      '<div class="match-row"><span>' + (i + 1) + '. <b>' + esc(m.gigger.name) + '</b> — ' + esc(m.gigger.skills.join(', ')) + '</span>'
+      + '<span class="dist">' + (m.distanceKm != null ? m.distanceKm + ' km' : m.basis === 'same-area' ? 'same area' : m.basis === 'same-parish' ? 'same parish' : 'no location yet') + '</span></div>').join('');
+    box.innerHTML = html;
+  } catch (err) {
+    box.innerHTML = '';
+  }
 }
 
 function closeDetail() {
@@ -339,10 +413,25 @@ async function postGig(event) {
     when: $('gig-when').value,
     customerName: $('gig-name').value,
     customerPhone: $('gig-phone').value,
+    photo: pendingPhoto,
+    lat: $('gig-lat').value ? Number($('gig-lat').value) : null,
+    lng: $('gig-lng').value ? Number($('gig-lng').value) : null,
   };
   try {
     const data = await api('/api/giggit/gigs', { method: 'POST', body: JSON.stringify(body) });
-    showMsg('post-msg', 'Gig posted — Giggers in Castries can see it now.', true);
+    let note = 'Gig posted — Giggers in Castries can see it now.';
+    if (data.closest) {
+      note += ' Closest: ' + data.closest.gigger.name
+        + (data.closest.distanceKm != null ? ' (' + data.closest.distanceKm + ' km away)' : '')
+        + (data.notified && data.notified.notified ? ' — they were notified.' : ' — they have no push on yet, so it is listed for them.');
+    }
+    showMsg('post-msg', note, true);
+    pendingPhoto = null;
+    $('photo-preview').classList.add('hidden');
+    $('gig-photo').value = '';
+    $('gig-lat').value = '';
+    $('gig-lng').value = '';
+    $('gig-loc-status').textContent = 'No location yet — matching falls back to area.';
     $('post-form').reset();
     await refreshData();
     detailId = data.gig.id;
@@ -364,6 +453,8 @@ async function registerGigger(event) {
     idType: $('reg-idtype').value,
     idNumber: $('reg-idnum').value,
     skills,
+    lat: $('reg-lat').value ? Number($('reg-lat').value) : null,
+    lng: $('reg-lng').value ? Number($('reg-lng').value) : null,
   };
   try {
     const data = await api('/api/giggit/giggers', { method: 'POST', body: JSON.stringify(body) });
@@ -464,7 +555,7 @@ async function enablePush() {
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(publicKey),
     });
-    await api('/api/giggit/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription: sub }) });
+    await api('/api/giggit/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription: sub, giggerId: whoAmI || null }) });
     showMsg('push-msg', 'Notifications on — new gigs will reach you here. (iPhone: add Giggit to your Home Screen first.)', true);
   } catch (err) {
     showMsg('push-msg', err.message, false);
