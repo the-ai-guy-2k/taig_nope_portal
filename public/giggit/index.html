@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0077C8">
+<meta name="description" content="Giggit — find trusted local help in Saint Lucia. Workers on one side, customers on the other, money held till the job is done.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Giggit — Work in Saint Lucia</title>
+<link rel="stylesheet" href="giggit.css">
+</head>
+<body>
+<div id="update-banner">A new version of Giggit is ready.<button id="update-btn" type="button">Update now</button></div>
+<div id="offline-banner">You are offline — showing the last saved gigs. New posts need a connection.</div>
+<header>
+  <div class="hero">
+    <svg viewBox="0 0 880 220" role="img" aria-label="The Pitons of Saint Lucia over the Caribbean Sea">
+      <rect width="880" height="220" rx="12" fill="#7ec3ea"/>
+      <circle cx="700" cy="52" r="34" fill="#FFD200"/>
+      <path d="M0 220 L180 30 L330 220 Z" fill="#0b3d5c"/>
+      <path d="M210 220 L400 70 L560 220 Z" fill="#14567e"/>
+      <path d="M180 30 L205 78 L160 78 Z" fill="#d6e9f5" opacity="0.85"/>
+      <path d="M400 70 L420 108 L382 108 Z" fill="#d6e9f5" opacity="0.85"/>
+      <path d="M0 196 Q110 182 220 196 T440 196 T660 196 T880 196 L880 220 L0 220 Z" fill="#0077C8"/>
+      <path d="M0 208 Q110 198 220 208 T440 208 T660 208 T880 208 L880 220 L0 220 Z" fill="#005a96"/>
+    </svg>
+    <h1>Giggit <span>— Saint Lucia</span></h1>
+    <p>Find trusted local help. Workers on one side, customers on the other, money held till the job is done.</p>
+    <span class="pilot">MVP PILOT • CASTRIES ONLY • TEST BUILD</span>
+  </div>
+</header>
+<main>
+  <div class="whoami">
+    <b>Testing as:</b> <span id="whoami-label">nobody yet</span>
+    <select id="whoami" onchange="setWhoAmI(this.value)">
+      <option value="">— Pick who you are (MVP test, no accounts yet) —</option>
+    </select>
+    <div class="hint">Pick a Gigger to accept and work gigs, or leave it blank to browse and post as a customer.</div>
+  </div>
+
+  <div class="tabs">
+    <button id="tab-gigs" class="active" onclick="showTab('gigs')">Find work</button>
+    <button id="tab-post" onclick="showTab('post')">Post a gig</button>
+    <button id="tab-giggers" onclick="showTab('giggers')">Giggers</button>
+    <button id="tab-wallet" onclick="showTab('wallet')">My wallet</button>
+    <button id="tab-about" onclick="showTab('about')">About</button>
+  </div>
+
+  <div id="view-gigs"></div>
+
+  <div id="view-post" class="hidden">
+    <div class="card">
+      <h3>Post a gig</h3>
+      <p class="meta">Castries pilot. Your number stays hidden until a Gigger accepts.</p>
+      <div id="post-msg" class="msg"></div>
+      <form id="post-form" onsubmit="postGig(event)">
+        <label for="gig-category">What do you need?</label>
+        <select id="gig-category" required></select>
+        <div class="hint" id="price-hint"></div>
+        <label for="gig-title">Title</label>
+        <input type="text" id="gig-title" maxlength="120" required placeholder="e.g. Deep clean 2-bed apartment">
+        <label for="gig-desc">Tell the Gigger what the job is</label>
+        <textarea id="gig-desc" maxlength="2000" required placeholder="What, where, what to bring, anything they should know"></textarea>
+        <div class="row">
+          <div>
+            <label for="gig-area">Area in Castries</label>
+            <input type="text" id="gig-area" maxlength="80" placeholder="e.g. Morne Fortune">
+          </div>
+          <div>
+            <label for="gig-price">Price (EC$)</label>
+            <input type="number" id="gig-price" min="1" max="10000" step="0.01" required placeholder="120">
+          </div>
+        </div>
+        <label for="gig-when">When</label>
+        <input type="text" id="gig-when" maxlength="120" placeholder="e.g. Saturday morning">
+        <div class="row">
+          <div>
+            <label for="gig-name">Your name</label>
+            <input type="text" id="gig-name" maxlength="100" required>
+          </div>
+          <div>
+            <label for="gig-phone">Your phone</label>
+            <input type="tel" id="gig-phone" maxlength="40" required placeholder="+1 758 …">
+          </div>
+        </div>
+        <button class="btn" type="submit">Post this gig</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="view-giggers" class="hidden">
+    <div class="card">
+      <h3>Become a Gigger — Level 1</h3>
+      <p class="meta">7-minute sign-up. Level 1 needs your ID only — that covers basic tasks. Skills + a reference lift you to Level 2 later.</p>
+      <div id="reg-msg" class="msg"></div>
+      <form id="reg-form" onsubmit="registerGigger(event)">
+        <label for="reg-name">Your name</label>
+        <input type="text" id="reg-name" maxlength="100" required>
+        <div class="row">
+          <div>
+            <label for="reg-phone">Phone</label>
+            <input type="tel" id="reg-phone" maxlength="40" required placeholder="+1 758 …">
+          </div>
+          <div>
+            <label for="reg-area">Area in Castries</label>
+            <input type="text" id="reg-area" maxlength="80" placeholder="e.g. Ciceron">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="reg-idtype">ID type</label>
+            <select id="reg-idtype" required>
+              <option>National ID</option>
+              <option>Driver’s Licence</option>
+              <option>Passport</option>
+            </select>
+          </div>
+          <div>
+            <label for="reg-idnum">ID number</label>
+            <input type="text" id="reg-idnum" maxlength="40" required>
+          </div>
+        </div>
+        <label>Your skills (pick up to 8)</label>
+        <div class="checks" id="reg-skills"></div>
+        <button class="btn" type="submit">Join as a Gigger</button>
+      </form>
+    </div>
+    <div id="gigger-list"></div>
+  </div>
+
+  <div id="view-wallet" class="hidden"></div>
+
+  <div id="view-about" class="hidden">
+    <div class="card">
+      <h3>About this pilot</h3>
+      <p>Giggit is Musty’s gig-work platform for Saint Lucia. This is the MVP test build — Castries only, English only for now (French and Spanish coming), one payment channel.</p>
+      <p><b>How it works:</b> a customer posts a gig. A Gigger accepts — the money goes into escrow (held). The Gigger does the work, marks it done, and the customer confirms with the completion code. The money releases after a 1-hour dispute window. Commission is 15% standard, 10% at 20+ gigs a month, 5% for Giggit Pro.</p>
+      <p><b>Money in this test build is simulated.</b> The Giggit Wallet is a practice ledger — no real money moves. Real payments (Mona, WiPay, bank transfers, cash QR) come in a later phase.</p>
+      <p><b>Notifications:</b> use the button below to turn on push alerts for new gigs. On iPhone, web notifications only work if you add Giggit to your Home Screen first (iOS 16.4+). SMS alerts are coming with the SMS gateway.</p>
+      <p><button class="btn small" type="button" onclick="enablePush()">Enable notifications</button>
+      <button class="btn small ghost" type="button" onclick="testPush()">Send a test notification</button></p>
+      <div id="push-msg" class="msg"></div>
+      <p class="meta">Built by TAIG for Musty. Giggit is Musty’s platform — TAIG builds it and runs it; Musty pays the infrastructure at cost when money comes in.</p>
+    </div>
+  </div>
+
+  <div id="gig-detail"></div>
+</main>
+<footer>Giggit • Castries pilot • Built by TAIG for Musty • Money in this test build is simulated</footer>
+<script src="giggit.js"></script>
+</body>
+</html>

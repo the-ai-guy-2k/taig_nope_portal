@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const {
   dashboardRoutes,
+  giggitRoutes,
   jobOrderRoutes,
   lucianJobConnectRoutes,
   musicStoreRoutes,
@@ -35,6 +36,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/', dashboardRoutes);
 app.use('/job-orders', jobOrderRoutes);
+app.use('/', giggitRoutes);
 app.use('/', lucianJobConnectRoutes);
 app.use('/', musicStoreRoutes);
 app.use('/', sportsReportRoutes);
