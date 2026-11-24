@@ -9,6 +9,21 @@ let whoAmI = localStorage.getItem('giggit-whoami') || '';
 let currentTab = 'gigs';
 let detailId = null;
 
+/* Role views (the drawing's three lanes): Gigger (phone), Client (phone),
+   Admin (desktop). Each role gets its own tabs; the role sticks in
+   localStorage. */
+let role = localStorage.getItem('giggit-role') || 'gigger';
+const GIG = 'Gig';
+const ROLE_TABS = {
+  gigger: [['gigs', 'Find work'], ['wallet', 'My wallet'], ['giggers', GIG + 'gers'], ['about', 'About']],
+  client: [['post', 'Post a gig'], ['mygigs', 'My gigs'], ['about', 'About']],
+  admin: [['admin', 'All gigs'], ['overview', 'Overview'], ['giggers', GIG + 'gers'], ['about', 'About']],
+};
+const ALL_VIEWS = ['gigs', 'post', 'giggers', 'wallet', 'about', 'mygigs', 'admin', 'overview'];
+let clientName = localStorage.getItem('giggit-client-name') || '';
+let clientPhone = localStorage.getItem('giggit-client-phone') || '';
+let adminGigs = [];
+
 const $ = (id) => document.getElementById(id);
 
 function esc(s) {
@@ -89,22 +104,54 @@ function setCurrency(cur) {
   localStorage.setItem('giggit-currency', displayCurrency);
   $('curr-xcd').classList.toggle('active', displayCurrency === 'XCD');
   $('curr-usd').classList.toggle('active', displayCurrency === 'USD');
-  renderGigs();
+  renderCurrentTab();
   if (detailId) openGig(detailId);
   if (currentTab === 'wallet') renderWallet();
+}
+
+function renderTabs() {
+  $('tabs').innerHTML = ROLE_TABS[role].map(([name, label]) =>
+    '<button id="tab-' + name + '" onclick="showTab(\'' + name + '\')">' + esc(label) + '</button>').join('');
+}
+
+function applyRole() {
+  ['gigger', 'client', 'admin'].forEach((r) => {
+    const btn = $('role-' + r);
+    if (btn) btn.classList.toggle('active', r === role);
+  });
+  $('whoami-box').classList.toggle('hidden', role !== 'gigger');
+  $('client-box').classList.toggle('hidden', role !== 'client');
+}
+
+function setRole(next) {
+  role = ['gigger', 'client', 'admin'].includes(next) ? next : 'gigger';
+  localStorage.setItem('giggit-role', role);
+  applyRole();
+  renderTabs();
+  showTab(ROLE_TABS[role][0][0]);
+  if (role === 'client') fillClientIdentity();
+}
+
+function renderCurrentTab() {
+  if (currentTab === 'gigs') renderGigs();
+  else if (currentTab === 'mygigs') renderMyGigs();
+  else if (currentTab === 'admin') renderAdmin();
+  else if (currentTab === 'overview') renderOverview();
+  else if (currentTab === 'giggers') renderGiggers();
+  else if (currentTab === 'wallet') renderWallet();
 }
 
 function showTab(tab) {
   currentTab = tab;
   detailId = null;
-  ['gigs', 'post', 'giggers', 'wallet', 'about'].forEach((name) => {
-    $('view-' + name).classList.toggle('hidden', name !== tab);
-    $('tab-' + name).classList.toggle('active', name === tab);
+  ALL_VIEWS.forEach((name) => {
+    const view = $('view-' + name);
+    if (view) view.classList.toggle('hidden', name !== tab);
+    const btn = $('tab-' + name);
+    if (btn) btn.classList.toggle('active', name === tab);
   });
   $('gig-detail').innerHTML = '';
-  if (tab === 'gigs') renderGigs();
-  if (tab === 'giggers') renderGiggers();
-  if (tab === 'wallet') renderWallet();
+  renderCurrentTab();
 }
 
 function setWhoAmI(id) {
@@ -112,7 +159,7 @@ function setWhoAmI(id) {
   if (whoAmI) localStorage.setItem('giggit-whoami', whoAmI);
   else localStorage.removeItem('giggit-whoami');
   updateWhoAmI();
-  renderGigs();
+  renderCurrentTab();
   if (detailId) openGig(detailId);
 }
 
@@ -178,7 +225,10 @@ async function loadAll() {
   await refreshData();
   buildForms();
   updateWhoAmI();
-  renderGigs();
+  renderTabs();
+  applyRole();
+  fillClientIdentity();
+  showTab(ROLE_TABS[role][0][0]);
   $('gig-photo').addEventListener('change', handlePhotoInput);
 }
 
@@ -233,10 +283,12 @@ function pricingChanged() {
 
 function gigCard(g) {
   const me = giggers.find((entry) => entry.id === whoAmI);
-  const canAccept = g.status === 'open' && me && me.skills.includes(g.category) && g.pricingMode !== 'quote';
-  const acceptHint = g.status === 'open' && whoAmI && !canAccept && g.pricingMode !== 'quote'
+  const canAccept = role === 'gigger' && g.status === 'open' && me && me.skills.includes(g.category) && g.pricingMode !== 'quote';
+  const canReject = role === 'gigger' && g.status === 'open' && me && me.skills.includes(g.category) && g.pricingMode !== 'quote';
+  const passed = me && (g.rejections || []).some((r) => r.giggerId === me.id);
+  const acceptHint = role === 'gigger' && g.status === 'open' && whoAmI && !canAccept && g.pricingMode !== 'quote'
     ? '<div class="hint">You do not list ' + esc(g.category) + ' — add the skill to accept this one.</div>' : '';
-  const quoteHint = g.status === 'open' && g.pricingMode === 'quote' && me && me.skills.includes(g.category)
+  const quoteHint = role === 'gigger' && g.status === 'open' && g.pricingMode === 'quote' && me && me.skills.includes(g.category)
     ? '<div class="hint">This gig is asking for quotes — open it to send yours.</div>' : '';
   return '<div class="card">'
     + '<h3>' + esc(g.title) + ' ' + (g.sample ? '<span class="badge sample">SAMPLE</span>' : '') + '</h3>'
@@ -251,6 +303,8 @@ function gigCard(g) {
     + acceptHint + quoteHint
     + '<button class="btn small" type="button" onclick="openGig(\'' + esc(g.id) + '\')">Open</button> '
     + (canAccept ? '<button class="btn small leaf" type="button" onclick="acceptGig(\'' + esc(g.id) + '\')">Accept this gig</button>' : '')
+    + (canReject && !passed ? ' <button class="btn small ghost" type="button" onclick="rejectGig(\'' + esc(g.id) + '\')">Pass on this gig</button>' : '')
+    + (passed ? '<div class="hint">You passed on this gig — it stays open for other ' + GIG + 'gers.</div>' : '')
     + '</div>';
 }
 
@@ -285,11 +339,123 @@ function renderGiggers() {
       + '</div>').join('') : '<div class="card">No Giggers yet — be the first.</div>');
 }
 
+/* ---- Client view: my gigs (matched by the phone saved in the client box) ---- */
+async function renderMyGigs() {
+  const el = $('view-mygigs');
+  if (!clientPhone) {
+    el.innerHTML = '<div class="card"><h3>My gigs</h3><p>Save your name and phone in “You are the customer” above — your gigs are matched by phone.</p></div>';
+    return;
+  }
+  let mine = [];
+  try {
+    mine = (await api('/api/giggit/gigs?customerPhone=' + encodeURIComponent(clientPhone))).gigs || [];
+  } catch (err) {
+    el.innerHTML = '<div class="msg err" style="display:block">Could not load your gigs — check the connection and try again.</div>';
+    return;
+  }
+  el.innerHTML = '<h3>My gigs</h3>'
+    + (mine.length ? mine.map(gigCard).join('') : '<div class="card">No gigs under this phone yet — post one and it will show here.</div>');
+}
+
+function saveClientIdentity() {
+  clientName = ($('client-name') || {}).value.trim();
+  clientPhone = ($('client-phone') || {}).value.trim();
+  if (clientPhone.length < 7) {
+    alert('Give a phone number so your gigs can be matched to you.');
+    return;
+  }
+  localStorage.setItem('giggit-client-name', clientName);
+  localStorage.setItem('giggit-client-phone', clientPhone);
+  fillClientIdentity();
+  renderMyGigs();
+}
+
+function fillClientIdentity() {
+  if ($('client-name')) $('client-name').value = clientName;
+  if ($('client-phone')) $('client-phone').value = clientPhone;
+  const formName = $('gig-name');
+  if (formName && clientName) formName.value = clientName;
+  const formPhone = $('gig-phone');
+  if (formPhone && clientPhone) formPhone.value = clientPhone;
+}
+
+/* ---- Admin view: all gigs table (desktop) + overview ---- */
+let adminFilter = { status: '', category: '', q: '' };
+
+async function renderAdmin() {
+  const el = $('view-admin');
+  try {
+    adminGigs = (await api('/api/giggit/gigs?contacts=1')).gigs || [];
+  } catch (err) {
+    adminGigs = gigs;
+  }
+  const cats = (meta && meta.categories) || [];
+  let rows = adminGigs.slice();
+  if (adminFilter.status) rows = rows.filter((g) => g.status === adminFilter.status);
+  if (adminFilter.category) rows = rows.filter((g) => g.category === adminFilter.category);
+  if (adminFilter.q) {
+    const needle = adminFilter.q.trim().toLowerCase();
+    rows = rows.filter((g) => (g.title + ' ' + g.description).toLowerCase().includes(needle));
+  }
+  el.innerHTML = '<div class="card"><h3>All gigs (' + rows.length + ')</h3>'
+    + '<div class="row"><div><label>Status</label><select id="admin-status" onchange="adminFilterChanged()">'
+    + '<option value="">All statuses</option>'
+    + ['open', 'accepted', 'in_progress', 'completion_requested', 'completed', 'released', 'disputed', 'cancelled'].map((s) => '<option value="' + s + '"' + (adminFilter.status === s ? ' selected' : '') + '>' + statusLabel(s) + '</option>').join('')
+    + '</select></div><div><label>Category</label><select id="admin-category" onchange="adminFilterChanged()">'
+    + '<option value="">All categories</option>'
+    + cats.map((c) => '<option' + (adminFilter.category === c ? ' selected' : '') + '>' + esc(c) + '</option>').join('')
+    + '</select></div><div><label>Search</label><input type="text" id="admin-q" value="' + esc(adminFilter.q) + '" placeholder="Title or description" oninput="adminFilterChanged()"></div></div>'
+    + '<p class="hint">Tap a row to open the gig — open gigs can be edited from there. The admin sees both phone numbers on every gig.</p></div>'
+    + (rows.length ? '<div class="table-wrap"><table class="admin-table"><thead><tr><th>Gig</th><th>Category</th><th>Customer</th><th>Gigger</th><th>Status</th><th>Price</th><th>Posted</th></tr></thead><tbody>'
+      + rows.map((g) => '<tr onclick="openGig(\'' + esc(g.id) + '\')"><td><b>' + esc(g.title) + '</b>' + (g.sample ? ' <span class="badge sample">SAMPLE</span>' : '') + '</td><td>' + esc(g.category) + '</td><td>' + esc(g.customerName || '—') + '</td><td>' + esc(g.giggerName || '—') + '</td><td><span class="status ' + esc(g.status) + '">' + esc(statusLabel(g.status)) + '</span></td><td>' + esc(moneyText(g)) + '</td><td>' + esc(new Date(g.createdAt).toLocaleDateString()) + '</td></tr>').join('')
+      + '</tbody></table></div>' : '<div class="card">No gigs match those filters.</div>');
+}
+
+function adminFilterChanged() {
+  adminFilter = {
+    status: ($('admin-status') || {}).value || '',
+    category: ($('admin-category') || {}).value || '',
+    q: ($('admin-q') || {}).value || '',
+  };
+  const hadFocus = document.activeElement && document.activeElement.id === 'admin-q';
+  renderAdmin();
+  if (hadFocus) {
+    const q = $('admin-q');
+    q.focus();
+    q.setSelectionRange(q.value.length, q.value.length);
+  }
+}
+
+async function renderOverview() {
+  const el = $('view-overview');
+  el.innerHTML = '<div class="card"><p class="meta">Loading stats…</p></div>';
+  try {
+    const [stats, evts] = await Promise.all([
+      api('/api/giggit/stats'),
+      api('/api/giggit/events?limit=20'),
+    ]);
+    const s = stats;
+    el.innerHTML = '<h3>Overview</h3><div class="stat-grid">'
+      + '<div class="card stat"><div class="stat-num">' + s.demand.gigsPosted + '</div><div class="meta">Gigs posted (real)</div></div>'
+      + '<div class="card stat"><div class="stat-num">' + s.supply.giggers + '</div><div class="meta">Giggers (real)</div></div>'
+      + '<div class="card stat"><div class="stat-num">' + esc(moneyEC(s.money.escrowHeldEC)) + '</div><div class="meta">Escrow held</div></div>'
+      + '<div class="card stat"><div class="stat-num">' + (s.matching.medianSecondsToFirstAccept != null ? s.matching.medianSecondsToFirstAccept + 's' : '—') + '</div><div class="meta">Median seconds to first accept</div></div>'
+      + '<div class="card stat"><div class="stat-num">' + s.matching.zeroResponseCount + ' / ' + s.matching.gigsOldEnoughToJudge + '</div><div class="meta">Zero-response gigs</div></div>'
+      + '<div class="card stat"><div class="stat-num">' + (s.trust.completionRate != null ? Math.round(s.trust.completionRate * 100) + '%' : '—') + '</div><div class="meta">Completion rate</div></div>'
+      + '<div class="card stat"><div class="stat-num">' + s.trust.disputedCount + '</div><div class="meta">Disputed now</div></div>'
+      + '<div class="card stat"><div class="stat-num">' + esc(moneyEC(s.money.totalCommissionEC)) + '</div><div class="meta">Commission so far</div></div>'
+      + '</div><h3>Recent events</h3>'
+      + ((evts.events || []).length ? '<div class="card">' + evts.events.map((e) => '<p><span class="meta">' + esc(new Date(e.at).toLocaleString()) + '</span> — <b>' + esc(e.group) + ' / ' + esc(e.type) + '</b>' + (e.gigId ? ' • ' + esc(e.gigId) : '') + '</p>').join('') + '</div>' : '<div class="card">No events yet.</div>');
+  } catch (err) {
+    el.innerHTML = '<div class="msg err" style="display:block">' + esc(err.message) + '</div>';
+  }
+}
+
 async function openGig(id) {
   detailId = id;
   let g;
   try {
-    g = (await api('/api/giggit/gigs/' + encodeURIComponent(id))).gig;
+    g = (await api('/api/giggit/gigs/' + encodeURIComponent(id) + (role === 'admin' ? '?contacts=1' : ''))).gig;
   } catch (err) {
     $('gig-detail').innerHTML = '<div class="msg err" style="display:block">' + esc(err.message) + '</div>';
     return;
@@ -328,7 +494,7 @@ async function openGig(id) {
       html += g.quotes.map((q) =>
         '<div class="quote-row"><span><b>' + esc(q.giggerName) + '</b> — ' + esc(moneyEC(q.amountEC))
         + (q.postedIn === 'USD' ? ' <span class="meta">(posted US$' + Number(q.postedAmount).toFixed(2) + ')</span>' : '') + '</span>'
-        + '<button class="btn small leaf" type="button" onclick="acceptQuote(\'' + esc(g.id) + '\', \'' + esc(q.giggerId) + '\')">Accept this quote</button></div>').join('');
+        + (role !== 'gigger' ? '<button class="btn small leaf" type="button" onclick="acceptQuote(\'' + esc(g.id) + '\', \'' + esc(q.giggerId) + '\')">Accept this quote</button>' : '') + '</div>').join('');
     } else {
       html += '<p class="meta">No quotes yet — matching Giggers will send theirs here.</p>';
     }
@@ -345,8 +511,17 @@ async function openGig(id) {
   if (g.hasPhoto) {
     html += '<img class="thumb" src="/api/giggit/gigs/' + esc(g.id) + '/photo" alt="Photo of the problem">';
   }
-  if (g.status === 'open' && me && me.skills.includes(g.category) && g.pricingMode !== 'quote') {
+  if (role === 'gigger' && g.status === 'open' && me && me.skills.includes(g.category) && g.pricingMode !== 'quote') {
     html += '<button class="btn leaf" type="button" onclick="acceptGig(\'' + esc(g.id) + '\')">Accept this gig</button> ';
+    const passedHere = (g.rejections || []).some((r) => r.giggerId === me.id);
+    if (!passedHere) html += '<button class="btn ghost" type="button" onclick="rejectGig(\'' + esc(g.id) + '\')">Pass on this gig</button> ';
+    else html += '<span class="hint">You passed on this gig — it stays open for other ' + GIG + 'gers.</span> ';
+  }
+  if (role === 'admin' && g.status === 'open') {
+    html += '<button class="btn" type="button" onclick="showEditForm(\'' + esc(g.id) + '\')">Edit gig</button> ';
+  }
+  if (g.rejections && g.rejections.length) {
+    html += '<p class="meta">Passed on this gig: ' + g.rejections.map((r) => esc(r.giggerName) + ' (' + esc(new Date(r.at).toLocaleDateString()) + ')').join(', ') + '</p>';
   }
   if (isMine && g.status === 'accepted') {
     html += '<button class="btn" type="button" onclick="gigAction(\'' + esc(g.id) + '\', \'start\', {giggerId: whoAmI})">Start the job</button> ';
@@ -379,6 +554,7 @@ async function openGig(id) {
       '<p>★'.repeat(r.stars) + '☆'.repeat(5 - r.stars) + ' — ' + esc(r.by) + (r.comment ? ': ' + esc(r.comment) : '') + '</p>').join('');
   }
   html += '<div id="matches-box"><p class="meta">Finding the closest Giggers…</p></div>';
+  html += '<div id="edit-box"></div>';
   html += '<p><button class="btn ghost small" type="button" onclick="closeDetail()">Back to gigs</button></p></div>';
   $('gig-detail').innerHTML = html;
   $('gig-detail').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -404,7 +580,7 @@ async function renderMatches(id) {
       html += '<div class="closest-banner"><b>You are the closest Gigger for this job.</b> It came to you first — accept it above.</div>';
     }
     html += '<h3>Closest first</h3>' + data.matches.map((m, i) =>
-      '<div class="match-row' + (m.inCurrentRing === false ? ' out-of-ring' : '') + '"><span>' + (i + 1) + '. <b>' + esc(m.gigger.name) + '</b> — ' + esc(m.gigger.skills.join(', ')) + ' <span class="ring">RING ' + m.ring + '</span></span>'
+      '<div class="match-row' + (m.inCurrentRing === false ? ' out-of-ring' : '') + (m.rejected ? ' passed' : '') + '"><span>' + (i + 1) + '. <b>' + esc(m.gigger.name) + '</b> — ' + esc(m.gigger.skills.join(', ')) + ' <span class="ring">RING ' + m.ring + '</span>' + (m.rejected ? ' <span class="badge">PASSED</span>' : '') + '</span>'
       + '<span class="dist">' + (m.distanceKm != null ? m.distanceKm + ' km' : m.basis === 'same-area' ? 'same area' : m.basis === 'same-parish' ? 'same parish' : 'no location yet') + '</span></div>').join('');
     box.innerHTML = html;
   } catch (err) {
@@ -415,7 +591,7 @@ async function renderMatches(id) {
 function closeDetail() {
   detailId = null;
   $('gig-detail').innerHTML = '';
-  renderGigs();
+  renderCurrentTab();
 }
 
 let pickedStars = 0;
@@ -433,7 +609,7 @@ async function gigAction(id, action, body) {
     });
     await refreshData();
     openGig(id);
-    renderGigs();
+    renderCurrentTab();
   } catch (err) {
     showMsg('post-msg', err.message, false);
     alert(err.message);
@@ -446,6 +622,65 @@ async function acceptGig(id) {
     return;
   }
   await gigAction(id, 'accept', { giggerId: whoAmI });
+}
+
+async function rejectGig(id) {
+  if (!whoAmI) {
+    alert('Pick who you are first — choose a Gigger in “Testing as” at the top.');
+    return;
+  }
+  await gigAction(id, 'reject', { giggerId: whoAmI });
+}
+
+let editingGig = null;
+
+async function showEditForm(id) {
+  let g;
+  try {
+    g = (await api('/api/giggit/gigs/' + encodeURIComponent(id) + '?contacts=1')).gig;
+  } catch (err) {
+    alert(err.message);
+    return;
+  }
+  editingGig = g;
+  const cats = (meta && meta.categories) || [];
+  $('edit-box').innerHTML = '<div class="card edit-box"><h3>Edit gig (open gigs only)</h3>'
+    + '<label>Title</label><input type="text" id="edit-title" maxlength="120" value="' + esc(g.title) + '">'
+    + '<label>Description</label><textarea id="edit-desc" maxlength="2000">' + esc(g.description) + '</textarea>'
+    + '<label>Category</label><select id="edit-category">' + cats.map((c) => '<option' + (c === g.category ? ' selected' : '') + '>' + esc(c) + '</option>').join('') + '</select>'
+    + '<div class="row"><div><label>Area</label><input type="text" id="edit-area" maxlength="80" value="' + esc(g.area || '') + '"></div>'
+    + '<div><label>When</label><input type="text" id="edit-when" maxlength="120" value="' + esc(g.when || '') + '"></div></div>'
+    + (g.pricingMode === 'budget' ? '<label>Budget (EC$)</label><input type="number" id="edit-price" min="1" max="10000" step="0.01" value="' + Number(g.priceEC).toFixed(2) + '">' : '<p class="meta">Quote gig — the price comes from the accepted quote, so it cannot be edited here.</p>')
+    + '<p><button class="btn leaf" type="button" onclick="saveEdit(\'' + esc(g.id) + '\')">Save changes</button> '
+    + '<button class="btn ghost" type="button" onclick="closeEditForm()">Cancel</button></p>'
+    + '<div id="edit-msg" class="msg"></div></div>';
+  $('edit-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeEditForm() {
+  editingGig = null;
+  const box = $('edit-box');
+  if (box) box.innerHTML = '';
+}
+
+async function saveEdit(id) {
+  const body = {
+    title: $('edit-title').value,
+    description: $('edit-desc').value,
+    category: $('edit-category').value,
+    area: $('edit-area').value,
+    when: $('edit-when').value,
+  };
+  const priceEl = $('edit-price');
+  if (priceEl) body.priceEC = Number(priceEl.value);
+  try {
+    await api('/api/giggit/gigs/' + encodeURIComponent(id), { method: 'PUT', body: JSON.stringify(body) });
+    await refreshData();
+    openGig(id);
+    renderCurrentTab();
+  } catch (err) {
+    showMsg('edit-msg', err.message, false);
+  }
 }
 
 async function submitQuote(id) {
@@ -520,6 +755,10 @@ async function postGig(event) {
         + (data.notified && data.notified.notified ? ' — they were notified.' : ' — they have no push on yet, so it is listed for them.');
     }
     showMsg('post-msg', note, true);
+    clientName = body.customerName;
+    clientPhone = body.customerPhone;
+    localStorage.setItem('giggit-client-name', clientName);
+    localStorage.setItem('giggit-client-phone', clientPhone);
     pendingPhoto = null;
     $('photo-preview').classList.add('hidden');
     $('gig-photo').value = '';

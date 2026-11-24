@@ -104,8 +104,8 @@ router.post('/api/giggit/giggers', throttleWrites, (req, res) => {
 });
 
 router.get('/api/giggit/gigs', (req, res) => {
-  const { status, parish, category } = req.query;
-  res.json({ gigs: store.listGigs({ status, parish, category }) });
+  const { status, parish, category, customerPhone, q } = req.query;
+  res.json({ gigs: store.listGigs({ status, parish, category, customerPhone, q, includeContacts: req.query.contacts === '1' }) });
   drainWidenPushes();
 });
 
@@ -151,7 +151,7 @@ router.get('/api/giggit/gigs/:id/photo', (req, res) => {
 });
 
 router.get('/api/giggit/gigs/:id', (req, res) => {
-  const gig = store.getGig(req.params.id);
+  const gig = store.getGig(req.params.id, req.query.contacts === '1');
   if (!gig) return res.status(404).json({ error: 'Gig not found.' });
   drainWidenPushes();
   return res.json({ gig });
@@ -177,6 +177,25 @@ router.post('/api/giggit/gigs/:id/accept-quote', throttleWrites, (req, res) => {
 router.post('/api/giggit/gigs/:id/accept', throttleWrites, (req, res) => {
   try {
     res.json({ gig: store.acceptGig(req.params.id, String((req.body || {}).giggerId || '')) });
+  } catch (err) {
+    badRequest(res, err);
+  }
+});
+
+/* Reject: a Gigger passes on an open gig. The gig stays open for
+   everybody else. */
+router.post('/api/giggit/gigs/:id/reject', throttleWrites, (req, res) => {
+  try {
+    res.json({ gig: store.rejectGig(req.params.id, String((req.body || {}).giggerId || '')) });
+  } catch (err) {
+    badRequest(res, err);
+  }
+});
+
+/* Admin edit: correct an open gig before anyone accepts. */
+router.put('/api/giggit/gigs/:id', throttleWrites, (req, res) => {
+  try {
+    res.json({ gig: store.updateGig(req.params.id, req.body || {}) });
   } catch (err) {
     badRequest(res, err);
   }

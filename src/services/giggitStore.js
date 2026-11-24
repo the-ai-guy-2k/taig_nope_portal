@@ -477,6 +477,8 @@ function publicGig(gig, opts) {
     createdAt: gig.createdAt,
     acceptedAt: gig.acceptedAt || null,
     completedAt: gig.completedAt || null,
+    when: gig.when || null,
+    rejections: (gig.rejections || []).map((entry) => ({ giggerId: entry.giggerId, giggerName: entry.giggerName, at: entry.at })),
   };
   if (showContacts) {
     out.customerName = gig.customerName;
@@ -597,6 +599,7 @@ function createGig(body) {
     escrow: null,
     ratings: [],
     quotes: [],
+    rejections: [],
     ring: 0,
     createdAt: nowIso(),
   };
@@ -615,16 +618,24 @@ function listGigs(filter) {
   if (filter && filter.status) gigs = gigs.filter((gig) => gig.status === filter.status);
   if (filter && filter.parish) gigs = gigs.filter((gig) => gig.parish === filter.parish);
   if (filter && filter.category) gigs = gigs.filter((gig) => gig.category === filter.category);
-  return gigs.map((gig) => publicGig(gig, { rate: settingsOf(state).usdRate }));
+  if (filter && filter.customerPhone) gigs = gigs.filter((gig) => gig.customerPhone === filter.customerPhone);
+  if (filter && filter.q) {
+    const needle = String(filter.q).trim().toLowerCase();
+    if (needle) gigs = gigs.filter((gig) => (gig.title + ' ' + gig.description).toLowerCase().includes(needle));
+  }
+  /* Contacts stay hidden until accept — except for the admin lane, which
+     passes includeContacts and sees both numbers on every gig. */
+  return gigs.map((gig) => publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: !!(filter && filter.includeContacts) }));
 }
 
-function getGig(id) {
+function getGig(id, includeContacts) {
   const state = load();
   const gig = state.gigs.find((entry) => entry.id === id);
   if (!gig) return null;
   /* Contacts are visible once a Gigger has accepted — both sides need
-     each other to coordinate. Before that, numbers stay hidden. */
-  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: gig.status !== 'open', includePhoto: true });
+     each other to coordinate. Before that, numbers stay hidden — except
+     for the admin lane (includeContacts), which sees them on every gig. */
+  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: includeContacts || gig.status !== 'open', includePhoto: true });
 }
 
 /* Closest-first matching (Musty's notebook flow): rank the pool by skill
@@ -652,6 +663,7 @@ function matchesForGig(id) {
       basis: entry.basis,
       ring: ringForRank(index),
       inCurrentRing: ring === null ? false : index < RING_SIZES[ring],
+      rejected: (gig.rejections || []).some((r) => r.giggerId === entry.gigger.id),
     })),
   };
 }
@@ -725,6 +737,9 @@ function acceptGig(id, giggerId) {
   if (!gigger.skills.includes(gig.category)) {
     throw new ValidationError('That Gigger does not list this service — pick a matching skill first.');
   }
+  if ((gig.rejections || []).some((entry) => entry.giggerId === gigger.id)) {
+    throw new ValidationError('You already passed on this gig.');
+  }
   /* Ring rule: only the current ring can accept. The closest 3 get the
      first ~2 minutes; after that the ring widens. */
   const ring = currentRing(gig, Date.now());
@@ -750,6 +765,9 @@ function submitQuote(id, giggerId, amount, currency) {
   if (!gigger) throw new ValidationError('That Gigger was not found — register first.');
   if (!gigger.skills.includes(gig.category)) {
     throw new ValidationError('That Gigger does not list this service — pick a matching skill first.');
+  }
+  if ((gig.rejections || []).some((entry) => entry.giggerId === gigger.id)) {
+    throw new ValidationError('You already passed on this gig.');
   }
   const raw = cleanMoney(amount);
   if (raw === null) throw new ValidationError('Give a quote amount (more than 0).');
@@ -785,6 +803,83 @@ function acceptQuote(id, giggerId) {
   logAcceptEvents(state, gig, gigger.id, currentRing(gig, Date.now()));
   save(state);
   return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
+}
+
+/* Reject (new, Nov 24 — the drawing's "View / accept / Reject gigs"):
+   a Gigger passes on an open gig. The gig stays open for everybody
+   else — a reject is a pass, not a claim — so rings do NOT gate it
+   (like quotes, only accepts are ring-gated). A Gigger who passed
+   cannot later accept or quote on the same gig. Logged as a matching
+   event so the pass shows in the tracking feed. */
+function rejectGig(id, giggerId) {
+  const state = load();
+  const gig = findGigOrThrow(state, id);
+  if (gig.status !== 'open') throw new ValidationError('That gig is no longer open.');
+  const gigger = state.giggers.find((entry) => entry.id === giggerId);
+  if (!gigger) throw new ValidationError('That Gigger was not found — register first.');
+  if (!gigger.skills.includes(gig.category)) {
+    throw new ValidationError('That Gigger does not list this service — pick a matching skill first.');
+  }
+  if (!Array.isArray(gig.rejections)) gig.rejections = [];
+  if (gig.rejections.some((entry) => entry.giggerId === gigger.id)) {
+    throw new ValidationError('You already passed on this gig.');
+  }
+  gig.rejections.push({ giggerId: gigger.id, giggerName: gigger.name, at: nowIso() });
+  logEvent(state, 'matching', 'gig_rejected', gig.id, { giggerId: gigger.id, ring: currentRing(gig, Date.now()) });
+  save(state);
+  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: false });
+}
+
+/* Admin edit (new, Nov 24 — the drawing's "edit gig?"): an open gig can
+   be corrected before anyone accepts — title, description, category,
+   area, when, and (budget gigs only) the budget in EC$. Once accepted
+   the deal is set and the gig cannot be edited. Logged as a matching
+   event so edits leave a trail. */
+function updateGig(id, body) {
+  const state = load();
+  const gig = findGigOrThrow(state, id);
+  if (gig.status !== 'open') throw new ValidationError('Only an open gig can be edited — this one is already ' + gig.status + '.');
+  const changed = [];
+  if (body.title !== undefined) {
+    const title = cleanText(body.title, 120);
+    if (title.length < 3) throw new ValidationError('Title needs at least 3 characters.');
+    if (title !== gig.title) { gig.title = title; changed.push('title'); }
+  }
+  if (body.description !== undefined) {
+    const description = cleanText(body.description, 2000);
+    if (description.length < 20) throw new ValidationError('Description needs at least 20 characters.');
+    if (description !== gig.description) { gig.description = description; changed.push('description'); }
+  }
+  if (body.category !== undefined) {
+    const category = cleanText(body.category, 40);
+    if (!CATEGORIES.includes(category)) throw new ValidationError('Pick a service category from the list.');
+    if (category !== gig.category) { gig.category = category; changed.push('category'); }
+  }
+  if (body.area !== undefined) {
+    const area = cleanText(body.area, 80);
+    if (area !== gig.area) { gig.area = area; changed.push('area'); }
+  }
+  if (body.when !== undefined) {
+    const when = cleanText(body.when, 120);
+    if (when !== gig.when) { gig.when = when; changed.push('when'); }
+  }
+  if (body.priceEC !== undefined && body.priceEC !== null && body.priceEC !== '') {
+    if (gig.pricingMode === 'quote') {
+      throw new ValidationError('A quote gig has no set budget — its price comes from the accepted quote.');
+    }
+    const priceEC = cleanMoney(body.priceEC);
+    if (priceEC === null) throw new ValidationError('Give a budget in EC$ (more than 0).');
+    if (priceEC !== gig.priceEC) {
+      gig.priceEC = priceEC;
+      gig.postedIn = 'XCD';
+      gig.postedAmount = priceEC;
+      changed.push('priceEC');
+    }
+  }
+  if (!changed.length) throw new ValidationError('Nothing changed — edit at least one field.');
+  logEvent(state, 'matching', 'gig_edited', gig.id, { fields: changed });
+  save(state);
+  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: false });
 }
 
 function startGig(id, giggerId) {
@@ -1095,6 +1190,8 @@ module.exports = {
   notifyRinged,
   drainWidenQueue,
   acceptGig,
+  rejectGig,
+  updateGig,
   submitQuote,
   acceptQuote,
   startGig,

@@ -38,7 +38,13 @@
   </div>
 </header>
 <main>
-  <div class="whoami">
+  <div class="role-switch" id="role-switch">
+    <span class="role-label">I am using Giggit as:</span>
+    <button type="button" id="role-gigger" onclick="setRole('gigger')">Gigger</button>
+    <button type="button" id="role-client" onclick="setRole('client')">Client</button>
+    <button type="button" id="role-admin" onclick="setRole('admin')">Admin</button>
+  </div>
+  <div class="whoami" id="whoami-box">
     <b>Testing as:</b> <span id="whoami-label">nobody yet</span>
     <select id="whoami" onchange="setWhoAmI(this.value)">
       <option value="">— Pick who you are (MVP test, no accounts yet) —</option>
@@ -47,13 +53,23 @@
     <div class="hint">Prices in: <span class="curr-toggle"><button type="button" id="curr-xcd" class="active" onclick="setCurrency('XCD')">EC$</button><button type="button" id="curr-usd" onclick="setCurrency('USD')">US$</button></span> <span id="curr-rate"></span></div>
   </div>
 
-  <div class="tabs">
-    <button id="tab-gigs" class="active" onclick="showTab('gigs')">Find work</button>
-    <button id="tab-post" onclick="showTab('post')">Post a gig</button>
-    <button id="tab-giggers" onclick="showTab('giggers')">Giggers</button>
-    <button id="tab-wallet" onclick="showTab('wallet')">My wallet</button>
-    <button id="tab-about" onclick="showTab('about')">About</button>
+  <div class="whoami hidden" id="client-box">
+    <b>You are the customer:</b>
+    <div class="row">
+      <div>
+        <label for="client-name">Your name</label>
+        <input type="text" id="client-name" maxlength="100">
+      </div>
+      <div>
+        <label for="client-phone">Your phone</label>
+        <input type="tel" id="client-phone" maxlength="40" placeholder="+1 758 …">
+      </div>
+    </div>
+    <button class="btn small" type="button" onclick="saveClientIdentity()">Save — show my gigs</button>
+    <div class="hint">Your gigs are matched by phone. Posting a gig saves these details too.</div>
   </div>
+
+  <div class="tabs" id="tabs"></div>
 
   <div id="view-gigs"></div>
 
@@ -178,6 +194,12 @@
       <p class="meta">Built by TAIG for Musty. Giggit is Musty’s platform — TAIG builds it and runs it; Musty pays the infrastructure at cost when money comes in.</p>
     </div>
   </div>
+
+  <div id="view-mygigs" class="hidden"></div>
+
+  <div id="view-admin" class="hidden"></div>
+
+  <div id="view-overview" class="hidden"></div>
 
   <div id="gig-detail"></div>
 </main>
