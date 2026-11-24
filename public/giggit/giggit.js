@@ -243,7 +243,7 @@ function gigCard(g) {
     + '<div class="meta">' + esc(g.category) + ' • ' + esc(g.parish) + (g.area ? ' — ' + esc(g.area) : '')
     + (g.when ? ' • ' + esc(g.when) : '') + '</div>'
     + '<div class="price">' + esc(moneyText(g)) + ' <small>' + (g.pricingMode === 'quote' && g.priceEC == null ? 'quotes welcome' : 'per gig') + '</small></div>'
-    + (g.status === 'open' ? '<div class="ring-note">Ring ' + (g.ring != null ? g.ring : 0) + ' — the ' + (g.ring === 1 ? 'closest 6' : g.ring === 2 ? 'every matching' : 'closest 3') + ' Giggers have the first look.</div>' : '')
+    + (g.status === 'open' ? '<div class="ring-note">Ring ' + (g.ring != null ? g.ring : 0) + ' — ' + (g.ring === 2 ? 'every matching Gigger has the first look.' : 'the ' + (g.ring === 1 ? 'closest 6' : 'closest 3') + ' Giggers have the first look.') + '</div>' : '')
     + (g.hasPhoto ? '<img class="thumb small" src="/api/giggit/gigs/' + esc(g.id) + '/photo" alt="Photo of the problem" loading="lazy">' : '')
     + '<p>' + esc(g.description) + '</p>'
     + '<p><span class="status ' + esc(g.status) + '">' + esc(statusLabel(g.status)) + '</span>'
