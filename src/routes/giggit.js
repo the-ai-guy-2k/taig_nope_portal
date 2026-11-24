@@ -31,21 +31,64 @@ function badRequest(res, err) {
   return res.status(500).json({ error: 'Something went wrong saving that.' });
 }
 
+/* Widen pushes: when a ring advances, the newly-included giggers get a
+   push. load() queues those jobs; this drains them after gig reads, and
+   a 60-second timer drains them even when nobody is reading. */
+function drainWidenPushes() {
+  for (const job of store.drainWidenQueue()) {
+    store.notifyRinged(job).catch(() => {});
+  }
+}
+
+const widenTimer = setInterval(drainWidenPushes, 60000);
+widenTimer.unref();
+
 router.get('/api/giggit/meta', (req, res) => {
+  const settings = store.getSettings();
   res.json({
     parishes: store.PARISHES,
     pilotParishes: store.PILOT_PARISHES,
     categories: store.CATEGORIES,
+    maxCategories: store.MAX_CATEGORIES,
+    categorySlotsFree: store.MAX_CATEGORIES - store.CATEGORIES.length,
     priceGuide: store.PRICE_GUIDE,
+    pricingModes: ['budget', 'quote'],
+    usdRate: settings.usdRate,
+    rateSource: settings.rateSource,
     commission: {
       standard: store.COMMISSION_STANDARD,
       volume: store.COMMISSION_VOLUME,
       pro: store.COMMISSION_PRO,
       note: '15% standard, 10% at 20+ gigs a month, 5% Giggit Pro.',
     },
-    disputeWindowMinutes: store.DISPUTE_WINDOW_MS / 60000,
-    mvpNote: 'Castries pilot. Photo on the gig request + closest-first matching by location are live. Giggit Wallet is a simulated ledger in the MVP — no real money moves.',
+    disputeWindowMinutes: settings.disputeWindowMinutes,
+    disputeWindowRange: settings.disputeWindowRange,
+    ringWindowMinutes: store.RING_WINDOW_MINUTES,
+    ringSizes: store.RING_SIZES.map((size) => (Number.isFinite(size) ? size : null)),
+    trackingGroups: ['matching', 'supply', 'demand', 'money', 'trust', 'growth'],
+    mvpNote: 'Castries pilot. Budget or quote pricing, EC$ default with US$ at the EC$2.70 peg, closest-first rings (2-minute window), event tracking for the six groups. Giggit Wallet is a simulated ledger in the MVP — no real money moves.',
   });
+});
+
+router.get('/api/giggit/settings', (req, res) => {
+  res.json(store.getSettings());
+});
+
+router.put('/api/giggit/settings', throttleWrites, (req, res) => {
+  try {
+    res.json(store.updateSettings(req.body || {}));
+  } catch (err) {
+    badRequest(res, err);
+  }
+});
+
+router.get('/api/giggit/events', (req, res) => {
+  const { group, type, gigId, limit } = req.query;
+  res.json({ events: store.listEvents({ group, type, gigId, limit }) });
+});
+
+router.get('/api/giggit/stats', (req, res) => {
+  res.json(store.getStats());
 });
 
 router.get('/api/giggit/giggers', (req, res) => {
@@ -63,6 +106,7 @@ router.post('/api/giggit/giggers', throttleWrites, (req, res) => {
 router.get('/api/giggit/gigs', (req, res) => {
   const { status, parish, category } = req.query;
   res.json({ gigs: store.listGigs({ status, parish, category }) });
+  drainWidenPushes();
 });
 
 router.post('/api/giggit/gigs', throttleWrites, async (req, res) => {
@@ -92,6 +136,7 @@ router.post('/api/giggit/gigs', throttleWrites, async (req, res) => {
 router.get('/api/giggit/gigs/:id/matches', (req, res) => {
   const ranked = store.matchesForGig(req.params.id);
   if (!ranked) return res.status(404).json({ error: 'Gig not found.' });
+  drainWidenPushes();
   return res.json(ranked);
 });
 
@@ -108,7 +153,25 @@ router.get('/api/giggit/gigs/:id/photo', (req, res) => {
 router.get('/api/giggit/gigs/:id', (req, res) => {
   const gig = store.getGig(req.params.id);
   if (!gig) return res.status(404).json({ error: 'Gig not found.' });
+  drainWidenPushes();
   return res.json({ gig });
+});
+
+router.post('/api/giggit/gigs/:id/quotes', throttleWrites, (req, res) => {
+  try {
+    const body = req.body || {};
+    res.status(201).json({ gig: store.submitQuote(req.params.id, String(body.giggerId || ''), body.amount, body.currency) });
+  } catch (err) {
+    badRequest(res, err);
+  }
+});
+
+router.post('/api/giggit/gigs/:id/accept-quote', throttleWrites, (req, res) => {
+  try {
+    res.json({ gig: store.acceptQuote(req.params.id, String((req.body || {}).giggerId || '')) });
+  } catch (err) {
+    badRequest(res, err);
+  }
 });
 
 router.post('/api/giggit/gigs/:id/accept', throttleWrites, (req, res) => {

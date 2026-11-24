@@ -19,9 +19,29 @@ const LIVE_PATH = path.join(__dirname, '..', '..', 'nebula_local', 'giggit.json'
 const SEED_PATH = path.join(__dirname, '..', '..', 'data', 'giggit.json');
 const VAPID_PATH = path.join(__dirname, '..', '..', 'nebula_local', 'giggit-vapid.json');
 
-/* 1-hour dispute window after completion, per the ops plan. Escrow
-   releases automatically when the window closes with no dispute. */
-const DISPUTE_WINDOW_MS = 60 * 60 * 1000;
+/* Escrow dispute window after completion, per the ops plan — default 1
+   hour, configurable 1 hour to 1 day (Musty/Tee set it). Stored in
+   state.settings.disputeWindowMinutes; disputeWindowMs(state) reads it. */
+const DEFAULT_DISPUTE_WINDOW_MINUTES = 60;
+const MIN_DISPUTE_WINDOW_MINUTES = 60;
+const MAX_DISPUTE_WINDOW_MINUTES = 1440;
+
+/* EC$ is pegged to the US dollar at EC$2.70 = US$1 (Eastern Caribbean
+   Central Bank peg, fixed since 1976). That peg IS the market rate for
+   XCD/USD — it does not float, so no live feed is needed; the rate is a
+   setting (state.settings.usdRate) and changes only if the peg moves. */
+const DEFAULT_USD_RATE = 2.70;
+
+/* Matching rings (Musty, Nov 24): the closest giggers get the first
+   ~2-minute window, then the ring widens — ring 0 is the closest 3,
+   ring 1 the closest 6, ring 2 everybody matching in the parish. */
+const RING_WINDOW_MINUTES = 2;
+const RING_SIZES = [3, 6, Infinity];
+
+/* Job categories — Musty's deck, Nov 24 (12 named). Four more slots are
+   kept open (MAX_CATEGORIES 16); the extra names come from Musty, never
+   invented here. */
+const MAX_CATEGORIES = 16;
 
 /* St. Lucia parishes (quarters). MVP pilot is Castries only. */
 const PARISHES = [
@@ -40,46 +60,29 @@ const PARISHES = [
 const PILOT_PARISHES = ['Castries'];
 
 const CATEGORIES = [
+  'Courier',
+  'Roadside Assistance',
+  'Mounting',
+  'Moving',
   'Cleaning',
-  'Gardening & Yard Work',
+  'Outdoor Help',
+  'Home Repairs',
   'Painting',
-  'Plumbing',
-  'Electrical',
-  'Carpentry',
-  'Housekeeping',
-  'Cooking & Catering',
-  'Delivery & Errands',
-  'Caregiving',
-  'Childcare',
-  'Moving & Hauling',
-  'Laundry & Ironing',
-  'Farming & Fishing Help',
-  'Tour Guide',
-  'Event Help',
-  'Other',
+  'Home Help',
+  'Tech Install',
+  'Beautification',
+  'Gardening',
 ];
 
-/* Suggested EC$ price ranges (Castries, per gig). These are MVP guide
-   numbers for the pilot — NOT market-verified rates. The ops plan's smart
-   pricing (parish averages, complexity, travel) is a later phase. */
+/* Suggested EC$ price ranges (Castries, per gig) for the five categories
+   carried over from the MVP guide — NOT market-verified rates. The other
+   seven categories show no guide until Musty sets ranges for them. */
 const PRICE_GUIDE = {
   'Cleaning': [80, 150],
-  'Gardening & Yard Work': [75, 150],
+  'Gardening': [75, 150],
   'Painting': [150, 400],
-  'Plumbing': [100, 300],
-  'Electrical': [120, 350],
-  'Carpentry': [150, 400],
-  'Housekeeping': [80, 150],
-  'Cooking & Catering': [100, 250],
-  'Delivery & Errands': [25, 80],
-  'Caregiving': [100, 200],
-  'Childcare': [80, 160],
-  'Moving & Hauling': [150, 400],
-  'Laundry & Ironing': [40, 100],
-  'Farming & Fishing Help': [60, 120],
-  'Tour Guide': [150, 300],
-  'Event Help': [80, 180],
-  'Other': [50, 200],
+  'Moving': [150, 400],
+  'Courier': [25, 80],
 };
 
 /* Commission per the ops plan: 15% standard, 10% at 20+ gigs in the
@@ -178,7 +181,11 @@ function loadSeed() {
 }
 
 function emptyState() {
-  return { giggers: [], gigs: [], ratings: [], ledger: [], pushSubscriptions: [] };
+  return {
+    giggers: [], gigs: [], ratings: [], ledger: [], pushSubscriptions: [],
+    events: [],
+    settings: { usdRate: DEFAULT_USD_RATE, disputeWindowMinutes: DEFAULT_DISPUTE_WINDOW_MINUTES },
+  };
 }
 
 function load() {
@@ -197,8 +204,17 @@ function load() {
   for (const key of ['giggers', 'gigs', 'ratings', 'ledger', 'pushSubscriptions']) {
     if (!Array.isArray(state[key])) state[key] = [];
   }
+  if (!Array.isArray(state.events)) state.events = [];
+  if (!state.settings || typeof state.settings !== 'object') state.settings = {};
+  state.settings.usdRate = Number.isFinite(Number(state.settings.usdRate))
+    ? Number(state.settings.usdRate) : DEFAULT_USD_RATE;
+  state.settings.disputeWindowMinutes = Number.isInteger(state.settings.disputeWindowMinutes)
+    ? Math.min(MAX_DISPUTE_WINDOW_MINUTES, Math.max(MIN_DISPUTE_WINDOW_MINUTES, state.settings.disputeWindowMinutes))
+    : DEFAULT_DISPUTE_WINDOW_MINUTES;
   /* Lazy escrow sweep: release anything whose dispute window closed. */
   if (sweepReleases(state)) save(state);
+  /* Lazy ring widening: advance any open gig past its window. */
+  if (sweepRings(state)) save(state);
   return state;
 }
 
@@ -208,6 +224,145 @@ function save(state) {
   const tmp = `${LIVE_PATH}.tmp-${process.pid}`;
   fs.writeFileSync(tmp, JSON.stringify(state, null, 2), 'utf8');
   fs.renameSync(tmp, LIVE_PATH);
+}
+
+/* ---- Settings, currency, events, rings ---- */
+
+function settingsOf(state) {
+  return {
+    usdRate: Number.isFinite(Number(state.settings && state.settings.usdRate))
+      ? Number(state.settings.usdRate) : DEFAULT_USD_RATE,
+    disputeWindowMinutes: Number.isInteger(state.settings && state.settings.disputeWindowMinutes)
+      ? state.settings.disputeWindowMinutes : DEFAULT_DISPUTE_WINDOW_MINUTES,
+  };
+}
+
+function disputeWindowMs(state) {
+  return settingsOf(state).disputeWindowMinutes * 60 * 1000;
+}
+
+function xcdToUsd(rate, ec) {
+  if (ec == null) return null;
+  return Math.round((Number(ec) / rate) * 100) / 100;
+}
+
+function usdToXcd(rate, usd) {
+  return Math.round(Number(usd) * rate * 100) / 100;
+}
+
+/* Tracking events for the six groups (matching, supply, demand, money,
+   trust, growth). The events feed is what the later dashboard reads;
+   the store keeps the last 500. */
+function logEvent(state, group, type, gigId, data) {
+  if (!Array.isArray(state.events)) state.events = [];
+  state.events.unshift({
+    id: `evt-${randomUUID().slice(0, 8)}`,
+    group, type,
+    gigId: gigId || null,
+    giggerId: (data && data.giggerId) || null,
+    at: nowIso(),
+    data: data || {},
+  });
+  if (state.events.length > 500) state.events.length = 500;
+}
+
+/* Which ring an open gig is in right now: 0 for the first ~2 minutes,
+   1 for the next 2, 2 after that. Pure — computed from createdAt. */
+function currentRing(gig, now) {
+  const elapsedMin = (now - Date.parse(gig.createdAt)) / 60000;
+  if (elapsedMin < RING_WINDOW_MINUTES) return 0;
+  if (elapsedMin < RING_WINDOW_MINUTES * 2) return 1;
+  return 2;
+}
+
+function ringForRank(index) {
+  if (index < RING_SIZES[0]) return 0;
+  if (index < RING_SIZES[1]) return 1;
+  return 2;
+}
+
+/* Shared ranking used by matches + ring enforcement: skill + parish,
+   closest first (GPS km → same area → same parish → no location). */
+function rankMatches(state, gig) {
+  return state.giggers
+    .filter((gigger) => gigger.skills.includes(gig.category) && gigger.parish === gig.parish)
+    .map((gigger) => {
+      let distanceKm = null;
+      let basis = 'no-location';
+      let rank = 3000;
+      if (gig.lat != null && gig.lng != null && gigger.lat != null && gigger.lng != null) {
+        distanceKm = haversineKm(gig.lat, gig.lng, gigger.lat, gigger.lng);
+        basis = 'gps';
+        rank = distanceKm;
+      } else if (gig.area && gigger.area && gig.area.trim().toLowerCase() === gigger.area.trim().toLowerCase()) {
+        basis = 'same-area';
+        rank = 1000;
+      } else {
+        basis = 'same-parish';
+        rank = 2000;
+      }
+      return { gigger, distanceKm, basis, rank };
+    })
+    .sort((a, b) => a.rank - b.rank || a.gigger.name.localeCompare(b.gigger.name));
+}
+
+/* Widen queue: when a ring advances, the giggers newly inside it get a
+   push. load() advances the ring + logs the event; routes drain the
+   queue and send the pushes (best-effort, never blocks the read). */
+let widenQueue = [];
+
+function drainWidenQueue() {
+  const queued = widenQueue;
+  widenQueue = [];
+  return queued;
+}
+
+/* Advance any open gig whose ring moved. Returns true when anything
+   changed (so load() can persist it). */
+function sweepRings(state) {
+  const now = Date.now();
+  let changed = false;
+  for (const gig of state.gigs) {
+    if (gig.status !== 'open') continue;
+    const ring = currentRing(gig, now);
+    const stored = Number.isInteger(gig.ring) ? gig.ring : 0;
+    if (ring <= stored) continue;
+    gig.ring = ring;
+    const ranked = rankMatches(state, gig);
+    const newGiggers = ranked
+      .map((entry, index) => ({ entry, index }))
+      .filter(({ index }) => ringForRank(index) === ring)
+      .map(({ entry }) => entry.gigger.id);
+    logEvent(state, 'matching', 'ring_widened', gig.id, { ring, newGiggerCount: newGiggers.length });
+    if (newGiggers.length) {
+      widenQueue.push({ gigId: gig.id, category: gig.category, title: gig.title, ring, giggerIds: newGiggers });
+    }
+    changed = true;
+  }
+  return changed;
+}
+
+async function sendPushToGigger(state, giggerId, title, body) {
+  const sub = state.pushSubscriptions.find((entry) => entry.giggerId === giggerId);
+  if (!sub) return false;
+  try {
+    const webPush = require('web-push');
+    const keys = getVapidKeys();
+    webPush.setVapidDetails('mailto:taig2k@outlook.com', keys.publicKey, keys.privateKey);
+    await webPush.sendNotification(sub, JSON.stringify({ title, body, url: '/giggit/' }));
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+async function notifyRinged(job) {
+  const state = load();
+  for (const giggerId of job.giggerIds) {
+    await sendPushToGigger(state, giggerId,
+      'Giggit: a ' + job.category + ' gig near you opened up',
+      job.title + ' — it just widened to your ring. Open Giggit to accept.');
+  }
 }
 
 /* Release escrow for completed gigs past the dispute window. Returns
@@ -231,6 +386,10 @@ function sweepReleases(state) {
       { id: `led-${randomUUID().slice(0, 8)}`, gigId: gig.id, giggerId: gig.giggerId, type: 'release', amountEC: payout, at: nowIso(), note: 'Escrow released after dispute window' },
       { id: `led-${randomUUID().slice(0, 8)}`, gigId: gig.id, giggerId: gig.giggerId, type: 'fee', amountEC: fee, at: nowIso(), note: `Giggit commission ${Math.round(rate * 100)}%` },
     );
+    logEvent(state, 'money', 'escrow_released', gig.id, { giggerId: gig.giggerId, amountEC: gig.priceEC, payoutEC: payout, commissionEC: fee });
+    if (!state.gigs.some((other) => other !== gig && other.giggerId === gig.giggerId && other.status === 'released')) {
+      logEvent(state, 'growth', 'gigger_first_release', gig.id, { giggerId: gig.giggerId });
+    }
     changed = true;
   }
   return changed;
@@ -258,6 +417,7 @@ function publicGigger(gigger) {
     parish: gigger.parish,
     area: gigger.area,
     skills: gigger.skills,
+    certifications: gigger.certifications || [],
     tier: gigger.tier,
     pro: !!gigger.pro,
     ratingAvg: gigger.ratingAvg || null,
@@ -271,6 +431,7 @@ function publicGigger(gigger) {
 function publicGig(gig, opts) {
   const showContacts = opts && opts.showContacts;
   const includePhoto = opts && opts.includePhoto;
+  const rate = (opts && opts.rate) || DEFAULT_USD_RATE;
   const out = {
     id: gig.id,
     category: gig.category,
@@ -278,8 +439,22 @@ function publicGig(gig, opts) {
     description: gig.description,
     parish: gig.parish,
     area: gig.area,
+    pricingMode: gig.pricingMode || 'budget',
     priceEC: gig.priceEC,
+    priceUSD: xcdToUsd(rate, gig.priceEC),
+    postedIn: gig.postedIn || 'XCD',
+    postedAmount: gig.postedAmount != null ? gig.postedAmount : null,
     priceGuide: PRICE_GUIDE[gig.category] || null,
+    quotes: (gig.quotes || []).map((quote) => ({
+      giggerId: quote.giggerId,
+      giggerName: quote.giggerName,
+      amountEC: quote.amountEC,
+      amountUSD: xcdToUsd(rate, quote.amountEC),
+      postedIn: quote.postedIn || 'XCD',
+      postedAmount: quote.postedAmount != null ? quote.postedAmount : null,
+      createdAt: quote.createdAt,
+    })),
+    ring: gig.status === 'open' ? currentRing(gig, Date.now()) : (Number.isInteger(gig.ring) ? gig.ring : null),
     hasPhoto: !!gig.photo,
     lat: gig.lat != null ? gig.lat : null,
     lng: gig.lng != null ? gig.lng : null,
@@ -338,11 +513,21 @@ function validateGigger(body) {
     ? [...new Set(body.skills.map((s) => cleanText(s, 40)).filter((s) => CATEGORIES.includes(s)))].slice(0, 8)
     : [];
   if (!skills.length) throw new ValidationError('Pick at least one skill.');
+  /* Certifications are OPTIONAL and self-declared — the ID card above is
+     what verifies a Gigger (Level 1). Certs show on the profile as-is. */
+  const certifications = Array.isArray(body.certifications)
+    ? [...new Map(body.certifications.map((entry) => {
+        const cert = typeof entry === 'string'
+          ? { name: cleanText(entry, 80), issuer: '' }
+          : { name: cleanText(entry && entry.name, 80), issuer: cleanText(entry && entry.issuer, 80) };
+        return [cert.name.toLowerCase(), cert];
+      })).values()].filter((cert) => cert.name.length >= 2).slice(0, 6)
+    : [];
   const { lat, lng } = cleanLatLng(body);
-  return { name, phone, parish, area, idType, idNumber, skills, lat, lng };
+  return { name, phone, parish, area, idType, idNumber, skills, certifications, lat, lng };
 }
 
-function validateGig(body) {
+function validateGig(body, usdRate) {
   const category = cleanText(body.category, 40);
   if (!CATEGORIES.includes(category)) throw new ValidationError('Pick a service category from the list.');
   const title = cleanText(body.title, 120);
@@ -354,8 +539,17 @@ function validateGig(body) {
     throw new ValidationError('The pilot is Castries only for now — pick Castries as the parish.');
   }
   const area = cleanText(body.area, 80);
-  const priceEC = cleanMoney(body.priceEC);
-  if (priceEC === null) throw new ValidationError('Give a price in EC$ (more than 0).');
+  /* Pricing (Musty, Nov 24): the customer either sets a budget OR asks
+     for an actual quote — both options. A budget is stored in EC$
+     (canonical); if the customer ticked USD, convert at today's rate. */
+  const pricingMode = String(body.pricingMode || 'budget') === 'quote' ? 'quote' : 'budget';
+  const postedIn = String(body.currency || 'XCD').toUpperCase() === 'USD' ? 'USD' : 'XCD';
+  const postedAmount = cleanMoney(body.priceEC);
+  let priceEC = null;
+  if (pricingMode === 'budget') {
+    if (postedAmount === null) throw new ValidationError('Give a budget in EC$ (more than 0) — or ask Giggers to quote instead.');
+    priceEC = postedIn === 'USD' ? usdToXcd(usdRate, postedAmount) : postedAmount;
+  }
   const customerName = cleanText(body.customerName, 100);
   if (customerName.length < 2) throw new ValidationError('Your name needs at least 2 characters.');
   const customerPhone = cleanText(body.customerPhone, 40);
@@ -363,7 +557,7 @@ function validateGig(body) {
   const when = cleanText(body.when, 120);
   const photo = validatePhoto(body.photo || null);
   const { lat, lng } = cleanLatLng(body);
-  return { category, title, description, parish, area, priceEC, customerName, customerPhone, when, photo, lat, lng };
+  return { category, title, description, parish, area, pricingMode, priceEC, postedIn, postedAmount: pricingMode === 'budget' ? postedAmount : null, customerName, customerPhone, when, photo, lat, lng };
 }
 
 function createGigger(body) {
@@ -380,6 +574,7 @@ function createGigger(body) {
     createdAt: nowIso(),
   };
   state.giggers.unshift(gigger);
+  logEvent(state, 'supply', 'gigger_registered', null, { giggerId: gigger.id, parish: gigger.parish, skills: gigger.skills, certifications: gigger.certifications.length });
   save(state);
   return publicGigger(gigger);
 }
@@ -389,8 +584,8 @@ function listGiggers() {
 }
 
 function createGig(body) {
-  const fields = validateGig(body);
   const state = load();
+  const fields = validateGig(body, settingsOf(state).usdRate);
   const gig = {
     id: `gig-${randomUUID().slice(0, 8)}`,
     ...fields,
@@ -401,11 +596,17 @@ function createGig(body) {
     completionCode: null,
     escrow: null,
     ratings: [],
+    quotes: [],
+    ring: 0,
     createdAt: nowIso(),
   };
   state.gigs.unshift(gig);
+  logEvent(state, 'demand', 'gig_posted', gig.id, { category: gig.category, parish: gig.parish, pricingMode: gig.pricingMode, priceEC: gig.priceEC, postedIn: gig.postedIn });
+  if (!state.gigs.some((other) => other !== gig && other.customerPhone === gig.customerPhone)) {
+    logEvent(state, 'growth', 'customer_first_gig', gig.id, { customerPhone: gig.customerPhone });
+  }
   save(state);
-  return publicGig(gig);
+  return publicGig(gig, { rate: settingsOf(state).usdRate });
 }
 
 function listGigs(filter) {
@@ -414,7 +615,7 @@ function listGigs(filter) {
   if (filter && filter.status) gigs = gigs.filter((gig) => gig.status === filter.status);
   if (filter && filter.parish) gigs = gigs.filter((gig) => gig.parish === filter.parish);
   if (filter && filter.category) gigs = gigs.filter((gig) => gig.category === filter.category);
-  return gigs.map((gig) => publicGig(gig));
+  return gigs.map((gig) => publicGig(gig, { rate: settingsOf(state).usdRate }));
 }
 
 function getGig(id) {
@@ -423,41 +624,35 @@ function getGig(id) {
   if (!gig) return null;
   /* Contacts are visible once a Gigger has accepted — both sides need
      each other to coordinate. Before that, numbers stay hidden. */
-  return publicGig(gig, { showContacts: gig.status !== 'open', includePhoto: true });
+  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: gig.status !== 'open', includePhoto: true });
 }
 
 /* Closest-first matching (Musty's notebook flow): rank the pool by skill
    + parish, closest first. GPS distance when both sides shared a
    location; same area next; same parish after that; no location last.
    distanceKm is a real number only when both sides have GPS — otherwise
-   null, and the basis says why. */
+   null, and the basis says why. Each match also carries its ring: ring 0
+   is the closest 3 (first ~2 minutes), ring 1 the closest 6, ring 2
+   everybody matching. inCurrentRing says whether that Gigger can accept
+   right now. */
 function matchesForGig(id) {
   const state = load();
   const gig = state.gigs.find((entry) => entry.id === id);
   if (!gig) return null;
-  const ranked = state.giggers
-    .filter((gigger) => gigger.skills.includes(gig.category) && gigger.parish === gig.parish)
-    .map((gigger) => {
-      let distanceKm = null;
-      let basis = 'no-location';
-      let rank = 3000;
-      if (gig.lat != null && gig.lng != null && gigger.lat != null && gigger.lng != null) {
-        distanceKm = haversineKm(gig.lat, gig.lng, gigger.lat, gigger.lng);
-        basis = 'gps';
-        rank = distanceKm;
-      } else if (gig.area && gigger.area && gig.area.trim().toLowerCase() === gigger.area.trim().toLowerCase()) {
-        basis = 'same-area';
-        rank = 1000;
-      } else {
-        basis = 'same-parish';
-        rank = 2000;
-      }
-      return { gigger: publicGigger(gigger), distanceKm, basis, rank };
-    })
-    .sort((a, b) => a.rank - b.rank || a.gigger.name.localeCompare(b.gigger.name));
+  const ring = gig.status === 'open' ? currentRing(gig, Date.now()) : null;
+  const ranked = rankMatches(state, gig);
   return {
-    gig: publicGig(gig),
-    matches: ranked.map((entry) => ({ gigger: entry.gigger, distanceKm: entry.distanceKm, basis: entry.basis })),
+    gig: publicGig(gig, { rate: settingsOf(state).usdRate }),
+    currentRing: ring,
+    ringWindowMinutes: RING_WINDOW_MINUTES,
+    ringSizes: RING_SIZES.map((size) => (Number.isFinite(size) ? size : null)),
+    matches: ranked.map((entry, index) => ({
+      gigger: publicGigger(entry.gigger),
+      distanceKm: entry.distanceKm,
+      basis: entry.basis,
+      ring: ringForRank(index),
+      inCurrentRing: ring === null ? false : index < RING_SIZES[ring],
+    })),
   };
 }
 
@@ -467,24 +662,16 @@ async function notifyClosest(gig) {
     return { notified: null, reason: 'No matching gigger in the pool yet.' };
   }
   const closest = ranked.matches[0];
-  const state = load();
-  const sub = state.pushSubscriptions.find((entry) => entry.giggerId === closest.gigger.id);
-  if (!sub) {
+  const priceText = gig.pricingMode === 'quote'
+    ? 'asking for quotes'
+    : 'EC$' + Number(gig.priceEC).toFixed(2);
+  const sent = await sendPushToGigger(load(), closest.gigger.id,
+    'Giggit: new ' + gig.category + ' gig near you',
+    gig.title + ' — ' + priceText + ', ' + (gig.area || gig.parish) + '. Open Giggit to accept.');
+  if (!sent) {
     return { notified: null, reason: 'Closest gigger has no push subscription yet — the gig is listed for them.' };
   }
-  try {
-    const webPush = require('web-push');
-    const keys = getVapidKeys();
-    webPush.setVapidDetails('mailto:taig2k@outlook.com', keys.publicKey, keys.privateKey);
-    await webPush.sendNotification(sub, JSON.stringify({
-      title: 'Giggit: new ' + gig.category + ' gig near you',
-      body: gig.title + ' — EC$' + Number(gig.priceEC).toFixed(2) + ', ' + (gig.area || gig.parish) + '. Open Giggit to accept.',
-      url: '/giggit/',
-    }));
-    return { notified: closest.gigger.id, giggerName: closest.gigger.name, distanceKm: closest.distanceKm, basis: closest.basis };
-  } catch (err) {
-    return { notified: null, reason: 'Push to the closest gigger failed — the gig is listed for them.' };
-  }
+  return { notified: closest.gigger.id, giggerName: closest.gigger.name, distanceKm: closest.distanceKm, basis: closest.basis };
 }
 
 function findGigOrThrow(state, id) {
@@ -493,15 +680,9 @@ function findGigOrThrow(state, id) {
   return gig;
 }
 
-function acceptGig(id, giggerId) {
-  const state = load();
-  const gig = findGigOrThrow(state, id);
-  if (gig.status !== 'open') throw new ValidationError('That gig is no longer open.');
-  const gigger = state.giggers.find((entry) => entry.id === giggerId);
-  if (!gigger) throw new ValidationError('That Gigger was not found — register first.');
-  if (!gigger.skills.includes(gig.category)) {
-    throw new ValidationError('That Gigger does not list this service — pick a matching skill first.');
-  }
+/* Shared accept path: mark the gig accepted, set the completion code,
+   hold the escrow. Used by direct accept (budget gigs) and quote accept. */
+function holdEscrow(state, gig, gigger) {
   gig.status = 'accepted';
   gig.giggerId = gigger.id;
   gig.giggerName = gigger.name;
@@ -521,8 +702,89 @@ function acceptGig(id, giggerId) {
     id: `led-${randomUUID().slice(0, 8)}`, gigId: gig.id, giggerId: gigger.id,
     type: 'hold', amountEC: gig.priceEC, at: nowIso(), note: 'Escrow held on accept',
   });
+  logEvent(state, 'money', 'escrow_held', gig.id, { giggerId: gigger.id, amountEC: gig.priceEC });
+}
+
+function logAcceptEvents(state, gig, giggerId, ring) {
+  const secondsToAccept = Math.round((Date.now() - Date.parse(gig.createdAt)) / 1000);
+  if (!state.events.some((entry) => entry.type === 'first_accept' && entry.gigId === gig.id)) {
+    logEvent(state, 'matching', 'first_accept', gig.id, { giggerId, secondsSincePost: secondsToAccept });
+  }
+  logEvent(state, 'matching', 'accept', gig.id, { giggerId, ring });
+}
+
+function acceptGig(id, giggerId) {
+  const state = load();
+  const gig = findGigOrThrow(state, id);
+  if (gig.status !== 'open') throw new ValidationError('That gig is no longer open.');
+  if (gig.pricingMode === 'quote') {
+    throw new ValidationError('This gig is asking for quotes — send a quote first, the customer picks one.');
+  }
+  const gigger = state.giggers.find((entry) => entry.id === giggerId);
+  if (!gigger) throw new ValidationError('That Gigger was not found — register first.');
+  if (!gigger.skills.includes(gig.category)) {
+    throw new ValidationError('That Gigger does not list this service — pick a matching skill first.');
+  }
+  /* Ring rule: only the current ring can accept. The closest 3 get the
+     first ~2 minutes; after that the ring widens. */
+  const ring = currentRing(gig, Date.now());
+  const ranked = rankMatches(state, gig);
+  const position = ranked.findIndex((entry) => entry.gigger.id === gigger.id);
+  if (position === -1 || position >= RING_SIZES[ring]) {
+    throw new ValidationError('This gig has not widened to you yet — the closest Giggers get the first ' + RING_WINDOW_MINUTES + ' minutes.');
+  }
+  holdEscrow(state, gig, gigger);
+  logAcceptEvents(state, gig, gigger.id, ring);
   save(state);
-  return publicGig(gig, { showContacts: true });
+  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
+}
+
+/* Quote flow (Musty, Nov 24): on a quote-mode gig, matching Giggers send
+   a quote; the customer picks one, which sets the price and accepts. */
+function submitQuote(id, giggerId, amount, currency) {
+  const state = load();
+  const gig = findGigOrThrow(state, id);
+  if (gig.status !== 'open') throw new ValidationError('That gig is no longer open.');
+  if (gig.pricingMode !== 'quote') throw new ValidationError('This gig has a set budget — no quotes needed.');
+  const gigger = state.giggers.find((entry) => entry.id === giggerId);
+  if (!gigger) throw new ValidationError('That Gigger was not found — register first.');
+  if (!gigger.skills.includes(gig.category)) {
+    throw new ValidationError('That Gigger does not list this service — pick a matching skill first.');
+  }
+  const raw = cleanMoney(amount);
+  if (raw === null) throw new ValidationError('Give a quote amount (more than 0).');
+  const rate = settingsOf(state).usdRate;
+  const postedIn = String(currency || 'XCD').toUpperCase() === 'USD' ? 'USD' : 'XCD';
+  const amountEC = postedIn === 'USD' ? usdToXcd(rate, raw) : raw;
+  if (!Array.isArray(gig.quotes)) gig.quotes = [];
+  const quote = {
+    giggerId: gigger.id, giggerName: gigger.name, amountEC, postedIn, postedAmount: raw, createdAt: nowIso(),
+  };
+  const existing = gig.quotes.find((entry) => entry.giggerId === gigger.id);
+  if (existing) Object.assign(existing, quote);
+  else gig.quotes.push(quote);
+  logEvent(state, 'matching', 'quote_received', gig.id, { giggerId: gigger.id, amountEC });
+  save(state);
+  return publicGig(gig, { rate, showContacts: false });
+}
+
+function acceptQuote(id, giggerId) {
+  const state = load();
+  const gig = findGigOrThrow(state, id);
+  if (gig.status !== 'open') throw new ValidationError('That gig is no longer open.');
+  if (gig.pricingMode !== 'quote') throw new ValidationError('This gig has a set budget — accept it directly.');
+  const quote = (gig.quotes || []).find((entry) => entry.giggerId === giggerId);
+  if (!quote) throw new ValidationError('That Gigger has not quoted on this gig yet.');
+  const gigger = state.giggers.find((entry) => entry.id === giggerId);
+  if (!gigger) throw new ValidationError('That Gigger was not found.');
+  gig.priceEC = quote.amountEC;
+  gig.postedIn = quote.postedIn;
+  gig.postedAmount = quote.postedAmount;
+  holdEscrow(state, gig, gigger);
+  logEvent(state, 'money', 'quote_accepted', gig.id, { giggerId: gigger.id, amountEC: quote.amountEC });
+  logAcceptEvents(state, gig, gigger.id, currentRing(gig, Date.now()));
+  save(state);
+  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
 }
 
 function startGig(id, giggerId) {
@@ -532,7 +794,7 @@ function startGig(id, giggerId) {
   if (gig.giggerId !== giggerId) throw new ValidationError('Only the accepted Gigger can start this gig.');
   gig.status = 'in_progress';
   save(state);
-  return publicGig(gig, { showContacts: true });
+  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
 }
 
 function requestComplete(id, giggerId) {
@@ -544,7 +806,7 @@ function requestComplete(id, giggerId) {
   if (gig.giggerId !== giggerId) throw new ValidationError('Only the accepted Gigger can mark this gig done.');
   gig.status = 'completion_requested';
   save(state);
-  return publicGig(gig, { showContacts: true });
+  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
 }
 
 function confirmComplete(id, code) {
@@ -558,9 +820,9 @@ function confirmComplete(id, code) {
   }
   gig.status = 'completed';
   gig.completedAt = nowIso();
-  gig.escrow.releaseAt = new Date(Date.now() + DISPUTE_WINDOW_MS).toISOString();
+  gig.escrow.releaseAt = new Date(Date.now() + disputeWindowMs(state)).toISOString();
   save(state);
-  return publicGig(gig, { showContacts: true });
+  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
 }
 
 function disputeGig(id, by, reason) {
@@ -577,8 +839,9 @@ function disputeGig(id, by, reason) {
   gig.status = 'disputed';
   gig.dispute = { by: who, reason: cleanText(reason, 500), at: nowIso() };
   if (gig.escrow) gig.escrow.status = 'frozen';
+  logEvent(state, 'trust', 'dispute_opened', gig.id, { by: who, reason: gig.dispute.reason });
   save(state);
-  return publicGig(gig, { showContacts: true });
+  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
 }
 
 function cancelGig(id, by, reason) {
@@ -594,7 +857,7 @@ function cancelGig(id, by, reason) {
   gig.cancelReason = cleanText(reason, 500);
   if (gig.escrow) gig.escrow.status = 'returned';
   save(state);
-  return publicGig(gig, { showContacts: true });
+  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
 }
 
 function rateGig(id, by, stars, comment) {
@@ -613,6 +876,7 @@ function rateGig(id, by, stars, comment) {
   const rating = { by: who, stars: n, comment: text, at: nowIso() };
   gig.ratings.push(rating);
   state.ratings.push({ id: `rat-${randomUUID().slice(0, 8)}`, gigId: gig.id, ...rating });
+  logEvent(state, 'trust', 'rating_submitted', gig.id, { by: who, stars: n });
   if (who === 'customer') {
     const gigger = state.giggers.find((entry) => entry.id === gig.giggerId);
     if (gigger) {
@@ -626,7 +890,7 @@ function rateGig(id, by, stars, comment) {
     }
   }
   save(state);
-  return publicGig(gig, { showContacts: true });
+  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
 }
 
 function walletFor(giggerId) {
@@ -649,6 +913,123 @@ function walletFor(giggerId) {
     availableEC: Math.round(available * 100) / 100,
     feesEC: Math.round(fees * 100) / 100,
     entries: entries.slice(0, 50),
+  };
+}
+
+/* ---- Settings, events, stats (tracking) ---- */
+
+function getSettings() {
+  const settings = settingsOf(load());
+  return {
+    usdRate: settings.usdRate,
+    rateSource: 'EC$ peg — EC$2.70 per US$1 (fixed peg, configurable if the peg ever moves)',
+    disputeWindowMinutes: settings.disputeWindowMinutes,
+    disputeWindowRange: [MIN_DISPUTE_WINDOW_MINUTES, MAX_DISPUTE_WINDOW_MINUTES],
+  };
+}
+
+function updateSettings(body) {
+  const state = load();
+  if (body.usdRate !== undefined && body.usdRate !== null && body.usdRate !== '') {
+    const rate = Number(body.usdRate);
+    if (!Number.isFinite(rate) || rate < 2.0 || rate > 3.5) {
+      throw new ValidationError('The USD rate must be between 2.00 and 3.50.');
+    }
+    state.settings.usdRate = Math.round(rate * 100) / 100;
+  }
+  if (body.disputeWindowMinutes !== undefined && body.disputeWindowMinutes !== null && body.disputeWindowMinutes !== '') {
+    const mins = Number(body.disputeWindowMinutes);
+    if (!Number.isInteger(mins) || mins < MIN_DISPUTE_WINDOW_MINUTES || mins > MAX_DISPUTE_WINDOW_MINUTES) {
+      throw new ValidationError('The dispute window must be between 60 minutes (1 hour) and 1440 minutes (1 day).');
+    }
+    state.settings.disputeWindowMinutes = mins;
+  }
+  save(state);
+  return getSettings();
+}
+
+function listEvents(filter) {
+  const state = load();
+  let events = state.events;
+  if (filter && filter.group) events = events.filter((entry) => entry.group === filter.group);
+  if (filter && filter.type) events = events.filter((entry) => entry.type === filter.type);
+  if (filter && filter.gigId) events = events.filter((entry) => entry.gigId === filter.gigId);
+  const limit = Math.min(200, Math.max(1, Number((filter && filter.limit) || 50) || 50));
+  return events.slice(0, limit);
+}
+
+/* Tracking aggregates for the six groups. Samples are EXCLUDED — the
+   numbers must measure real use. Targets are Musty's ops-plan targets. */
+function getStats() {
+  const state = load();
+  const gigs = state.gigs.filter((gig) => !gig.sample);
+  const giggers = state.giggers.filter((gigger) => !gigger.sample);
+  const firstAccepts = state.events
+    .filter((entry) => entry.type === 'first_accept' && Number.isFinite(entry.data && entry.data.secondsSincePost))
+    .map((entry) => entry.data.secondsSincePost)
+    .sort((a, b) => a - b);
+  const medianSeconds = firstAccepts.length ? firstAccepts[Math.floor(firstAccepts.length / 2)] : null;
+  const oldEnough = gigs.filter((gig) => Date.now() - Date.parse(gig.createdAt) > 30 * 60 * 1000);
+  const zeroResponse = oldEnough.filter((gig) => !state.events.some(
+    (entry) => entry.gigId === gig.id && (entry.type === 'accept' || entry.type === 'quote_received'),
+  ));
+  const released = gigs.filter((gig) => gig.status === 'released');
+  const done = gigs.filter((gig) => gig.status === 'completed' || gig.status === 'released');
+  const disputed = gigs.filter((gig) => gig.status === 'disputed').length;
+  const escrowHeld = gigs
+    .filter((gig) => gig.escrow && gig.escrow.status === 'held')
+    .reduce((sum, gig) => sum + gig.escrow.amountEC, 0);
+  const commission = state.ledger
+    .filter((entry) => entry.type === 'fee')
+    .reduce((sum, entry) => sum + entry.amountEC, 0);
+  const byCategory = {};
+  for (const gig of gigs) byCategory[gig.category] = (byCategory[gig.category] || 0) + 1;
+  return {
+    generatedAt: nowIso(),
+    samplesExcluded: { gigs: state.gigs.length - gigs.length, giggers: state.giggers.length - giggers.length },
+    matching: {
+      medianSecondsToFirstAccept: medianSeconds,
+      zeroResponseRate: oldEnough.length ? Math.round((zeroResponse.length / oldEnough.length) * 1000) / 1000 : null,
+      zeroResponseCount: zeroResponse.length,
+      gigsOldEnoughToJudge: oldEnough.length,
+      widenedCount: state.events.filter((entry) => entry.type === 'ring_widened').length,
+      note: 'Zero-response = gigs older than 30 minutes with no accept and no quotes.',
+    },
+    supply: {
+      giggers: giggers.length,
+      withCertifications: giggers.filter((gigger) => (gigger.certifications || []).length > 0).length,
+    },
+    demand: {
+      gigsPosted: gigs.length,
+      byCategory,
+      budgetVsQuote: {
+        budget: gigs.filter((gig) => gig.pricingMode !== 'quote').length,
+        quote: gigs.filter((gig) => gig.pricingMode === 'quote').length,
+      },
+    },
+    money: {
+      escrowHeldEC: Math.round(escrowHeld * 100) / 100,
+      totalCommissionEC: Math.round(commission * 100) / 100,
+      avgGigValueEC: gigs.length
+        ? Math.round((gigs.reduce((sum, gig) => sum + (gig.priceEC || 0), 0) / gigs.length) * 100) / 100
+        : null,
+    },
+    trust: {
+      completionRate: gigs.length ? Math.round((done.length / gigs.length) * 1000) / 1000 : null,
+      releasedCount: released.length,
+      disputedCount: disputed,
+    },
+    growth: {
+      customersFirstGig: state.events.filter((entry) => entry.type === 'customer_first_gig').length,
+      giggersFirstRelease: state.events.filter((entry) => entry.type === 'gigger_first_release').length,
+    },
+    targets: {
+      acceptanceWithin30Min: '>85%',
+      completion: '>95%',
+      onboardingHours: '<48',
+      disputeHours: '<24',
+      paymentDays: '<2',
+    },
   };
 }
 
@@ -692,11 +1073,15 @@ module.exports = {
   PARISHES,
   PILOT_PARISHES,
   CATEGORIES,
+  MAX_CATEGORIES,
   PRICE_GUIDE,
   COMMISSION_STANDARD,
   COMMISSION_VOLUME,
   COMMISSION_PRO,
-  DISPUTE_WINDOW_MS,
+  DEFAULT_USD_RATE,
+  DEFAULT_DISPUTE_WINDOW_MINUTES,
+  RING_WINDOW_MINUTES,
+  RING_SIZES,
   ValidationError,
   getVapidKeys,
   createGigger,
@@ -707,7 +1092,11 @@ module.exports = {
   gigPhoto,
   matchesForGig,
   notifyClosest,
+  notifyRinged,
+  drainWidenQueue,
   acceptGig,
+  submitQuote,
+  acceptQuote,
   startGig,
   requestComplete,
   confirmComplete,
@@ -715,6 +1104,10 @@ module.exports = {
   cancelGig,
   rateGig,
   walletFor,
+  getSettings,
+  updateSettings,
+  listEvents,
+  getStats,
   savePushSubscription,
   listPushSubscriptions,
 };

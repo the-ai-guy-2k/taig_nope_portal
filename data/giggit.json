@@ -16,12 +16,17 @@
       "sample": true,
       "skills": [
         "Cleaning",
-        "Housekeeping",
-        "Laundry & Ironing"
+        "Home Help"
       ],
       "tier": 1,
       "lat": 14.0027,
-      "lng": -60.9876
+      "lng": -60.9876,
+      "certifications": [
+        {
+          "name": "Cleaning Certificate",
+          "issuer": "St. Lucia Hospitality School"
+        }
+      ]
     },
     {
       "area": "Ciceron",
@@ -29,7 +34,7 @@
       "gigsCompleted": 8,
       "id": "ggr-sample2",
       "idNumber": "SAMPLE-ID-002",
-      "idType": "Driver\u2019s Licence",
+      "idType": "Driver’s Licence",
       "name": "Kerwin Paul",
       "parish": "Castries",
       "phone": "+17584550002",
@@ -38,12 +43,18 @@
       "ratingCount": 3,
       "sample": true,
       "skills": [
-        "Gardening & Yard Work",
-        "Moving & Hauling"
+        "Gardening",
+        "Moving"
       ],
       "tier": 1,
       "lat": 14.014,
-      "lng": -60.994
+      "lng": -60.994,
+      "certifications": [
+        {
+          "name": "Horticulture Certificate",
+          "issuer": "Sir Arthur Lewis Community College"
+        }
+      ]
     },
     {
       "area": "Castries Town",
@@ -60,12 +71,17 @@
       "ratingCount": 2,
       "sample": true,
       "skills": [
-        "Cooking & Catering",
-        "Event Help"
+        "Home Help"
       ],
       "tier": 1,
       "lat": 14.01,
-      "lng": -60.993
+      "lng": -60.993,
+      "certifications": [
+        {
+          "name": "Food Hygiene Certificate",
+          "issuer": "Ministry of Health"
+        }
+      ]
     }
   ],
   "gigs": [
@@ -76,7 +92,7 @@
       "createdAt": "2026-11-22T12:00:00.000Z",
       "customerName": "Sample Customer",
       "customerPhone": "+17584559901",
-      "description": "Deep clean of a 2-bedroom apartment in Morne Fortune \u2014 kitchen, bathrooms, floors. Bring your own supplies.",
+      "description": "Deep clean of a 2-bedroom apartment in Morne Fortune — kitchen, bathrooms, floors. Bring your own supplies.",
       "escrow": null,
       "giggerId": null,
       "giggerName": null,
@@ -91,12 +107,17 @@
       "when": "Saturday morning",
       "lat": 14.0027,
       "lng": -60.9876,
-      "photo": null
+      "photo": null,
+      "pricingMode": "budget",
+      "postedIn": "XCD",
+      "postedAmount": 120,
+      "quotes": [],
+      "ring": 0
     },
     {
       "acceptedAt": "2026-11-22T13:00:00.000Z",
       "area": "Ciceron",
-      "category": "Gardening & Yard Work",
+      "category": "Gardening",
       "completionCode": "481516",
       "createdAt": "2026-11-22T12:00:00.000Z",
       "customerName": "Sample Customer",
@@ -124,12 +145,17 @@
       "when": "Weekday afternoon",
       "lat": 14.014,
       "lng": -60.994,
-      "photo": null
+      "photo": null,
+      "pricingMode": "budget",
+      "postedIn": "XCD",
+      "postedAmount": 90,
+      "quotes": [],
+      "ring": 0
     },
     {
       "acceptedAt": "2026-11-20T13:00:00.000Z",
       "area": "Castries Town",
-      "category": "Cooking & Catering",
+      "category": "Home Help",
       "completedAt": "2026-11-21T14:00:00.000Z",
       "completionCode": "234567",
       "createdAt": "2026-11-20T12:00:00.000Z",
@@ -161,11 +187,16 @@
       ],
       "sample": true,
       "status": "released",
-      "title": "Cook lunch for 10 \u2014 family gathering",
+      "title": "Cook lunch for 10 — family gathering",
       "when": "Sunday midday",
       "lat": 14.01,
       "lng": -60.993,
-      "photo": null
+      "photo": null,
+      "pricingMode": "budget",
+      "postedIn": "XCD",
+      "postedAmount": 200,
+      "quotes": [],
+      "ring": 0
     }
   ],
   "ledger": [
@@ -207,5 +238,10 @@
       "id": "rat-sample1",
       "stars": 5
     }
-  ]
+  ],
+  "settings": {
+    "usdRate": 2.7,
+    "disputeWindowMinutes": 60
+  },
+  "events": []
 }

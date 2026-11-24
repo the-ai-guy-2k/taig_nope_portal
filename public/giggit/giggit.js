@@ -55,6 +55,45 @@ function timeLeft(iso) {
   return 'releases in ~' + Math.round(mins / 60) + ' h';
 }
 
+/* ---- Currency display (EC$ default, US$ toggle) ---- */
+let displayCurrency = localStorage.getItem('giggit-currency') || 'XCD';
+
+function usdRate() {
+  return (meta && Number(meta.usdRate)) || 2.70;
+}
+
+function moneyText(g) {
+  if (g.pricingMode === 'quote' && g.priceEC == null) return 'Asking for quotes';
+  if (displayCurrency === 'USD') {
+    const usd = g.priceUSD != null ? g.priceUSD : (Number(g.priceEC) / usdRate());
+    return 'US$' + Number(usd).toFixed(2);
+  }
+  return 'EC$' + Number(g.priceEC).toFixed(2);
+}
+
+function moneyEC(ec) {
+  if (displayCurrency === 'USD') return 'US$' + (Number(ec) / usdRate()).toFixed(2);
+  return 'EC$' + Number(ec).toFixed(2);
+}
+
+function windowText() {
+  const mins = (meta && meta.disputeWindowMinutes) || 60;
+  if (mins === 60) return '1-hour dispute window';
+  if (mins === 1440) return '24-hour dispute window';
+  if (mins < 60) return mins + '-minute dispute window';
+  return (mins / 60) + '-hour dispute window';
+}
+
+function setCurrency(cur) {
+  displayCurrency = cur === 'USD' ? 'USD' : 'XCD';
+  localStorage.setItem('giggit-currency', displayCurrency);
+  $('curr-xcd').classList.toggle('active', displayCurrency === 'XCD');
+  $('curr-usd').classList.toggle('active', displayCurrency === 'USD');
+  renderGigs();
+  if (detailId) openGig(detailId);
+  if (currentTab === 'wallet') renderWallet();
+}
+
 function showTab(tab) {
   currentTab = tab;
   detailId = null;
@@ -178,25 +217,40 @@ function buildForms() {
   };
   $('gig-category').addEventListener('change', updateHint);
   updateHint();
+  $('usd-rate-note').textContent = 'Converted at EC$' + usdRate().toFixed(2) + ' per US$1 (the EC$ peg).';
+  $('curr-rate').textContent = 'EC$' + usdRate().toFixed(2) + ' = US$1';
+  $('curr-xcd').classList.toggle('active', displayCurrency === 'XCD');
+  $('curr-usd').classList.toggle('active', displayCurrency === 'USD');
+  pricingChanged();
+}
+
+function pricingChanged() {
+  const mode = (document.querySelector('input[name="pricing"]:checked') || {}).value || 'budget';
+  $('budget-box').classList.toggle('hidden', mode !== 'budget');
+  $('quote-hint').classList.toggle('hidden', mode !== 'quote');
+  $('gig-price').required = mode === 'budget';
 }
 
 function gigCard(g) {
   const me = giggers.find((entry) => entry.id === whoAmI);
-  const canAccept = g.status === 'open' && me && me.skills.includes(g.category);
-  const acceptHint = g.status === 'open' && whoAmI && !canAccept
+  const canAccept = g.status === 'open' && me && me.skills.includes(g.category) && g.pricingMode !== 'quote';
+  const acceptHint = g.status === 'open' && whoAmI && !canAccept && g.pricingMode !== 'quote'
     ? '<div class="hint">You do not list ' + esc(g.category) + ' — add the skill to accept this one.</div>' : '';
+  const quoteHint = g.status === 'open' && g.pricingMode === 'quote' && me && me.skills.includes(g.category)
+    ? '<div class="hint">This gig is asking for quotes — open it to send yours.</div>' : '';
   return '<div class="card">'
     + '<h3>' + esc(g.title) + ' ' + (g.sample ? '<span class="badge sample">SAMPLE</span>' : '') + '</h3>'
     + '<div class="meta">' + esc(g.category) + ' • ' + esc(g.parish) + (g.area ? ' — ' + esc(g.area) : '')
     + (g.when ? ' • ' + esc(g.when) : '') + '</div>'
-    + '<div class="price">EC$' + Number(g.priceEC).toFixed(2) + ' <small>per gig</small></div>'
+    + '<div class="price">' + esc(moneyText(g)) + ' <small>' + (g.pricingMode === 'quote' && g.priceEC == null ? 'quotes welcome' : 'per gig') + '</small></div>'
+    + (g.status === 'open' ? '<div class="ring-note">Ring ' + (g.ring != null ? g.ring : 0) + ' — the ' + (g.ring === 1 ? 'closest 6' : g.ring === 2 ? 'every matching' : 'closest 3') + ' Giggers have the first look.</div>' : '')
     + (g.hasPhoto ? '<img class="thumb small" src="/api/giggit/gigs/' + esc(g.id) + '/photo" alt="Photo of the problem" loading="lazy">' : '')
     + '<p>' + esc(g.description) + '</p>'
     + '<p><span class="status ' + esc(g.status) + '">' + esc(statusLabel(g.status)) + '</span>'
     + (g.giggerName ? ' • <b>' + esc(g.giggerName) + '</b>' : '') + '</p>'
-    + acceptHint
+    + acceptHint + quoteHint
     + '<button class="btn small" type="button" onclick="openGig(\'' + esc(g.id) + '\')">Open</button> '
-    + (canAccept ? '<button class="btn small sun" type="button" onclick="acceptGig(\'' + esc(g.id) + '\')">Accept this gig</button>' : '')
+    + (canAccept ? '<button class="btn small leaf" type="button" onclick="acceptGig(\'' + esc(g.id) + '\')">Accept this gig</button>' : '')
     + '</div>';
 }
 
@@ -227,6 +281,7 @@ function renderGiggers() {
       + (g.ratingAvg != null ? ' • ★ ' + g.ratingAvg + ' (' + g.ratingCount + ')' : '')
       + ' • ' + g.gigsCompleted + ' gigs done</div>'
       + g.skills.map((s) => '<span class="tag">' + esc(s) + '</span>').join('')
+      + ((g.certifications || []).length ? '<br>' + g.certifications.map((c) => '<span class="tag cert">★ ' + esc(c.name) + (c.issuer ? ' — ' + esc(c.issuer) : '') + '</span>').join('') : '')
       + '</div>').join('') : '<div class="card">No Giggers yet — be the first.</div>');
 }
 
@@ -244,7 +299,7 @@ async function openGig(id) {
   let html = '<div class="card"><h3>' + esc(g.title) + ' ' + (g.sample ? '<span class="badge sample">SAMPLE</span>' : '') + '</h3>'
     + '<div class="meta">' + esc(g.category) + ' • ' + esc(g.parish) + (g.area ? ' — ' + esc(g.area) : '')
     + (g.when ? ' • ' + esc(g.when) : '') + '</div>'
-    + '<div class="price">EC$' + Number(g.priceEC).toFixed(2) + '</div>'
+    + '<div class="price">' + esc(moneyText(g)) + '</div>'
     + '<p>' + esc(g.description) + '</p>'
     + '<p><span class="status ' + esc(g.status) + '">' + esc(statusLabel(g.status)) + '</span></p>'
     + '<div class="timeline">Posted ' + esc(new Date(g.createdAt).toLocaleString())
@@ -260,12 +315,29 @@ async function openGig(id) {
       + (g.giggerPhone ? ' • ' + esc(g.giggerPhone) : '') + '</p>';
   }
   if (g.escrow) {
-    html += '<div class="escrow"><b>Escrow: EC$' + Number(g.escrow.amountEC).toFixed(2) + ' — ' + esc(g.escrow.status) + '</b>'
-      + (g.escrow.status === 'held' && g.escrow.releaseAt ? '<br>' + esc(timeLeft(g.escrow.releaseAt)) + ' (1-hour dispute window after completion).' : '')
+    html += '<div class="escrow"><b>Escrow: ' + esc(moneyEC(g.escrow.amountEC)) + ' — ' + esc(g.escrow.status) + '</b>'
+      + (g.escrow.status === 'held' && g.escrow.releaseAt ? '<br>' + esc(timeLeft(g.escrow.releaseAt)) + ' (' + esc(windowText()) + ' after completion).' : '')
       + (g.escrow.status === 'released'
-        ? '<br>Paid out EC$' + Number(g.escrow.payoutEC).toFixed(2) + ' to the Gigger, commission EC$' + Number(g.escrow.commissionEC).toFixed(2) + ' (' + Math.round((g.escrow.commissionRate || 0) * 100) + '%).'
+        ? '<br>Paid out ' + esc(moneyEC(g.escrow.payoutEC)) + ' to the Gigger, commission ' + esc(moneyEC(g.escrow.commissionEC)) + ' (' + Math.round((g.escrow.commissionRate || 0) * 100) + '%).'
         : '')
       + '</div>';
+  }
+  if (g.pricingMode === 'quote' && g.status === 'open') {
+    html += '<h3>Quotes</h3>';
+    if (g.quotes && g.quotes.length) {
+      html += g.quotes.map((q) =>
+        '<div class="quote-row"><span><b>' + esc(q.giggerName) + '</b> — ' + esc(moneyEC(q.amountEC))
+        + (q.postedIn === 'USD' ? ' <span class="meta">(posted US$' + Number(q.postedAmount).toFixed(2) + ')</span>' : '') + '</span>'
+        + '<button class="btn small leaf" type="button" onclick="acceptQuote(\'' + esc(g.id) + '\', \'' + esc(q.giggerId) + '\')">Accept this quote</button></div>').join('');
+    } else {
+      html += '<p class="meta">No quotes yet — matching Giggers will send theirs here.</p>';
+    }
+  }
+  if (g.pricingMode === 'quote' && g.status === 'open' && me && me.skills.includes(g.category)) {
+    html += '<label for="quote-amount">Your quote</label>'
+      + '<input type="number" id="quote-amount" min="1" max="10000" step="0.01" placeholder="150"> '
+      + '<label><input type="checkbox" id="quote-usd"> In US$</label> '
+      + '<button class="btn leaf" type="button" onclick="submitQuote(\'' + esc(g.id) + '\')">Send quote</button>';
   }
   if (g.completionCode && (g.status === 'accepted' || g.status === 'in_progress' || g.status === 'completion_requested')) {
     html += '<p>Completion code (customer gives this to the Gigger when the work is done):<br><span class="code">' + esc(g.completionCode) + '</span></p>';
@@ -273,19 +345,19 @@ async function openGig(id) {
   if (g.hasPhoto) {
     html += '<img class="thumb" src="/api/giggit/gigs/' + esc(g.id) + '/photo" alt="Photo of the problem">';
   }
-  if (g.status === 'open' && me && me.skills.includes(g.category)) {
-    html += '<button class="btn sun" type="button" onclick="acceptGig(\'' + esc(g.id) + '\')">Accept this gig</button> ';
+  if (g.status === 'open' && me && me.skills.includes(g.category) && g.pricingMode !== 'quote') {
+    html += '<button class="btn leaf" type="button" onclick="acceptGig(\'' + esc(g.id) + '\')">Accept this gig</button> ';
   }
   if (isMine && g.status === 'accepted') {
     html += '<button class="btn" type="button" onclick="gigAction(\'' + esc(g.id) + '\', \'start\', {giggerId: whoAmI})">Start the job</button> ';
   }
   if (isMine && (g.status === 'accepted' || g.status === 'in_progress')) {
-    html += '<button class="btn sun" type="button" onclick="gigAction(\'' + esc(g.id) + '\', \'request-complete\', {giggerId: whoAmI})">Job done — ask customer to confirm</button> ';
+    html += '<button class="btn leaf" type="button" onclick="gigAction(\'' + esc(g.id) + '\', \'request-complete\', {giggerId: whoAmI})">Job done — ask customer to confirm</button> ';
   }
   if (g.status === 'completion_requested') {
     html += '<label for="confirm-code">Customer: enter the completion code</label>'
       + '<input type="text" id="confirm-code" maxlength="6" inputmode="numeric" placeholder="6 digits"> '
-      + '<button class="btn sun" type="button" onclick="confirmComplete(\'' + esc(g.id) + '\')">Confirm — release to escrow window</button>';
+      + '<button class="btn leaf" type="button" onclick="confirmComplete(\'' + esc(g.id) + '\')">Confirm — release to escrow window</button>';
   }
   if (g.status === 'completed') {
     html += '<p>' + esc(timeLeft(g.escrow && g.escrow.releaseAt)) + '</p>'
@@ -324,11 +396,15 @@ async function renderMatches(id) {
     }
     const me = giggers.find((entry) => entry.id === whoAmI);
     let html = '';
+    const ringNames = ['closest 3', 'closest 6', 'every matching Gigger'];
+    if (data.gig.status === 'open' && data.currentRing != null) {
+      html += '<div class="ring-note"><b>Ring ' + data.currentRing + ' of 2</b> — the ' + ringNames[data.currentRing] + ' get this gig first. The ring widens every ' + data.ringWindowMinutes + ' minutes with no accept.</div>';
+    }
     if (me && data.matches[0].gigger.id === me.id && data.gig.status === 'open') {
       html += '<div class="closest-banner"><b>You are the closest Gigger for this job.</b> It came to you first — accept it above.</div>';
     }
     html += '<h3>Closest first</h3>' + data.matches.map((m, i) =>
-      '<div class="match-row"><span>' + (i + 1) + '. <b>' + esc(m.gigger.name) + '</b> — ' + esc(m.gigger.skills.join(', ')) + '</span>'
+      '<div class="match-row' + (m.inCurrentRing === false ? ' out-of-ring' : '') + '"><span>' + (i + 1) + '. <b>' + esc(m.gigger.name) + '</b> — ' + esc(m.gigger.skills.join(', ')) + ' <span class="ring">RING ' + m.ring + '</span></span>'
       + '<span class="dist">' + (m.distanceKm != null ? m.distanceKm + ' km' : m.basis === 'same-area' ? 'same area' : m.basis === 'same-parish' ? 'same parish' : 'no location yet') + '</span></div>').join('');
     box.innerHTML = html;
   } catch (err) {
@@ -372,6 +448,20 @@ async function acceptGig(id) {
   await gigAction(id, 'accept', { giggerId: whoAmI });
 }
 
+async function submitQuote(id) {
+  if (!whoAmI) {
+    alert('Pick who you are first — choose a Gigger in “Testing as” at the top.');
+    return;
+  }
+  const amount = Number(($('quote-amount') || {}).value || 0);
+  const currency = ($('quote-usd') || {}).checked ? 'USD' : 'XCD';
+  await gigAction(id, 'quotes', { giggerId: whoAmI, amount, currency });
+}
+
+async function acceptQuote(id, giggerId) {
+  await gigAction(id, 'accept-quote', { giggerId });
+}
+
 async function confirmComplete(id) {
   const code = ($('confirm-code') || {}).value || '';
   await gigAction(id, 'confirm-complete', { code });
@@ -409,7 +499,9 @@ async function postGig(event) {
     description: $('gig-desc').value,
     parish: 'Castries',
     area: $('gig-area').value,
+    pricingMode: (document.querySelector('input[name="pricing"]:checked') || {}).value || 'budget',
     priceEC: Number($('gig-price').value),
+    currency: $('gig-usd').checked ? 'USD' : 'XCD',
     when: $('gig-when').value,
     customerName: $('gig-name').value,
     customerPhone: $('gig-phone').value,
@@ -419,7 +511,9 @@ async function postGig(event) {
   };
   try {
     const data = await api('/api/giggit/gigs', { method: 'POST', body: JSON.stringify(body) });
-    let note = 'Gig posted — Giggers in Castries can see it now.';
+    let note = data.gig.pricingMode === 'quote'
+      ? 'Gig posted — Giggers will send quotes, you pick one on the gig page.'
+      : 'Gig posted — Giggers in Castries can see it now.';
     if (data.closest) {
       note += ' Closest: ' + data.closest.gigger.name
         + (data.closest.distanceKm != null ? ' (' + data.closest.distanceKm + ' km away)' : '')
@@ -453,6 +547,7 @@ async function registerGigger(event) {
     idType: $('reg-idtype').value,
     idNumber: $('reg-idnum').value,
     skills,
+    certifications: $('reg-certs').value.split(',').map((s) => s.trim()).filter(Boolean),
     lat: $('reg-lat').value ? Number($('reg-lat').value) : null,
     lng: $('reg-lng').value ? Number($('reg-lng').value) : null,
   };
@@ -478,10 +573,10 @@ async function renderWallet() {
     const w = await api('/api/giggit/wallet/' + encodeURIComponent(whoAmI));
     el.innerHTML = '<div class="card"><h3>' + esc(w.gigger.name) + ' — Giggit Wallet</h3>'
       + '<div class="meta">Simulated ledger — no real money moves in this test build.</div>'
-      + '<div class="price">EC$' + Number(w.availableEC).toFixed(2) + ' <small>available</small></div>'
-      + '<p>Held in escrow: <b>EC$' + Number(w.heldEC).toFixed(2) + '</b> • Commission paid so far: EC$' + Number(w.feesEC).toFixed(2) + '</p>'
+      + '<div class="price">' + esc(moneyEC(w.availableEC)) + ' <small>available</small></div>'
+      + '<p>Held in escrow: <b>' + esc(moneyEC(w.heldEC)) + '</b> • Commission paid so far: ' + esc(moneyEC(w.feesEC)) + '</p>'
       + (w.entries.length ? '<h3>Ledger</h3>' + w.entries.map((e) =>
-        '<p>' + esc(new Date(e.at).toLocaleString()) + ' — ' + esc(e.type) + ' EC$' + Number(e.amountEC).toFixed(2) + ' <span class="meta">' + esc(e.note || '') + '</span></p>').join('')
+        '<p>' + esc(new Date(e.at).toLocaleString()) + ' — ' + esc(e.type) + ' ' + esc(moneyEC(e.amountEC)) + ' <span class="meta">' + esc(e.note || '') + '</span></p>').join('')
         : '<p>No wallet activity yet.</p>')
       + '</div>';
   } catch (err) {

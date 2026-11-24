@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0077C8">
+<meta name="theme-color" content="#1B7A3D">
 <meta name="description" content="Giggit — find trusted local help in Saint Lucia. Workers on one side, customers on the other, money held till the job is done.">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon-192.png">
@@ -17,17 +17,41 @@
 <header>
   <div class="hero">
     <svg viewBox="0 0 880 220" role="img" aria-label="The Pitons of Saint Lucia over the Caribbean Sea">
-      <rect width="880" height="220" rx="12" fill="#7ec3ea"/>
-      <circle cx="700" cy="52" r="34" fill="#FFD200"/>
-      <path d="M0 220 L180 30 L330 220 Z" fill="#0b3d5c"/>
-      <path d="M210 220 L400 70 L560 220 Z" fill="#14567e"/>
-      <path d="M180 30 L205 78 L160 78 Z" fill="#d6e9f5" opacity="0.85"/>
-      <path d="M400 70 L420 108 L382 108 Z" fill="#d6e9f5" opacity="0.85"/>
-      <path d="M0 196 Q110 182 220 196 T440 196 T660 196 T880 196 L880 220 L0 220 Z" fill="#0077C8"/>
-      <path d="M0 208 Q110 198 220 208 T440 208 T660 208 T880 208 L880 220 L0 220 Z" fill="#005a96"/>
+      <rect width="880" height="220" rx="12" fill="#BFE3C6"/>
+      <circle cx="700" cy="52" r="34" fill="#8ED152"/>
+      <path d="M0 220 L180 30 L330 220 Z" fill="#12592B"/>
+      <path d="M210 220 L400 70 L560 220 Z" fill="#1B7A3D"/>
+      <path d="M180 30 L205 78 L160 78 Z" fill="#EAF6E4" opacity="0.85"/>
+      <path d="M400 70 L420 108 L382 108 Z" fill="#EAF6E4" opacity="0.85"/>
+      <path d="M0 196 Q110 182 220 196 T440 196 T660 196 T880 196 L880 220 L0 220 Z" fill="#1B7A3D"/>
+      <path d="M0 208 Q110 198 220 208 T440 208 T660 208 T880 208 L880 220 L0 220 Z" fill="#12592B"/>
+      <g transform="translate(748,118) scale(0.85)">
+        <ellipse cx="60" cy="62" rx="48" ry="28" fill="#2FA84F"/>
+        <circle cx="38" cy="36" r="14" fill="#2FA84F"/>
+        <circle cx="82" cy="36" r="14" fill="#2FA84F"/>
+        <circle cx="38" cy="34" r="9" fill="#fff"/>
+        <circle cx="82" cy="34" r="9" fill="#fff"/>
+        <circle cx="38" cy="35" r="4.5" fill="#14202b"/>
+        <circle cx="82" cy="35" r="4.5" fill="#14202b"/>
+        <path d="M40 62 Q60 76 80 62" stroke="#12592B" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </g>
     </svg>
-    <h1>Giggit <span>— Saint Lucia</span></h1>
-    <p>Find trusted local help. Workers on one side, customers on the other, money held till the job is done.</p>
+    <div class="brand">
+      <svg class="frog" viewBox="0 0 120 90" role="img" aria-label="Giggit frog mascot">
+        <ellipse cx="60" cy="62" rx="48" ry="28" fill="#2FA84F"/>
+        <circle cx="38" cy="36" r="14" fill="#2FA84F"/>
+        <circle cx="82" cy="36" r="14" fill="#2FA84F"/>
+        <circle cx="38" cy="34" r="9" fill="#fff"/>
+        <circle cx="82" cy="34" r="9" fill="#fff"/>
+        <circle cx="38" cy="35" r="4.5" fill="#14202b"/>
+        <circle cx="82" cy="35" r="4.5" fill="#14202b"/>
+        <path d="M40 62 Q60 76 80 62" stroke="#12592B" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <h1>Giggit <span>— Saint Lucia</span></h1>
+        <p>Find trusted local help. Workers on one side, customers on the other, money held till the job is done.</p>
+      </div>
+    </div>
     <span class="pilot">MVP PILOT • CASTRIES ONLY • TEST BUILD</span>
   </div>
 </header>
@@ -38,6 +62,7 @@
       <option value="">— Pick who you are (MVP test, no accounts yet) —</option>
     </select>
     <div class="hint">Pick a Gigger to accept and work gigs, or leave it blank to browse and post as a customer.</div>
+    <div class="hint">Prices in: <span class="curr-toggle"><button type="button" id="curr-xcd" class="active" onclick="setCurrency('XCD')">EC$</button><button type="button" id="curr-usd" onclick="setCurrency('USD')">US$</button></span> <span id="curr-rate"></span></div>
   </div>
 
   <div class="tabs">
@@ -80,11 +105,17 @@
         </div>
         <input type="hidden" id="gig-lat">
         <input type="hidden" id="gig-lng">
-          <div>
-            <label for="gig-price">Price (EC$)</label>
-            <input type="number" id="gig-price" min="1" max="10000" step="0.01" required placeholder="120">
-          </div>
+        <label>How do you want to price it?</label>
+        <div class="checks">
+          <label><input type="radio" name="pricing" value="budget" checked onchange="pricingChanged()"> I set a budget</label>
+          <label><input type="radio" name="pricing" value="quote" onchange="pricingChanged()"> Ask Giggers to quote</label>
         </div>
+        <div id="budget-box">
+          <label for="gig-price">Budget</label>
+          <input type="number" id="gig-price" min="1" max="10000" step="0.01" placeholder="120">
+          <div class="hint"><label><input type="checkbox" id="gig-usd"> In US$ instead</label> <span id="usd-rate-note"></span></div>
+        </div>
+        <div id="quote-hint" class="hint hidden">Giggers will send you quotes — you pick one, and that sets the price. No budget needed from you.</div>
         <label for="gig-when">When</label>
         <input type="text" id="gig-when" maxlength="120" placeholder="e.g. Saturday morning">
         <div class="row">
@@ -141,6 +172,9 @@
         </div>
         <label>Your skills (pick up to 8)</label>
         <div class="checks" id="reg-skills"></div>
+        <label for="reg-certs">Certifications (optional, up to 6)</label>
+        <input type="text" id="reg-certs" maxlength="500" placeholder="e.g. Food Hygiene Certificate, Horticulture Certificate">
+        <div class="hint">Optional — separate with commas. Your ID card is what verifies you.</div>
         <button class="btn" type="submit">Join as a Gigger</button>
       </form>
     </div>
