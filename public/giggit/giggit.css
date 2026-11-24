@@ -109,6 +109,7 @@ header p { color: #E4F5DF; }
 .hero svg { border-radius: 20px; box-shadow: var(--shadow-soft); }
 .pilot { background: var(--hibiscus); color: #fff; border-radius: 999px; padding: 3px 10px; }
 .frog { width: 72px; filter: drop-shadow(0 6px 8px rgba(31, 92, 38, .28)); }
+.logo { width: 84px; flex: none; filter: drop-shadow(0 4px 6px rgba(31, 92, 38, .30)); }
 .frog.hero-frog { width: 110px; right: 18px; bottom: 6px; }
 @media (max-width: 560px) { .frog.hero-frog { width: 64px; right: 10px; bottom: 4px; } }
 .card { border-radius: 20px; box-shadow: var(--shadow-soft); }

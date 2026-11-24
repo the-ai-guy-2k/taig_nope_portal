@@ -8,7 +8,7 @@
    tabs to close. API calls are network-first with a cache fallback so
    the gig list still reads offline. */
 
-const CACHE = 'giggit-v3';
+const CACHE = 'giggit-v4';
 const SHELL = [
   './',
   './index.html',
@@ -16,6 +16,7 @@ const SHELL = [
   './giggit.js',
   './manifest.json',
   './mascot.png',
+  './logo.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
 ];
