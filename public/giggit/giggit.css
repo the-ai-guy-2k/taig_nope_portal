@@ -87,8 +87,41 @@ footer { text-align: center; color: var(--muted); font-size: 13px; padding: 20px
 .match-row .dist { color: var(--muted); font-size: 13px; white-space: nowrap; }
 input[type=file] { width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 15px; background: #fff; }
 
-/* ---- Nov 24 slice: frog mascot, currency toggle, rings, quotes ---- */
+/* ---- Nov 24 restyle: match Tee's frog — warm, rounded 3D storybook ---- */
 /* Tee has more front-end notes coming — new front-end work lands here. */
+:root {
+  --leaf: #4E9A51;
+  --leaf-dark: #2F7A33;
+  --lime: #A8D98A;
+  --lime-soft: #EAF6DF;
+  --ink: #22301F;
+  --muted: #5F7059;
+  --line: #D9E7C6;
+  --paper: #F8F4E7;
+  --cream: #FFF6E8;
+  --hibiscus: #F58220;
+  --ok: #2F7A33;
+  --shadow-soft: 0 10px 24px rgba(47, 122, 51, .10);
+  --shadow-lift: 0 4px 0 rgba(31, 92, 38, .18);
+}
+header { background: linear-gradient(180deg, #5FA860, #3E8A44); border-radius: 0 0 28px 28px; box-shadow: 0 8px 24px rgba(31, 92, 38, .18); }
+header p { color: #E4F5DF; }
+.hero svg { border-radius: 20px; box-shadow: var(--shadow-soft); }
+.pilot { background: var(--hibiscus); color: #fff; border-radius: 999px; padding: 3px 10px; }
+.frog { width: 72px; filter: drop-shadow(0 6px 8px rgba(31, 92, 38, .28)); }
+.frog.hero-frog { width: 110px; right: 18px; bottom: 6px; }
+@media (max-width: 560px) { .frog.hero-frog { width: 64px; right: 10px; bottom: 4px; } }
+.card { border-radius: 20px; box-shadow: var(--shadow-soft); }
+.btn { border-radius: 999px; box-shadow: var(--shadow-lift); }
+.btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(31, 92, 38, .18); }
+.tabs button { box-shadow: 0 3px 0 rgba(31, 92, 38, .12); }
+input[type=text], input[type=tel], input[type=number], select, textarea, input[type=file] { border-radius: 14px; border-width: 2px; }
+.escrow, .ring-note, .closest-banner, .whoami, .msg { border-radius: 16px; }
+.code { border-radius: 16px; }
+.thumb { border-radius: 16px; box-shadow: var(--shadow-soft); }
+.stars button.lit { color: var(--hibiscus); text-shadow: none; }
+.escrow { background: var(--cream); border-color: var(--lime); }
+.whoami { background: var(--cream); }
 .brand { display: flex; align-items: center; gap: 12px; }
 .brand h1 { margin: 0; }
 .frog { width: 64px; height: auto; flex: none; }
