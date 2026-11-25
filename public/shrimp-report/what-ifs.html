@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<meta name="description" content="Five timestamped what-ifs for the Jacksonville Jumbo Shrimp, filed Nov 25, 2026 — to be scored in public." />
+<title>What-Ifs — The Shrimp, On Paper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --navy:#182941; --navy-deep:#0E1A2C; --navy-panel:#1F3350; --navy-panel2:#243A5C;
+    --gold:#CDA140; --gold-bright:#E7C46A; --ink:#F5F2E9; --muted:#A9B6C9;
+    --line:rgba(205,161,64,.28); --win:#43B581; --loss:#E5534B; --radius:14px;
+  }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; background:
+      radial-gradient(1100px 480px at 85% -120px, rgba(205,161,64,.14), transparent 60%),
+      linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 340px, var(--navy) 100%);
+    background-color:var(--navy-deep); color:var(--ink);
+    font-family:"Barlow", system-ui, sans-serif; font-size:17px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.cond{ font-family:"Barlow Condensed","Barlow",sans-serif; text-transform:uppercase; letter-spacing:.02em; margin:0; }
+  p{ margin:0; } a{ color:var(--gold-bright); }
+  :focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .wrap{ max-width:1120px; margin:0 auto; padding:0 16px; }
+  .eyebrow{ color:var(--gold); font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:13px; }
+  .muted{ color:var(--muted); }
+  .gold{ color:var(--gold-bright); }
+  .v1badge{ display:inline-block; border:1px solid var(--line); border-radius:999px; padding:2px 10px; font-size:13px; color:var(--gold-bright); }
+  .draftbadge{ display:inline-block; border:1px solid var(--loss); border-radius:999px; padding:2px 10px; font-size:13px; color:#F2A49E; }
+  .topnav{ position:sticky; top:0; z-index:50; background:rgba(14,26,44,.92); backdrop-filter:blur(8px); border-bottom:2px solid var(--gold); }
+  .topnav-inner{ max-width:1120px; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  .brand{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:26px; letter-spacing:.03em; color:var(--ink); text-decoration:none; padding:10px 8px 10px 0; margin-right:8px; }
+  .brand b{ color:var(--gold); }
+  .topnav a.navlink{ color:var(--ink); text-decoration:none; font-weight:600; padding:10px 10px; border-radius:8px; font-size:15px; }
+  .topnav a.navlink:hover{ background:rgba(205,161,64,.14); }
+  .topnav a.navlink.active{ color:var(--gold-bright); }
+  header.hero{ padding:44px 0 8px; }
+  header.hero h1{ font-size:clamp(44px, 9vw, 84px); line-height:.95; }
+  header.hero h1 span{ color:var(--gold); }
+  .tagline{ font-family:"Barlow Condensed",sans-serif; font-size:clamp(22px, 4vw, 30px); text-transform:uppercase; color:var(--gold-bright); margin-top:10px; }
+  .herosub{ max-width:720px; margin-top:12px; font-size:18px; }
+  .herometa{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  section{ padding:34px 0 8px; }
+  section h2{ font-size:clamp(28px, 5vw, 40px); margin-bottom:6px; }
+  section h2 span{ color:var(--gold); }
+  .section-sub{ color:var(--muted); max-width:760px; margin-bottom:18px; }
+  .cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px; }
+  .card{ background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel2)); border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+  .card h3{ font-size:23px; margin-bottom:8px; }
+  .card h3 span{ color:var(--gold); }
+  .card p + p{ margin-top:8px; }
+  .card .kicker{ color:var(--gold); font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:12px; }
+  .callout{ background:rgba(205,161,64,.08); border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px; }
+  .callout p + p{ margin-top:8px; }
+  ol.questions{ margin:8px 0 0; padding-left:22px; font-size:18px; }
+  ol.questions li{ margin-bottom:10px; }
+  ol.questions li::marker{ color:var(--gold); font-weight:700; }
+  .pagenav{ display:flex; justify-content:space-between; gap:14px; margin-top:36px; padding-top:18px; border-top:1px solid var(--line); font-weight:600; }
+  .pagenav a{ text-decoration:none; }
+  footer.page{ margin-top:44px; border-top:2px solid var(--gold); padding:22px 0 40px; }
+  footer.page p + p{ margin-top:8px; }
+</style>
+</head>
+<body>
+
+<nav class="topnav"><div class="topnav-inner">
+  <a class="brand" href="./">SHRIMP <b>·</b> ON PAPER</a>
+  <a class="navlink" href="./">The Read</a>
+  <a class="navlink" href="./numbers.html">Numbers</a>
+  <a class="navlink" href="./pattern.html">Pattern</a>
+  <a class="navlink active" href="./what-ifs.html">What-Ifs</a>
+  <a class="navlink" href="./comp.html">The Comp</a>
+  <a class="navlink" href="./method.html">Method</a>
+  <a class="navlink" href="/tsr-report/">TSR</a>
+</div></nav>
+
+<div class="wrap" id="top">
+<header class="hero">
+  <p class="eyebrow">Page 4 — What-Ifs</p>
+  <h1>The test, <span>stated now.</span></h1>
+  <p class="tagline">Five tests. Filed Nov 25, 2026. Scored in public.</p>
+  <p class="herosub">Sustain greatness does not mean repeating 89–61 exactly. At Triple-A, rosters are rebuilt by the parent club every winter, and holding any team to the same win total with a different roster would be a dishonest test. It means the <i>way</i> Jacksonville won — prevention first, depth over dependence, competitive in every setting — survives the roster turnover.</p>
+  <p class="herometa"><span class="v1badge">v1 — published Nov 25, 2026</span> <span class="draftbadge">DRAFT — FOR TEE'S REVIEW</span></p>
+</header>
+
+<section>
+  <h2>Five tests, <span>filed Nov 25, 2026</span></h2>
+  <p class="section-sub">Stated here in terms that can be scored after the 2026 season without moving the goalposts. If three or more of the five hold, the 2025 championship reads as the start of a sustained level. If prevention and the differential both go, it reads as a great team that was assembled once and dispersed — honored here, but not sustained. Either result will be reported on the same terms stated here.</p>
+  <ol class="questions">
+    <li><b>Prevention holds.</b> If Jacksonville allows runs at a rate in the top third of Triple-A again in 2026, the 2025 prevention read was a system, not a staff that happened to be together for one summer. If prevention falls to the middle or bottom of the level while the win total holds up on offense instead, this read was wrong about what carried the team.</li>
+    <li><b>Close games regress, but do not collapse.</b> Nobody should expect another .674 in one-run games. A sustain result is a winning one-run record — anything above .500 — alongside a winning record in games decided by three or fewer. A losing one-run record in 2026 would mark the 2025 edge as mostly sequencing.</li>
+    <li><b>Both settings, again.</b> A home record built on VyStar Ballpark with a losing road record would break the most proven part of the 2025 pattern. Sustain means a winning road record, or within a few games of one, for a second straight year.</li>
+    <li><b>Replacement production appears.</b> Berry, Mack, Marsee, De Los Santos, and Acosta will not all be Jacksonville regulars for another full season — that is the nature of a Marlins affiliate one step from the majors. Sustain means new regulars replace most of that spread production: no single player needing to replace all of it, and the team on-base and stolen-base identity surviving the names changing.</li>
+    <li><b>The differential stays positive.</b> The cleanest single check: a second straight positive run differential after +86 in 2025, following −47 in 2024 and −74 in 2023. Two positive years in a row would be the first clear break from the inherited pattern of the losing seasons.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>2026: the season <span>happened</span></h2>
+  <p class="section-sub">The record is stated here. The verdicts are not scored yet — that is Tee's call.</p>
+  <div class="cards">
+    <div class="card"><p class="kicker">2026 final</p><h3>73–74 <span>.497</span></h3><p>42–32 in the first half, 31–42 in the second. A burst, then a fall — the Shrimp are a live burst case, and the burst is the story the 2026 numbers tell.</p></div>
+    <div class="card"><p class="kicker">2026 runs</p><h3>738–730 <span>+8</span></h3><p>Still a positive differential — but the prevention fell to 4.97 runs allowed per game, against 4.05 in 2025.</p></div>
+    <div class="card"><p class="kicker">The open call</p><h3>Score now, <span>or keep forward?</span></h3><p>The five tests above were filed to be scored after 2026. The season is over. Whether this report scores them against the real 73–74 now, or keeps the forward read, is Tee's call — it is pending. Nothing on this page marks a test hit or miss until he says so.</p></div>
+  </div>
+  <div class="callout" style="margin-top:18px;">
+    <p><b>A pattern read that cannot be proven wrong is not analysis; it is promotion, and this is not that.</b> Jacksonville has the harder and better problem now. Plenty of teams have had one September. The 2025 Shrimp earned the right to be measured by what comes next — by whether the numbers they inherited, fixed, and finally proved can be proven again.</p>
+  </div>
+</section>
+
+<div class="pagenav"><a href="./pattern.html">← Pattern</a><a href="./comp.html">The Comp — who they hold up →</a></div>
+
+</div><!-- /wrap -->
+
+<footer class="page">
+  <div class="wrap">
+    <h2 style="font-size:26px;">Prove this <span style="color:var(--gold);">wrong</span></h2>
+    <p>Published first, out in the open, timestamped — so anybody can prove it wrong. That is what makes it real instead of a pitch. A fact beats a line.</p>
+    <p class="muted">Diamond IQ Analyst Report — Jacksonville Jumbo Shrimp. v1, published Nov 25, 2026. DRAFT for Tee's review. 2026 record verified across MiLB, Sportradar, Baseball-Reference, and The Baseball Cube. Sources on the <a href="./method.html">Method</a> page.</p>
+  </div>
+</footer>
+</body>
+</html>

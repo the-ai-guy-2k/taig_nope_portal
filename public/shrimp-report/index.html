@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<meta name="description" content="The Jumbo Shrimp, read on paper. Diamond IQ's Analyst section — the report for one team, just the Shrimp. Public data only." />
+<title>The Shrimp, On Paper — Diamond IQ Analyst Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --navy:#182941; --navy-deep:#0E1A2C; --navy-panel:#1F3350; --navy-panel2:#243A5C;
+    --gold:#CDA140; --gold-bright:#E7C46A; --ink:#F5F2E9; --muted:#A9B6C9;
+    --line:rgba(205,161,64,.28); --win:#43B581; --loss:#E5534B; --radius:14px;
+  }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; background:
+      radial-gradient(1100px 480px at 85% -120px, rgba(205,161,64,.14), transparent 60%),
+      linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 340px, var(--navy) 100%);
+    background-color:var(--navy-deep); color:var(--ink);
+    font-family:"Barlow", system-ui, sans-serif; font-size:17px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.cond{ font-family:"Barlow Condensed","Barlow",sans-serif; text-transform:uppercase; letter-spacing:.02em; margin:0; }
+  p{ margin:0; } a{ color:var(--gold-bright); }
+  :focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .wrap{ max-width:1120px; margin:0 auto; padding:0 16px; }
+  .eyebrow{ color:var(--gold); font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:13px; }
+  .muted{ color:var(--muted); }
+  .gold{ color:var(--gold-bright); }
+  .v1badge{ display:inline-block; border:1px solid var(--line); border-radius:999px; padding:2px 10px; font-size:13px; color:var(--gold-bright); }
+  .draftbadge{ display:inline-block; border:1px solid var(--loss); border-radius:999px; padding:2px 10px; font-size:13px; color:#F2A49E; }
+  .topnav{ position:sticky; top:0; z-index:50; background:rgba(14,26,44,.92); backdrop-filter:blur(8px); border-bottom:2px solid var(--gold); }
+  .topnav-inner{ max-width:1120px; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  .brand{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:26px; letter-spacing:.03em; color:var(--ink); text-decoration:none; padding:10px 8px 10px 0; margin-right:8px; }
+  .brand b{ color:var(--gold); }
+  .topnav a.navlink{ color:var(--ink); text-decoration:none; font-weight:600; padding:10px 10px; border-radius:8px; font-size:15px; }
+  .topnav a.navlink:hover{ background:rgba(205,161,64,.14); }
+  .topnav a.navlink.active{ color:var(--gold-bright); }
+  header.hero{ padding:44px 0 8px; }
+  header.hero h1{ font-size:clamp(44px, 9vw, 84px); line-height:.95; }
+  header.hero h1 span{ color:var(--gold); }
+  .tagline{ font-family:"Barlow Condensed",sans-serif; font-size:clamp(22px, 4vw, 30px); text-transform:uppercase; color:var(--gold-bright); margin-top:10px; }
+  .herosub{ max-width:720px; margin-top:12px; font-size:18px; }
+  .herometa{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  section{ padding:34px 0 8px; }
+  section h2{ font-size:clamp(28px, 5vw, 40px); margin-bottom:6px; }
+  section h2 span{ color:var(--gold); }
+  .section-sub{ color:var(--muted); max-width:760px; margin-bottom:18px; }
+  .cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px; }
+  .card{ background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel2)); border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+  .card h3{ font-size:23px; margin-bottom:8px; }
+  .card h3 span{ color:var(--gold); }
+  .card p + p{ margin-top:8px; }
+  .card .kicker{ color:var(--gold); font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:12px; }
+  blockquote.philosophy{
+    margin:22px 0 0; padding:20px 22px; border-left:4px solid var(--gold);
+    background:rgba(205,161,64,.08); border-radius:0 var(--radius) var(--radius) 0;
+    font-size:19px; line-height:1.55;
+  }
+  blockquote.philosophy footer{ margin-top:10px; color:var(--muted); font-size:15px; }
+  .bignum{ font-family:"Barlow Condensed",sans-serif; font-size:52px; line-height:1; color:var(--gold-bright); }
+  .bignum small{ font-size:24px; color:var(--ink); }
+  table.nums{ width:100%; border-collapse:collapse; font-size:15px; margin:14px 0 6px; }
+  table.nums caption{ text-align:left; color:var(--muted); font-size:14px; padding-bottom:8px; }
+  table.nums th, table.nums td{ padding:7px 8px; text-align:center; border-bottom:1px solid rgba(205,161,64,.16); }
+  table.nums th:first-child, table.nums td:first-child{ text-align:left; }
+  table.nums thead th{ color:var(--gold); font-family:"Barlow Condensed",sans-serif; text-transform:uppercase; letter-spacing:.04em; font-size:16px; }
+  .srcnote{ font-size:13px; color:var(--muted); }
+  .table-scroll{ overflow-x:auto; }
+  .bar-row{ display:grid; grid-template-columns:110px 1fr 64px; gap:10px; align-items:center; margin:8px 0; font-size:15px; }
+  .bar-track{ background:rgba(255,255,255,.08); border-radius:999px; height:14px; overflow:hidden; }
+  .bar-fill{ height:100%; background:var(--gold); border-radius:999px; }
+  .bar-fill.neg{ background:var(--loss); }
+  .bar-fill.win{ background:var(--win); }
+  .callout{ background:rgba(205,161,64,.08); border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px; }
+  .callout p + p{ margin-top:8px; }
+  ol.questions{ margin:8px 0 0; padding-left:22px; font-size:18px; }
+  ol.questions li{ margin-bottom:10px; }
+  ol.questions li::marker{ color:var(--gold); font-weight:700; }
+  .pagenav{ display:flex; justify-content:space-between; gap:14px; margin-top:36px; padding-top:18px; border-top:1px solid var(--line); font-weight:600; }
+  .pagenav a{ text-decoration:none; }
+  footer.page{ margin-top:44px; border-top:2px solid var(--gold); padding:22px 0 40px; }
+  footer.page p + p{ margin-top:8px; }
+</style>
+</head>
+<body>
+
+<nav class="topnav"><div class="topnav-inner">
+  <a class="brand" href="./">SHRIMP <b>·</b> ON PAPER</a>
+  <a class="navlink active" href="./">The Read</a>
+  <a class="navlink" href="./numbers.html">Numbers</a>
+  <a class="navlink" href="./pattern.html">Pattern</a>
+  <a class="navlink" href="./what-ifs.html">What-Ifs</a>
+  <a class="navlink" href="./comp.html">The Comp</a>
+  <a class="navlink" href="./method.html">Method</a>
+  <a class="navlink" href="/tsr-report/">TSR</a>
+</div></nav>
+
+<div class="wrap" id="top">
+<header class="hero">
+  <p class="eyebrow">Diamond IQ · Analyst Section — just the Shrimp</p>
+  <h1>The Shrimp, <span>on paper.</span></h1>
+  <p class="tagline">Who they are. What they did. What sustains it.</p>
+  <p class="herosub">This report reads one team — the Jacksonville Jumbo Shrimp — the way the system reads any team: themselves first, then the comp, then the pattern to sustain it. Public data only. Nothing here is a prediction.</p>
+  <p class="herometa"><span class="v1badge">v1 — published Nov 25, 2026</span> <span class="draftbadge">DRAFT — FOR TEE'S REVIEW</span> <span class="muted">Nothing from this report goes to the Shrimp or the Marlins.</span></p>
+</header>
+
+<section>
+  <h2>The read, <span>in one page</span></h2>
+  <p class="section-sub">Three facts carry the 2025 season. Everything else on this site is the proof behind them.</p>
+  <div class="cards">
+    <div class="card">
+      <p class="kicker">2025 — the season</p>
+      <p class="bignum">89–61 <small>.593</small></p>
+      <h3>Champions, <span>twice</span></h3>
+      <p>First in the International League East. Beat Scranton/Wilkes-Barre 2–1 for the club's first International League title since 1968 — then beat Las Vegas 8–7 for the Triple-A National Championship. Most wins for a Jacksonville club since 1964.</p>
+    </div>
+    <div class="card">
+      <p class="kicker">How they won</p>
+      <p class="bignum">607 <small>allowed</small></p>
+      <h3>Prevention, <span>not power</span></h3>
+      <p>693 scored, 607 allowed — a +86 differential. The offense ranked in the bottom third of Triple-A. The pitching and defense kept every game within reach, and the Shrimp took more of those reachable games than anyone else in their league.</p>
+    </div>
+    <div class="card">
+      <p class="kicker">2026 — the season happened</p>
+      <p class="bignum">73–74 <small>.497</small></p>
+      <h3>The burst, <span>then the fall</span></h3>
+      <p>42–32 in the first half, 31–42 in the second. 738 scored, 730 allowed — still a positive differential, +8. The 2026 what-if scoring waits on Tee's call — the record is stated here, the verdicts are not scored yet.</p>
+    </div>
+  </div>
+  <blockquote class="philosophy">
+    "The numbers are not there to replace the eye — they prove whether what you feel about a team is right."
+    <footer>— The rule this report runs on. A percentage of provenness: how much the numbers back the read.</footer>
+  </blockquote>
+</section>
+
+<section>
+  <h2>How this report <span>is built</span></h2>
+  <p class="section-sub">Six pages, in the order the system reads a team. Self first, comp second.</p>
+  <div class="cards">
+    <div class="card"><p class="kicker">Page 2</p><h3><a href="./numbers.html">Numbers</a></h3><p>The hereditary numbers — 2021 to 2025, season by season. What 2025 inherited, and what it broke.</p></div>
+    <div class="card"><p class="kicker">Page 3</p><h3><a href="./pattern.html">Pattern</a></h3><p>Prevention, closeness, depth over a single star. How much of the title was already proven — and the one slice that wasn't.</p></div>
+    <div class="card"><p class="kicker">Page 4</p><h3><a href="./what-ifs.html">What-Ifs</a></h3><p>Five timestamped tests, filed Nov 25, 2026, to be scored in public. Three or more holding means the level was sustained.</p></div>
+    <div class="card"><p class="kicker">Page 5</p><h3><a href="./comp.html">The Comp</a></h3><p>The club held up next to the Shrimp — framed, pick still open. A comp has to teach development, not payroll.</p></div>
+    <div class="card"><p class="kicker">Page 6</p><h3><a href="./method.html">Method</a></h3><p>How the read was made, what data it used, where it is thin, and how to prove it wrong.</p></div>
+    <div class="card"><p class="kicker">Who reads first</p><h3>Tee, <span>then the coaches</span></h3><p>Tee is user zero — if the report teaches him the team, it teaches anyone. Then coaches and stat heads together, then the front office, then the Marlins upstairs.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>Sustain greatness <span>means the pipeline</span></h2>
+  <p class="section-sub">For a Triple-A club, the record is not the measure. Development is.</p>
+  <div class="callout">
+    <p>Getting great is one problem. Staying great is a different one, and it is the only one worth tracking from here. At Triple-A, rosters are rebuilt by the parent club every winter — holding any team to the same win total with a different roster would be a dishonest test.</p>
+    <p><b>So the test is the pipeline:</b> development means experiencing close to the real thing before doing the real things. The club's goal is quality players into the major league — not necessarily the parent club, any majors club counts. The measure is majors arrivals, not wins. The trackers in the Shrimp's lane are records, playoffs, and chips.</p>
+  </div>
+</section>
+
+<div class="pagenav"><span></span><a href="./numbers.html">Numbers — the hereditary record →</a></div>
+
+</div><!-- /wrap -->
+
+<footer class="page">
+  <div class="wrap">
+    <h2 style="font-size:26px;">Prove this <span style="color:var(--gold);">wrong</span></h2>
+    <p>Published first, out in the open, timestamped — so anybody can prove it wrong. That is what makes it real instead of a pitch. A fact beats a line. If you can prove any part of this report wrong, say so and the report changes. That standard binds the author too.</p>
+    <p class="muted">Diamond IQ Analyst Report — Jacksonville Jumbo Shrimp. v1, published Nov 25, 2026. DRAFT for Tee's review. The analytic side of Diamond IQ; the other section is Training (PSIS). Full TSR lives at <a href="/tsr-report/">TSR — The Analytics Report</a>.</p>
+  </div>
+</footer>
+</body>
+</html>

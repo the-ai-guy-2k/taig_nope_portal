@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<meta name="description" content="Hereditary numbers — Jacksonville Jumbo Shrimp 2021–2025. What 2025 inherited, and what it broke." />
+<title>Numbers — The Shrimp, On Paper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --navy:#182941; --navy-deep:#0E1A2C; --navy-panel:#1F3350; --navy-panel2:#243A5C;
+    --gold:#CDA140; --gold-bright:#E7C46A; --ink:#F5F2E9; --muted:#A9B6C9;
+    --line:rgba(205,161,64,.28); --win:#43B581; --loss:#E5534B; --radius:14px;
+  }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; background:
+      radial-gradient(1100px 480px at 85% -120px, rgba(205,161,64,.14), transparent 60%),
+      linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 340px, var(--navy) 100%);
+    background-color:var(--navy-deep); color:var(--ink);
+    font-family:"Barlow", system-ui, sans-serif; font-size:17px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.cond{ font-family:"Barlow Condensed","Barlow",sans-serif; text-transform:uppercase; letter-spacing:.02em; margin:0; }
+  p{ margin:0; } a{ color:var(--gold-bright); }
+  :focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .wrap{ max-width:1120px; margin:0 auto; padding:0 16px; }
+  .eyebrow{ color:var(--gold); font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:13px; }
+  .muted{ color:var(--muted); }
+  .gold{ color:var(--gold-bright); }
+  .v1badge{ display:inline-block; border:1px solid var(--line); border-radius:999px; padding:2px 10px; font-size:13px; color:var(--gold-bright); }
+  .draftbadge{ display:inline-block; border:1px solid var(--loss); border-radius:999px; padding:2px 10px; font-size:13px; color:#F2A49E; }
+  .topnav{ position:sticky; top:0; z-index:50; background:rgba(14,26,44,.92); backdrop-filter:blur(8px); border-bottom:2px solid var(--gold); }
+  .topnav-inner{ max-width:1120px; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  .brand{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:26px; letter-spacing:.03em; color:var(--ink); text-decoration:none; padding:10px 8px 10px 0; margin-right:8px; }
+  .brand b{ color:var(--gold); }
+  .topnav a.navlink{ color:var(--ink); text-decoration:none; font-weight:600; padding:10px 10px; border-radius:8px; font-size:15px; }
+  .topnav a.navlink:hover{ background:rgba(205,161,64,.14); }
+  .topnav a.navlink.active{ color:var(--gold-bright); }
+  header.hero{ padding:44px 0 8px; }
+  header.hero h1{ font-size:clamp(44px, 9vw, 84px); line-height:.95; }
+  header.hero h1 span{ color:var(--gold); }
+  .tagline{ font-family:"Barlow Condensed",sans-serif; font-size:clamp(22px, 4vw, 30px); text-transform:uppercase; color:var(--gold-bright); margin-top:10px; }
+  .herosub{ max-width:720px; margin-top:12px; font-size:18px; }
+  .herometa{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  section{ padding:34px 0 8px; }
+  section h2{ font-size:clamp(28px, 5vw, 40px); margin-bottom:6px; }
+  section h2 span{ color:var(--gold); }
+  .section-sub{ color:var(--muted); max-width:760px; margin-bottom:18px; }
+  .cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px; }
+  .card{ background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel2)); border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+  .card h3{ font-size:23px; margin-bottom:8px; }
+  .card h3 span{ color:var(--gold); }
+  .card p + p{ margin-top:8px; }
+  .card .kicker{ color:var(--gold); font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:12px; }
+  table.nums{ width:100%; border-collapse:collapse; font-size:15px; margin:14px 0 6px; }
+  table.nums caption{ text-align:left; color:var(--muted); font-size:14px; padding-bottom:8px; }
+  table.nums th, table.nums td{ padding:7px 8px; text-align:center; border-bottom:1px solid rgba(205,161,64,.16); }
+  table.nums th:first-child, table.nums td:first-child{ text-align:left; }
+  table.nums thead th{ color:var(--gold); font-family:"Barlow Condensed",sans-serif; text-transform:uppercase; letter-spacing:.04em; font-size:16px; }
+  table.nums td.pos{ color:var(--win); font-weight:700; }
+  table.nums td.neg{ color:var(--loss); font-weight:700; }
+  .srcnote{ font-size:13px; color:var(--muted); }
+  .table-scroll{ overflow-x:auto; }
+  .bar-row{ display:grid; grid-template-columns:110px 1fr 64px; gap:10px; align-items:center; margin:8px 0; font-size:15px; }
+  .bar-track{ background:rgba(255,255,255,.08); border-radius:999px; height:14px; overflow:hidden; }
+  .bar-fill{ height:100%; background:var(--gold); border-radius:999px; }
+  .bar-fill.neg{ background:var(--loss); }
+  .bar-fill.win{ background:var(--win); }
+  .callout{ background:rgba(205,161,64,.08); border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px; }
+  .callout p + p{ margin-top:8px; }
+  .pagenav{ display:flex; justify-content:space-between; gap:14px; margin-top:36px; padding-top:18px; border-top:1px solid var(--line); font-weight:600; }
+  .pagenav a{ text-decoration:none; }
+  footer.page{ margin-top:44px; border-top:2px solid var(--gold); padding:22px 0 40px; }
+  footer.page p + p{ margin-top:8px; }
+</style>
+</head>
+<body>
+
+<nav class="topnav"><div class="topnav-inner">
+  <a class="brand" href="./">SHRIMP <b>·</b> ON PAPER</a>
+  <a class="navlink" href="./">The Read</a>
+  <a class="navlink active" href="./numbers.html">Numbers</a>
+  <a class="navlink" href="./pattern.html">Pattern</a>
+  <a class="navlink" href="./what-ifs.html">What-Ifs</a>
+  <a class="navlink" href="./comp.html">The Comp</a>
+  <a class="navlink" href="./method.html">Method</a>
+  <a class="navlink" href="/tsr-report/">TSR</a>
+</div></nav>
+
+<div class="wrap" id="top">
+<header class="hero">
+  <p class="eyebrow">Page 2 — Numbers</p>
+  <h1>Hereditary <span>numbers.</span></h1>
+  <p class="tagline">What 2025 inherited — and what it broke.</p>
+  <p class="herosub">Hereditary numbers are the numbers a season does not start from zero with: the record, the affiliations, the park, and the recent failures a team carries into Opening Day. They are the honest baseline for judging whether a title is a sudden spike or a return to something the place already knows how to do.</p>
+  <p class="herometa"><span class="v1badge">v1 — published Nov 25, 2026</span> <span class="draftbadge">DRAFT — FOR TEE'S REVIEW</span></p>
+</header>
+
+<section>
+  <h2>Five seasons, <span>on paper</span></h2>
+  <p class="section-sub">Jacksonville has been the Miami Marlins' affiliate since 2009 and a Triple-A club since 2021, playing at VyStar Ballpark. Under manager David Carpenter, in his first season in the role, the 2025 team reversed the exact thing that had sunk the two teams before it.</p>
+  <div class="table-scroll">
+  <table class="nums">
+    <caption>Jacksonville Jumbo Shrimp, Triple-A, 2021–2025. Sources: Baseball-Reference Register, The Baseball Cube.</caption>
+    <thead><tr><th>Season</th><th>Record</th><th>Win %</th><th>Runs for</th><th>Runs against</th><th>Differential</th></tr></thead>
+    <tbody>
+      <tr><td>2021</td><td>75–55</td><td>.577</td><td>577</td><td>578</td><td class="neg">−1</td></tr>
+      <tr><td>2022</td><td>80–69</td><td>.537</td><td>744</td><td>680</td><td class="pos">+64</td></tr>
+      <tr><td>2023</td><td>70–79</td><td>.470</td><td>751</td><td>825</td><td class="neg">−74</td></tr>
+      <tr><td>2024</td><td>73–76</td><td>.490</td><td>652</td><td>699</td><td class="neg">−47</td></tr>
+      <tr><td><b>2025</b></td><td><b>89–61</b></td><td><b>.593</b></td><td><b>693</b></td><td><b>607</b></td><td class="pos"><b>+86</b></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>In 2023, Jacksonville scored plenty and still lost, because 825 runs allowed overwhelmed everything. In 2024, the scoring fell to 652 and the prevention only partly recovered. In 2025, scoring recovered modestly to 693 while runs allowed dropped to 607 — a 92-run improvement on 2024 and a 218-run improvement on 2023. The hereditary problem was run prevention. The 2025 answer was run prevention.</p>
+  <div style="margin-top:18px;">
+    <p class="srcnote">Wins by season — bars scaled to 89</p>
+    <div class="bar-row"><span>2021 · 75</span><div class="bar-track"><div class="bar-fill" style="width:84%"></div></div><span>75–55</span></div>
+    <div class="bar-row"><span>2022 · 80</span><div class="bar-track"><div class="bar-fill" style="width:90%"></div></div><span>80–69</span></div>
+    <div class="bar-row"><span>2023 · 70</span><div class="bar-track"><div class="bar-fill" style="width:79%"></div></div><span>70–79</span></div>
+    <div class="bar-row"><span>2024 · 73</span><div class="bar-track"><div class="bar-fill" style="width:82%"></div></div><span>73–76</span></div>
+    <div class="bar-row"><span>2025 · 89</span><div class="bar-track"><div class="bar-fill win" style="width:100%"></div></div><span><b>89–61</b></span></div>
+  </div>
+  <div style="margin-top:18px;">
+    <p class="srcnote">Run differential by season — bars scaled to ±86; gold is positive, red is negative</p>
+    <div class="bar-row"><span>2021 · −1</span><div class="bar-track"><div class="bar-fill neg" style="width:2%"></div></div><span>−1</span></div>
+    <div class="bar-row"><span>2022 · +64</span><div class="bar-track"><div class="bar-fill" style="width:74%"></div></div><span>+64</span></div>
+    <div class="bar-row"><span>2023 · −74</span><div class="bar-track"><div class="bar-fill neg" style="width:86%"></div></div><span>−74</span></div>
+    <div class="bar-row"><span>2024 · −47</span><div class="bar-track"><div class="bar-fill neg" style="width:55%"></div></div><span>−47</span></div>
+    <div class="bar-row"><span>2025 · +86</span><div class="bar-track"><div class="bar-fill win" style="width:100%"></div></div><span><b>+86</b></span></div>
+  </div>
+</section>
+
+<section>
+  <h2>The 2025 team, <span>by the numbers</span></h2>
+  <p class="section-sub">A team that wins 89 games with this offensive profile is not winning the obvious way.</p>
+  <div class="cards">
+    <div class="card"><p class="kicker">Team slash</p><h3>.243 / .330 / .402</h3><p>.732 OPS as a team, with 162 home runs and 653 runs batted in. Batting average, on-base, slugging, and runs per game all ranked in the bottom third of Triple-A — roughly 25th to 28th of 30 teams.</p></div>
+    <div class="card"><p class="kicker">Prevention</p><h3>607 allowed</h3><p>4.0 runs allowed per game late in the season — the second-fewest in Triple-A — and among the level's best at limiting hits for most of the year.</p></div>
+    <div class="card"><p class="kicker">Both halves</p><h3>47–28 · 42–33</h3><p>First half .627, second half .560. The second half was weaker — this report does not hide that — but it was still a winning half, after the playoff berth was already secured, in a league where rosters turn over constantly.</p></div>
+    <div class="card"><p class="kicker">Home and road</p><h3>44–30 · 45–31</h3><p>Home .595, road .592. Almost no split to explain away — one more road win than home win. Whatever VyStar Ballpark gave them, they took the same baseball on the road.</p></div>
+    <div class="card"><p class="kicker">The crowd</p><h3>359,679 fans</h3><p>A record crowd in the first season after the Project NEXT renovations at VyStar Ballpark.</p></div>
+    <div class="card"><p class="kicker">History</p><h3>8th title</h3><p>The 2025 club won the city's eighth league title in the Double-A/Triple-A era (1962–present) — the first International League title since 1968, when the club was a New York Mets affiliate. The most recent title of any kind before 2025 was 2014, in the Southern League. The 89 wins are the most for a Jacksonville club since 1964 and, per the club, tied for the fourth-highest win total in franchise history.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>The graphs the analysis <span>proves</span></h2>
+  <p class="section-sub">Many graphs, not one. The two obvious ones a client expects are surfaced by the intake — they are not named here. What follows is what the analysis itself proves.</p>
+  <div class="callout">
+    <p><b>The proven graphs on this site:</b> wins and differential by season (above); home vs road; first half vs second half; the close-game record; runs for vs runs against. Each one is drawn from the verified totals on this page and the Pattern page.</p>
+    <p><b>The two obvious graphs</b> — the ones a club expects to see first — are named by the client intake, not by this report. That slot stays open until the intake surfaces them.</p>
+  </div>
+  <div style="margin-top:18px;">
+    <p class="srcnote">2025 splits — win percentage</p>
+    <div class="bar-row"><span>Home · 44–30</span><div class="bar-track"><div class="bar-fill" style="width:60%"></div></div><span>.595</span></div>
+    <div class="bar-row"><span>Road · 45–31</span><div class="bar-track"><div class="bar-fill" style="width:59%"></div></div><span>.592</span></div>
+    <div class="bar-row"><span>1st half · 47–28</span><div class="bar-track"><div class="bar-fill win" style="width:63%"></div></div><span>.627</span></div>
+    <div class="bar-row"><span>2nd half · 42–33</span><div class="bar-track"><div class="bar-fill" style="width:56%"></div></div><span>.560</span></div>
+  </div>
+</section>
+
+<div class="pagenav"><a href="./">← The Read</a><a href="./pattern.html">Pattern — how they actually won →</a></div>
+
+</div><!-- /wrap -->
+
+<footer class="page">
+  <div class="wrap">
+    <h2 style="font-size:26px;">Prove this <span style="color:var(--gold);">wrong</span></h2>
+    <p>Published first, out in the open, timestamped — so anybody can prove it wrong. That is what makes it real instead of a pitch. A fact beats a line.</p>
+    <p class="muted">Diamond IQ Analyst Report — Jacksonville Jumbo Shrimp. v1, published Nov 25, 2026. DRAFT for Tee's review. Sources: Baseball-Reference Register, The Baseball Cube, MiLB.com. Full source list on the <a href="./method.html">Method</a> page.</p>
+  </div>
+</footer>
+</body>
+</html>

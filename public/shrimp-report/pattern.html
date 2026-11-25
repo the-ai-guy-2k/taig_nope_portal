@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<meta name="description" content="The pattern — how the 2025 Jumbo Shrimp actually won: prevention, closeness, depth over a single star, and how much of the title was proven." />
+<title>Pattern — The Shrimp, On Paper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --navy:#182941; --navy-deep:#0E1A2C; --navy-panel:#1F3350; --navy-panel2:#243A5C;
+    --gold:#CDA140; --gold-bright:#E7C46A; --ink:#F5F2E9; --muted:#A9B6C9;
+    --line:rgba(205,161,64,.28); --win:#43B581; --loss:#E5534B; --radius:14px;
+  }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; background:
+      radial-gradient(1100px 480px at 85% -120px, rgba(205,161,64,.14), transparent 60%),
+      linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 340px, var(--navy) 100%);
+    background-color:var(--navy-deep); color:var(--ink);
+    font-family:"Barlow", system-ui, sans-serif; font-size:17px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.cond{ font-family:"Barlow Condensed","Barlow",sans-serif; text-transform:uppercase; letter-spacing:.02em; margin:0; }
+  p{ margin:0; } a{ color:var(--gold-bright); }
+  :focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .wrap{ max-width:1120px; margin:0 auto; padding:0 16px; }
+  .eyebrow{ color:var(--gold); font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:13px; }
+  .muted{ color:var(--muted); }
+  .gold{ color:var(--gold-bright); }
+  .v1badge{ display:inline-block; border:1px solid var(--line); border-radius:999px; padding:2px 10px; font-size:13px; color:var(--gold-bright); }
+  .draftbadge{ display:inline-block; border:1px solid var(--loss); border-radius:999px; padding:2px 10px; font-size:13px; color:#F2A49E; }
+  .topnav{ position:sticky; top:0; z-index:50; background:rgba(14,26,44,.92); backdrop-filter:blur(8px); border-bottom:2px solid var(--gold); }
+  .topnav-inner{ max-width:1120px; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  .brand{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:26px; letter-spacing:.03em; color:var(--ink); text-decoration:none; padding:10px 8px 10px 0; margin-right:8px; }
+  .brand b{ color:var(--gold); }
+  .topnav a.navlink{ color:var(--ink); text-decoration:none; font-weight:600; padding:10px 10px; border-radius:8px; font-size:15px; }
+  .topnav a.navlink:hover{ background:rgba(205,161,64,.14); }
+  .topnav a.navlink.active{ color:var(--gold-bright); }
+  header.hero{ padding:44px 0 8px; }
+  header.hero h1{ font-size:clamp(44px, 9vw, 84px); line-height:.95; }
+  header.hero h1 span{ color:var(--gold); }
+  .tagline{ font-family:"Barlow Condensed",sans-serif; font-size:clamp(22px, 4vw, 30px); text-transform:uppercase; color:var(--gold-bright); margin-top:10px; }
+  .herosub{ max-width:720px; margin-top:12px; font-size:18px; }
+  .herometa{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  section{ padding:34px 0 8px; }
+  section h2{ font-size:clamp(28px, 5vw, 40px); margin-bottom:6px; }
+  section h2 span{ color:var(--gold); }
+  .section-sub{ color:var(--muted); max-width:760px; margin-bottom:18px; }
+  .cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px; }
+  .card{ background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel2)); border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+  .card h3{ font-size:23px; margin-bottom:8px; }
+  .card h3 span{ color:var(--gold); }
+  .card p + p{ margin-top:8px; }
+  .card .kicker{ color:var(--gold); font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:12px; }
+  .srcnote{ font-size:13px; color:var(--muted); }
+  .bar-row{ display:grid; grid-template-columns:140px 1fr 64px; gap:10px; align-items:center; margin:8px 0; font-size:15px; }
+  .bar-track{ background:rgba(255,255,255,.08); border-radius:999px; height:14px; overflow:hidden; }
+  .bar-fill{ height:100%; background:var(--gold); border-radius:999px; }
+  .bar-fill.win{ background:var(--win); }
+  .callout{ background:rgba(205,161,64,.08); border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px; }
+  .callout p + p{ margin-top:8px; }
+  .pagenav{ display:flex; justify-content:space-between; gap:14px; margin-top:36px; padding-top:18px; border-top:1px solid var(--line); font-weight:600; }
+  .pagenav a{ text-decoration:none; }
+  footer.page{ margin-top:44px; border-top:2px solid var(--gold); padding:22px 0 40px; }
+  footer.page p + p{ margin-top:8px; }
+</style>
+</head>
+<body>
+
+<nav class="topnav"><div class="topnav-inner">
+  <a class="brand" href="./">SHRIMP <b>·</b> ON PAPER</a>
+  <a class="navlink" href="./">The Read</a>
+  <a class="navlink" href="./numbers.html">Numbers</a>
+  <a class="navlink active" href="./pattern.html">Pattern</a>
+  <a class="navlink" href="./what-ifs.html">What-Ifs</a>
+  <a class="navlink" href="./comp.html">The Comp</a>
+  <a class="navlink" href="./method.html">Method</a>
+  <a class="navlink" href="/tsr-report/">TSR</a>
+</div></nav>
+
+<div class="wrap" id="top">
+<header class="hero">
+  <p class="eyebrow">Page 3 — Pattern</p>
+  <h1>How they <span>actually won.</span></h1>
+  <p class="tagline">Prevention. Closeness. Depth over a single star.</p>
+  <p class="herosub">Put plainly: pitching and defense kept every game within reach, and Jacksonville took more of those reachable games than anyone else in their league.</p>
+  <p class="herometa"><span class="v1badge">v1 — published Nov 25, 2026</span> <span class="draftbadge">DRAFT — FOR TEE'S REVIEW</span></p>
+</header>
+
+<section>
+  <h2>They won the <span>close ones</span></h2>
+  <p class="section-sub">For this team, close-game execution was the offense's missing power — it turned a +86 run differential into a first-place finish, a first-half title, and home field for the league final. Close-game splits below are sourced from the club's September 2025 game notes — see the Method page.</p>
+  <div class="cards">
+    <div class="card"><p class="kicker">One-run games</p><h3>29–14 <span>.674</span></h3><p>Tied for the most one-run wins in the International League.</p></div>
+    <div class="card"><p class="kicker">Decided by 3 or fewer</p><h3>57–33 <span>.633</span></h3><p>64.8 percent of Jacksonville's wins to that point in the season had come by three runs or fewer.</p></div>
+    <div class="card"><p class="kicker">Run differential</p><h3>+86 <span>693–607</span></h3><p>A standard Pythagorean check on 693 scored and 607 allowed expects about .565 — roughly an 85–65 team. Jacksonville finished 89–61, about four wins better than that expectation, and the gap lives in those one-run and three-run games.</p></div>
+  </div>
+  <div style="margin-top:18px;">
+    <p class="srcnote">Close-game win percentage, 2025</p>
+    <div class="bar-row"><span>One-run · 29–14</span><div class="bar-track"><div class="bar-fill win" style="width:67%"></div></div><span>.674</span></div>
+    <div class="bar-row"><span>≤ 3 runs · 57–33</span><div class="bar-track"><div class="bar-fill win" style="width:63%"></div></div><span>.633</span></div>
+    <div class="bar-row"><span>Overall · 89–61</span><div class="bar-track"><div class="bar-fill" style="width:59%"></div></div><span>.593</span></div>
+    <div class="bar-row"><span>Pythagorean · ~85–65</span><div class="bar-track"><div class="bar-fill" style="width:57%"></div></div><span>~.565</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Depth over <span>a single star</span></h2>
+  <p class="section-sub">No Jacksonville regular carried this team the way a Triple-A MVP carries a team. That is a strength of the read, not a weakness in it — five different ways of producing a run, spread across five different players, none of whom had to be great every night for the total to work.</p>
+  <div class="cards">
+    <div class="card"><p class="kicker">Most complete regular</p><h3>Jacob Berry</h3><p>.261/.348/.394 in 124 games* — the best batting average among Jacksonville regulars — with a team-leading 28 doubles, 54 runs batted in (tied for the team lead), and 27 stolen bases.</p><p class="srcnote">*Games differ by one between registers: Baseball-Reference 124, The Baseball Cube / StatsCrew 123. Batting totals are identical.</p></div>
+    <div class="card"><p class="kicker">The power</p><h3>Joe Mack</h3><p>Team-leading 18 home runs while hitting .250/.320/.459 in 100 games, with 53 runs batted in.</p></div>
+    <div class="card"><p class="kicker">Run production</p><h3>Deyvison De Los Santos</h3><p>Matched Berry's 54 runs batted in, with 12 home runs.</p></div>
+    <div class="card"><p class="kicker">On-base and speed</p><h3>Jakob Marsee</h3><p>A .379 on-base percentage, 68 walks, 14 home runs, and a team-leading 47 stolen bases in 98 games.</p></div>
+    <div class="card"><p class="kicker">Volume</p><h3>Maximo Acosta</h3><p>116 games, 13 home runs, 33 stolen bases. As a team, Jacksonville stole 305 bases. 42 different players batted for Jacksonville in 2025 — the title did not rest on a lineup that stayed intact all year, because at Triple-A no lineup does.</p></div>
+    <div class="card"><p class="kicker">The pitching</p><h3>Roa · Snelling · Mazur</h3><p>Christian Roa went 10–2 with a 2.83 ERA in 50 relief appearances, striking out 64 in 60⅓ innings — the kind of bullpen arm a 29–14 one-run record is built on. Robby Snelling was dominant in 11 starts: 6–2, 1.27 ERA, 81 strikeouts in 63⅔ innings. Adam Mazur carried the heaviest starting load, 107⅓ innings with 100 strikeouts. Janson Junk added a 2.68 ERA across 10 appearances. Team notes also credited Jacksonville with leading Triple-A in defensive efficiency for much of the season.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>The championship weeks <span>were the season in miniature</span></h2>
+  <p class="section-sub">A team that only wins one way loses one of those two games. Jacksonville won both.</p>
+  <div class="cards">
+    <div class="card"><p class="kicker">Sept 25 — IL final, Game 3</p><h3>7–4 <span>over Scranton/WB</span></h3><p>At VyStar Ballpark. Jacksonville scored five runs in the first inning of the deciding game and closed the series 2–1. Early pressure, then enough pitching to make it stand.</p></div>
+    <div class="card"><p class="kicker">Sept 27 — National final</p><h3>8–7 <span>over Las Vegas</span></h3><p>At Las Vegas Ballpark. Jacksonville led, Las Vegas scored five in the top of the ninth to take a 7–6 lead, and the season came down to the bottom of the ninth in the other team's park. Jack Winkler singled, and with one out Jacob Berry hit a two-run walk-off home run, measured at 429 feet, to win 8–7. Berry was named the game's Most Valuable Player.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>Percentage of <span>provenness</span></h2>
+  <p class="section-sub">How much of the title was already proven over 150 games — and the one slice that still has to be earned.</p>
+  <div class="callout">
+    <p><b>Proven: both halves.</b> First half 47–28 (.627), second half 42–33 (.560) — a winning half after the playoff berth was secured, in a league where rosters turn over constantly with call-ups and rehab assignments.</p>
+    <p><b>Proven: home and road.</b> 44–30 at home, 45–31 on the road. Park and crowd were part of the season; they were not the reason for it.</p>
+    <p><b>Proven: run prevention over volume.</b> 607 runs allowed across 150 games, second-fewest per game in Triple-A late in the season, with 42 players batting. Not a two-week sample.</p>
+    <p><b>Not yet proven: the close-game edge at this size.</b> Some of the one-run surplus is real skill — bullpen quality, defense, late-inning execution. Some of it, in any single season, is sequencing that does not repeat at the same rate. The foundation was proven. The size of the close-game surplus is the part 2026 has to prove again.</p>
+    <p><b>The read in one line:</b> the championship was mostly built on repeatable things, and the one repeat that still has to be earned is the biggest one — turning close games into wins at a .674 clip in one-run games, year after year.</p>
+  </div>
+</section>
+
+<div class="pagenav"><a href="./numbers.html">← Numbers</a><a href="./what-ifs.html">What-Ifs — the five tests →</a></div>
+
+</div><!-- /wrap -->
+
+<footer class="page">
+  <div class="wrap">
+    <h2 style="font-size:26px;">Prove this <span style="color:var(--gold);">wrong</span></h2>
+    <p>Published first, out in the open, timestamped — so anybody can prove it wrong. That is what makes it real instead of a pitch. A fact beats a line.</p>
+    <p class="muted">Diamond IQ Analyst Report — Jacksonville Jumbo Shrimp. v1, published Nov 25, 2026. DRAFT for Tee's review. Sources: Baseball-Reference Register, The Baseball Cube, StatsCrew, MiLB.com, club September 2025 game notes. Full source list on the <a href="./method.html">Method</a> page.</p>
+  </div>
+</footer>
+</body>
+</html>

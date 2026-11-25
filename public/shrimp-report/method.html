@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<meta name="description" content="Method — how the Shrimp report was made, what data it used, where it is thin, and how to prove it wrong." />
+<title>Method — The Shrimp, On Paper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --navy:#182941; --navy-deep:#0E1A2C; --navy-panel:#1F3350; --navy-panel2:#243A5C;
+    --gold:#CDA140; --gold-bright:#E7C46A; --ink:#F5F2E9; --muted:#A9B6C9;
+    --line:rgba(205,161,64,.28); --win:#43B581; --loss:#E5534B; --radius:14px;
+  }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; background:
+      radial-gradient(1100px 480px at 85% -120px, rgba(205,161,64,.14), transparent 60%),
+      linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 340px, var(--navy) 100%);
+    background-color:var(--navy-deep); color:var(--ink);
+    font-family:"Barlow", system-ui, sans-serif; font-size:17px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.cond{ font-family:"Barlow Condensed","Barlow",sans-serif; text-transform:uppercase; letter-spacing:.02em; margin:0; }
+  p{ margin:0; } a{ color:var(--gold-bright); }
+  :focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .wrap{ max-width:1120px; margin:0 auto; padding:0 16px; }
+  .eyebrow{ color:var(--gold); font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:13px; }
+  .muted{ color:var(--muted); }
+  .gold{ color:var(--gold-bright); }
+  .v1badge{ display:inline-block; border:1px solid var(--line); border-radius:999px; padding:2px 10px; font-size:13px; color:var(--gold-bright); }
+  .draftbadge{ display:inline-block; border:1px solid var(--loss); border-radius:999px; padding:2px 10px; font-size:13px; color:#F2A49E; }
+  .topnav{ position:sticky; top:0; z-index:50; background:rgba(14,26,44,.92); backdrop-filter:blur(8px); border-bottom:2px solid var(--gold); }
+  .topnav-inner{ max-width:1120px; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  .brand{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:26px; letter-spacing:.03em; color:var(--ink); text-decoration:none; padding:10px 8px 10px 0; margin-right:8px; }
+  .brand b{ color:var(--gold); }
+  .topnav a.navlink{ color:var(--ink); text-decoration:none; font-weight:600; padding:10px 10px; border-radius:8px; font-size:15px; }
+  .topnav a.navlink:hover{ background:rgba(205,161,64,.14); }
+  .topnav a.navlink.active{ color:var(--gold-bright); }
+  header.hero{ padding:44px 0 8px; }
+  header.hero h1{ font-size:clamp(44px, 9vw, 84px); line-height:.95; }
+  header.hero h1 span{ color:var(--gold); }
+  .tagline{ font-family:"Barlow Condensed",sans-serif; font-size:clamp(22px, 4vw, 30px); text-transform:uppercase; color:var(--gold-bright); margin-top:10px; }
+  .herosub{ max-width:720px; margin-top:12px; font-size:18px; }
+  .herometa{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  section{ padding:34px 0 8px; }
+  section h2{ font-size:clamp(28px, 5vw, 40px); margin-bottom:6px; }
+  section h2 span{ color:var(--gold); }
+  .section-sub{ color:var(--muted); max-width:760px; margin-bottom:18px; }
+  .cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px; }
+  .card{ background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel2)); border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+  .card h3{ font-size:23px; margin-bottom:8px; }
+  .card h3 span{ color:var(--gold); }
+  .card p + p{ margin-top:8px; }
+  .card .kicker{ color:var(--gold); font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:12px; }
+  .callout{ background:rgba(205,161,64,.08); border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px; }
+  .callout p + p{ margin-top:8px; }
+  ol.questions{ margin:8px 0 0; padding-left:22px; font-size:18px; }
+  ol.questions li{ margin-bottom:10px; }
+  ol.questions li::marker{ color:var(--gold); font-weight:700; }
+  .pagenav{ display:flex; justify-content:space-between; gap:14px; margin-top:36px; padding-top:18px; border-top:1px solid var(--line); font-weight:600; }
+  .pagenav a{ text-decoration:none; }
+  footer.page{ margin-top:44px; border-top:2px solid var(--gold); padding:22px 0 40px; }
+  footer.page p + p{ margin-top:8px; }
+</style>
+</head>
+<body>
+
+<nav class="topnav"><div class="topnav-inner">
+  <a class="brand" href="./">SHRIMP <b>·</b> ON PAPER</a>
+  <a class="navlink" href="./">The Read</a>
+  <a class="navlink" href="./numbers.html">Numbers</a>
+  <a class="navlink" href="./pattern.html">Pattern</a>
+  <a class="navlink" href="./what-ifs.html">What-Ifs</a>
+  <a class="navlink" href="./comp.html">The Comp</a>
+  <a class="navlink active" href="./method.html">Method</a>
+  <a class="navlink" href="/tsr-report/">TSR</a>
+</div></nav>
+
+<div class="wrap" id="top">
+<header class="hero">
+  <p class="eyebrow">Page 6 — Method</p>
+  <h1>How it was <span>made.</span></h1>
+  <p class="tagline">The read. The pattern. The what-if. In public.</p>
+  <p class="herosub">This report is the analytic side of Diamond IQ — the system. The other section is Training (PSIS). The analytic side is the read, the pattern, the what-if, in public.</p>
+  <p class="herometa"><span class="v1badge">v1 — published Nov 25, 2026</span> <span class="draftbadge">DRAFT — FOR TEE'S REVIEW</span></p>
+</header>
+
+<section>
+  <h2>The method, <span>in order</span></h2>
+  <p class="section-sub">Take a bad team, go back to the hereditary numbers — what the great teams were before they were great — find the pattern in what they did, then run the what-if: if the bad team did that, inside the rules of their sport, where do they land.</p>
+  <ol class="questions">
+    <li><b>Hereditary numbers.</b> Start with what the team carried into the season — the record, the affiliations, the park, the recent failures. The 2021–2025 table on the Numbers page is the baseline.</li>
+    <li><b>The pattern.</b> Find what the great teams did to sustain it, then translate that pattern one-for-one to where a team is at — its market, its resources, its restrictions. Show the picture clearer than the emotion side alone.</li>
+    <li><b>The what-if.</b> State the tests timestamped, in terms that can be scored without moving the goalposts. Five tests, filed Nov 25, 2026, on the What-Ifs page.</li>
+    <li><b>Publish first.</b> Out in the open, timestamped, so anybody can prove it wrong. That is what makes it real instead of a pitch.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>Data — <span>public for now</span></h2>
+  <p class="section-sub">On-field data is gettable from public markets. Inside-club data is not — only if the club shares it.</p>
+  <div class="cards">
+    <div class="card"><p class="kicker">What is public</p><h3>On-field <span>data</span></h3><p>Pitch-level Statcast for all of Triple-A since 2023 via Baseball Savant. Team and player totals free via the MLB Stats API, MiLB.com, Baseball-Reference, and FanGraphs.</p></div>
+    <div class="card"><p class="kicker">What is not</p><h3>Inside-club <span>data</span></h3><p>Development plans, medical, scouting grades, internal video, proprietary models — only if the club shares them. This report uses none of that, because it does not have it.</p></div>
+    <div class="card"><p class="kicker">The legal catch</p><h3>Research use, <span>not commercial</span></h3><p>The free feeds are free for personal and research use, not commercial use. The paid product needs a licensed feed (Sportradar / Stats Perform, quote-only) or club-shared data. This report is the proof, published in public — not the paid product.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>Sources <span>and limits</span></h2>
+  <p class="section-sub">Public data only. No club, league, or player information beyond what is published for anyone to read was used.</p>
+  <div class="callout">
+    <p><b>Sources:</b> 2025 International League and Jacksonville team totals — Baseball-Reference Register; year-by-year franchise records and run totals — The Baseball Cube; roster and individual season totals cross-check — StatsCrew; championship and history reporting — MiLB.com (International League championship, Triple-A National Championship, Jax history timeline); 2026 record — MiLB, Sportradar, Baseball-Reference, The Baseball Cube.</p>
+    <p><b>Limits, stated plainly:</b></p>
+    <p>— Triple-A totals reflect constant roster movement, including major-league rehab assignments and call-ups, so individual totals are partial-season by design.</p>
+    <p>— Jacob Berry's games differ by one between registers: Baseball-Reference 124, The Baseball Cube / StatsCrew 123. Batting totals are identical.</p>
+    <p>— The full-season close-game splits (one-run 29–14, ≤3-run 57–33) rest on the club's September 2025 game notes. Sourced, not independently re-derived — confirm before publication.</p>
+    <p>— The Pythagorean check uses the standard runs-scored and runs-allowed formula and is presented as an expectation to test against, not as a verdict on any single game.</p>
+    <p>— The 2026 season is complete at 73–74 (42–32 first half, 31–42 second; season finale rained out). The five what-ifs are not scored on this report — scoring them is Tee's call.</p>
+    <p>— The comp-club pick is open. The two obvious graphs are surfaced by the client intake, not named on this report. No prices appear on this report — product first, pricing follows.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Built per <span>the RFC</span></h2>
+  <p class="section-sub">Level 3 going into level 4. Eating our own dog food.</p>
+  <div class="callout">
+    <p>This report is built the way the AI RFC says to build. The RFC is both the spec and the test subject — if the build has to break the RFC to work, the RFC changes in the open, not quietly.</p>
+    <p>Diamond IQ is the system. This report is its analytic side — the Analyst section. The other section is Training (PSIS).</p>
+    <p>The AI experience maturity scale is five levels, no zero. This setup sits at level 3 — the agent wired into its own software, acting as a participant — building toward level 5, where the system works for other people too and gets better from all of them.</p>
+    <p><a href="/way-i-use-ai/">Read the RFC</a> · <a href="https://github.com/the-ai-guy-2k/RFC-for-AI">RFC on GitHub</a> · <a href="/tsr-report/">TSR — The Analytics Report</a> · Tracked in the Hive — parent PIO <a href="https://taigtsp.duckdns.org/hive-portal/u/timhive/pio/pio/view?id=121">#121 Baseball</a></p>
+  </div>
+</section>
+
+<div class="pagenav"><a href="./comp.html">← The Comp</a><a href="./">The Read — back to the start →</a></div>
+
+</div><!-- /wrap -->
+
+<footer class="page">
+  <div class="wrap">
+    <h2 style="font-size:26px;">Prove this <span style="color:var(--gold);">wrong</span></h2>
+    <p>Published first, out in the open, timestamped — so anybody can prove it wrong. That is what makes it real instead of a pitch. A fact beats a line. If you can prove any part of this report wrong, say so — a GitHub issue on the RFC repo, or a comment on the report's PIO — and the report changes. That standard binds the author too. Nothing decided in private, nothing erased.</p>
+    <p class="muted">Diamond IQ Analyst Report — Jacksonville Jumbo Shrimp. v1, published Nov 25, 2026. DRAFT for Tee's review. Nothing from this report goes to the Shrimp or the Marlins.</p>
+  </div>
+</footer>
+</body>
+</html>
