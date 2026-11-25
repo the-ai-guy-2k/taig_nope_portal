@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<meta name="description" content="TSR — The Analytics Report. Sustain greatness, measured. Straight public data + AI. The data is the data." />
+<title>TSR — The Analytics Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --navy:#182941; --navy-deep:#0E1A2C; --navy-panel:#1F3350; --navy-panel2:#243A5C;
+    --gold:#CDA140; --gold-bright:#E7C46A; --ink:#F5F2E9; --muted:#A9B6C9;
+    --line:rgba(205,161,64,.28); --win:#43B581; --loss:#E5534B; --radius:14px;
+  }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; background:
+      radial-gradient(1100px 480px at 85% -120px, rgba(205,161,64,.14), transparent 60%),
+      linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 340px, var(--navy) 100%);
+    background-color:var(--navy-deep); color:var(--ink);
+    font-family:"Barlow", system-ui, sans-serif; font-size:17px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.cond{ font-family:"Barlow Condensed","Barlow",sans-serif; text-transform:uppercase; letter-spacing:.02em; margin:0; }
+  p{ margin:0; } a{ color:var(--gold-bright); }
+  button{ font-family:inherit; cursor:pointer; }
+  :focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .wrap{ max-width:1120px; margin:0 auto; padding:0 16px; }
+  .eyebrow{ color:var(--gold); font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:13px; }
+  .muted{ color:var(--muted); }
+  .gold{ color:var(--gold-bright); }
+  .v1badge{ display:inline-block; border:1px solid var(--line); border-radius:999px; padding:2px 10px; font-size:13px; color:var(--gold-bright); }
+
+  .topnav{ position:sticky; top:0; z-index:50; background:rgba(14,26,44,.92); backdrop-filter:blur(8px); border-bottom:2px solid var(--gold); }
+  .topnav-inner{ max-width:1120px; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  .brand{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:26px; letter-spacing:.03em; color:var(--ink); text-decoration:none; padding:10px 8px 10px 0; margin-right:8px; }
+  .brand b{ color:var(--gold); }
+  .topnav a.navlink{ color:var(--ink); text-decoration:none; font-weight:600; padding:10px 10px; border-radius:8px; font-size:15px; }
+  .topnav a.navlink:hover{ background:rgba(205,161,64,.14); }
+
+  header.hero{ padding:44px 0 8px; }
+  header.hero h1{ font-size:clamp(44px, 9vw, 84px); line-height:.95; }
+  header.hero h1 span{ color:var(--gold); }
+  .tagline{ font-family:"Barlow Condensed",sans-serif; font-size:clamp(22px, 4vw, 30px); text-transform:uppercase; color:var(--gold-bright); margin-top:10px; }
+  .herosub{ max-width:720px; margin-top:12px; font-size:18px; }
+  .herometa{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+  section{ padding:34px 0 8px; }
+  section h2{ font-size:clamp(28px, 5vw, 40px); margin-bottom:6px; }
+  section h2 span{ color:var(--gold); }
+  .section-sub{ color:var(--muted); max-width:760px; margin-bottom:18px; }
+
+  .cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px; }
+  .card{ background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel2)); border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+  .card h3{ font-size:23px; margin-bottom:8px; }
+  .card h3 span{ color:var(--gold); }
+  .card p + p{ margin-top:8px; }
+  .card .kicker{ color:var(--gold); font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:12px; }
+
+  blockquote.philosophy{
+    margin:22px 0 0; padding:20px 22px; border-left:4px solid var(--gold);
+    background:rgba(205,161,64,.08); border-radius:0 var(--radius) var(--radius) 0;
+    font-size:19px; line-height:1.55;
+  }
+  blockquote.philosophy footer{ margin-top:10px; color:var(--muted); font-size:15px; }
+
+  .intake-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; }
+  .intake{
+    text-align:left; background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel2));
+    border:2px solid var(--line); border-radius:var(--radius); padding:18px; color:var(--ink);
+  }
+  .intake:hover{ border-color:var(--gold); }
+  .intake[aria-pressed="true"]{ border-color:var(--gold); background:linear-gradient(180deg, #2A4266, var(--navy-panel2)); box-shadow:0 0 0 1px var(--gold); }
+  .intake h3{ font-size:24px; }
+  .intake p{ color:var(--muted); margin-top:6px; font-size:15px; }
+  .panel{ display:none; margin-top:16px; background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel2)); border:1px solid var(--line); border-radius:var(--radius); padding:22px; }
+  .panel.open{ display:block; }
+  .panel h3{ font-size:26px; margin-bottom:10px; }
+  .panel h3 span{ color:var(--gold); }
+  .panel p + p{ margin-top:8px; }
+
+  table.nums{ width:100%; border-collapse:collapse; font-size:15px; margin:14px 0 6px; }
+  table.nums caption{ text-align:left; color:var(--muted); font-size:14px; padding-bottom:8px; }
+  table.nums th, table.nums td{ padding:7px 8px; text-align:center; border-bottom:1px solid rgba(205,161,64,.16); }
+  table.nums th:first-child, table.nums td:first-child{ text-align:left; }
+  table.nums thead th{ color:var(--gold); font-family:"Barlow Condensed",sans-serif; text-transform:uppercase; letter-spacing:.04em; font-size:16px; }
+  table.nums td.sb-w{ color:var(--win); font-weight:700; }
+  table.nums td.sb-l{ color:var(--loss); font-weight:700; }
+  table.nums td.bad{ color:var(--loss); font-weight:700; }
+  .srcnote{ font-size:13px; color:var(--muted); }
+  .table-scroll{ overflow-x:auto; }
+
+  .case-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; }
+  .case{ background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel2)); border:1px solid var(--line); border-radius:var(--radius); padding:20px; }
+  .case h3{ font-size:27px; }
+  .case h3 span{ color:var(--gold); }
+  .case .record{ font-family:"Barlow Condensed",sans-serif; font-size:20px; color:var(--gold-bright); text-transform:uppercase; margin:6px 0 10px; }
+  .case p + p{ margin-top:8px; }
+  .case .q{ border-top:1px solid var(--line); margin-top:12px; padding-top:12px; }
+  .case .q b{ color:var(--gold-bright); }
+
+  ol.questions{ margin:8px 0 0; padding-left:22px; font-size:18px; }
+  ol.questions li{ margin-bottom:10px; }
+  ol.questions li::marker{ color:var(--gold); font-weight:700; }
+
+  .rfcbox{ background:rgba(205,161,64,.08); border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px; }
+  .rfcbox p + p{ margin-top:8px; }
+  .linkrow{ display:flex; gap:16px; flex-wrap:wrap; margin-top:12px; font-weight:600; }
+
+  footer.page{ margin-top:44px; border-top:2px solid var(--gold); padding:22px 0 40px; }
+  footer.page p + p{ margin-top:8px; }
+</style>
+</head>
+<body>
+
+<nav class="topnav"><div class="topnav-inner">
+  <a class="brand" href="#top">TSR <b>·</b> THE ANALYTICS REPORT</a>
+  <a class="navlink" href="#intro">Intro</a>
+  <a class="navlink" href="#who">Who are you?</a>
+  <a class="navlink" href="#cases">The cases</a>
+  <a class="navlink" href="#pattern">The pattern</a>
+  <a class="navlink" href="#rfc">Built per the RFC</a>
+</div></nav>
+
+<div class="wrap" id="top">
+<header class="hero">
+  <p class="eyebrow">TSR — The Analytics Report</p>
+  <h1>Sustain <span>greatness.</span></h1>
+  <p class="tagline">The data is the data.</p>
+  <p class="herosub">What did teams do to get great — and stay great? This report looks for the pattern, in the numbers, straight off public data. No paywalled feeds. No hot takes. Light on opinion.</p>
+  <p class="herometa"><span class="v1badge">v1 — first version for review</span> <span class="muted">Built per the AI RFC · Level 3 going into level 4 · Nov 25, 2026</span></p>
+</header>
+
+<section id="intro">
+  <h2>Read this <span>first</span></h2>
+  <p class="section-sub">Three short answers before you go anywhere else on the page.</p>
+  <div class="cards">
+    <div class="card">
+      <p class="kicker">What this report is</p>
+      <h3>An analytics report, <span>not a hot-take page</span></h3>
+      <p>We take a team's numbers — the hereditary numbers, what they actually did, season by season — and we look for the pattern behind staying great. Public data only. AI does the reading; a human checks it.</p>
+    </div>
+    <div class="card">
+      <p class="kicker">How to read it</p>
+      <h3>Pick who you are <span>below</span></h3>
+      <p>Stat head, manager, fan, regular Joe — the report meets you where you are. Numbers are regular-season wins unless it says otherwise. A percentage is a percentage of provenness: how much the numbers back the read. Nothing here is a prediction.</p>
+      <p>If a line is wrong, the fact beats the line. Say so and it changes.</p>
+    </div>
+    <div class="card">
+      <p class="kicker">The intent</p>
+      <h3>Find the pattern, <span>translate it</span></h3>
+      <p>Find what the great teams did to sustain it, then translate that pattern one-for-one to where a team is at — its market, its resources, its restrictions. Show the picture clearer than the emotion side alone. The other sides of the game make the picture finer later. The framing never moves.</p>
+    </div>
+  </div>
+  <blockquote class="philosophy">
+    "People use analytics wrong. They either use analytics all the way or they use emotions all the way. There is a balance. You use the numbers to prove if the emotions are right — it just gives you a percentage, a percentage of provenness. Once you see it from that lens, you know when or when not to use analytics."
+    <footer>— The rule this report runs on. Analytics doesn't replace the gut. It scores it.</footer>
+  </blockquote>
+</section>
+
+<section id="who">
+  <h2>Who <span>are you?</span></h2>
+  <p class="section-sub">Click what you are. The same report, served to your intake.</p>
+  <div class="intake-grid" role="group" aria-label="Pick who you are">
+    <button class="intake" data-intake="statheads" aria-pressed="true"><h3>Stat Heads</h3><p>You want the numbers. Every season, every win, every ending. Method and sources with the table.</p></button>
+    <button class="intake" data-intake="managers" aria-pressed="false"><h3>Managers</h3><p>You run a team. You want what to do — the pattern translated to your market and your resources.</p></button>
+    <button class="intake" data-intake="fans" aria-pressed="false"><h3>Regular Fans</h3><p>You watch every week. You want the story straight, in plain words.</p></button>
+    <button class="intake" data-intake="joes" aria-pressed="false"><h3>Regular Joes</h3><p>You just want to know what it means. One paragraph, no jargon.</p></button>
+  </div>
+
+  <div class="panel open" id="panel-statheads">
+    <h3>Stat Heads — <span>the hereditary numbers</span></h3>
+    <p>Regular-season record, season by season, 2013–2025. "Boom, this is what they did." Postseason result as listed. SB W = won the Super Bowl. SB L = lost the Super Bowl.</p>
+    <div class="table-scroll">
+    <table class="nums">
+      <caption>Kansas City — 12 straight winning seasons, 2013–2024. Same head coach the whole way (Andy Reid). Then 2025 happened.</caption>
+      <thead><tr><th>Season</th><th>W–L</th><th>Finish</th><th>Postseason</th></tr></thead>
+      <tbody>
+        <tr><td>2013</td><td>11–5</td><td>2nd</td><td>Lost Wild Card</td></tr>
+        <tr><td>2014</td><td>9–7</td><td>2nd</td><td>—</td></tr>
+        <tr><td>2015</td><td>11–5</td><td>2nd</td><td>Lost Divisional</td></tr>
+        <tr><td>2016</td><td>12–4</td><td>1st</td><td>Lost Divisional</td></tr>
+        <tr><td>2017</td><td>10–6</td><td>1st</td><td>Lost Wild Card</td></tr>
+        <tr><td>2018</td><td>12–4</td><td>1st</td><td>Lost AFC Championship</td></tr>
+        <tr><td>2019</td><td>12–4</td><td>1st</td><td class="sb-w">SB W</td></tr>
+        <tr><td>2020</td><td>14–2</td><td>1st</td><td class="sb-l">SB L</td></tr>
+        <tr><td>2021</td><td>12–5</td><td>1st</td><td>Lost AFC Championship</td></tr>
+        <tr><td>2022</td><td>14–3</td><td>1st</td><td class="sb-w">SB W</td></tr>
+        <tr><td>2023</td><td>11–6</td><td>1st</td><td class="sb-w">SB W</td></tr>
+        <tr><td>2024</td><td>15–2</td><td>1st</td><td class="sb-l">SB L</td></tr>
+        <tr><td>2025</td><td class="bad">6–11</td><td>3rd</td><td>—</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="table-scroll">
+    <table class="nums">
+      <caption>New England — the fall and the bounce-back. Seven straight 11+ win seasons, then the bottom, then back.</caption>
+      <thead><tr><th>Season</th><th>W–L</th><th>Finish</th><th>Postseason</th></tr></thead>
+      <tbody>
+        <tr><td>2013</td><td>12–4</td><td>1st</td><td>Lost AFC Championship</td></tr>
+        <tr><td>2014</td><td>12–4</td><td>1st</td><td class="sb-w">SB W</td></tr>
+        <tr><td>2015</td><td>12–4</td><td>1st</td><td>Lost AFC Championship</td></tr>
+        <tr><td>2016</td><td>14–2</td><td>1st</td><td class="sb-w">SB W</td></tr>
+        <tr><td>2017</td><td>13–3</td><td>1st</td><td class="sb-l">SB L</td></tr>
+        <tr><td>2018</td><td>11–5</td><td>1st</td><td class="sb-w">SB W</td></tr>
+        <tr><td>2019</td><td>12–4</td><td>1st</td><td>Lost Wild Card</td></tr>
+        <tr><td>2020</td><td>7–9</td><td>3rd</td><td>—</td></tr>
+        <tr><td>2021</td><td>10–7</td><td>2nd</td><td>Lost Wild Card</td></tr>
+        <tr><td>2022</td><td>8–9</td><td>3rd</td><td>—</td></tr>
+        <tr><td>2023</td><td class="bad">4–13</td><td>4th</td><td>—</td></tr>
+        <tr><td>2024</td><td class="bad">4–13</td><td>4th</td><td>—</td></tr>
+        <tr><td>2025</td><td>14–3</td><td>1st</td><td class="sb-l">SB L</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="table-scroll">
+    <table class="nums">
+      <caption>Philadelphia — the burst. Up, down, up, down, up. Coaches: Chip Kelly 2013–15, Doug Pederson 2016–20, Nick Sirianni 2021–.</caption>
+      <thead><tr><th>Season</th><th>W–L</th><th>Finish</th><th>Postseason</th></tr></thead>
+      <tbody>
+        <tr><td>2013</td><td>10–6</td><td>1st</td><td>Lost Wild Card</td></tr>
+        <tr><td>2014</td><td>10–6</td><td>2nd</td><td>—</td></tr>
+        <tr><td>2015</td><td>7–9</td><td>2nd</td><td>—</td></tr>
+        <tr><td>2016</td><td>7–9</td><td>4th</td><td>—</td></tr>
+        <tr><td>2017</td><td>13–3</td><td>1st</td><td class="sb-w">SB W</td></tr>
+        <tr><td>2018</td><td>9–7</td><td>2nd</td><td>Lost Divisional</td></tr>
+        <tr><td>2019</td><td>9–7</td><td>1st</td><td>Lost Wild Card</td></tr>
+        <tr><td>2020</td><td class="bad">4–11–1</td><td>4th</td><td>—</td></tr>
+        <tr><td>2021</td><td>9–8</td><td>2nd</td><td>Lost Wild Card</td></tr>
+        <tr><td>2022</td><td>14–3</td><td>1st</td><td class="sb-l">SB L</td></tr>
+        <tr><td>2023</td><td>11–6</td><td>2nd</td><td>Lost Wild Card</td></tr>
+        <tr><td>2024</td><td>14–3</td><td>1st</td><td class="sb-w">SB W</td></tr>
+        <tr><td>2025</td><td>11–6</td><td>1st</td><td>Lost Wild Card</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="srcnote">Method: start with the hereditary numbers — what each team actually did, season by season — then look for the pattern. Sources: Wikipedia season lists — List of Kansas City Chiefs seasons, List of New England Patriots seasons, List of Philadelphia Eagles seasons — public data, read Nov 25, 2026. 2025 is a completed season; the 2026 season is in progress and not in these tables. The pattern work — what separates the sustainers from the bursts — is next. Nothing here is a prediction.</p>
+  </div>
+
+  <div class="panel" id="panel-managers">
+    <h3>Managers — <span>what to do with it</span></h3>
+    <p>You run a team. The report's job is to show you what the sustainers did that you can do with what you have — inside your sport's rules, inside your market, inside your restrictions.</p>
+    <p>The pattern gets translated one-for-one to where your team is at. A small-market team will never sustain greatness like the Patriots or Kansas City, move for move. But Kansas City had to do something to get in position to sustain greatness in the first place. That something is what this report hunts for.</p>
+    <p><b>What you get:</b> the fix options within your sport's rules, the pattern translated to your resources, and an honest read on your place in the league — because knowing your place is the starting point, not the finish line.</p>
+    <p class="muted">Team reports are built to order — that is the client intent. No team client yet; this page is the frame. The pattern work lands here first.</p>
+  </div>
+
+  <div class="panel" id="panel-fans">
+    <h3>Regular Fans — <span>the story straight</span></h3>
+    <p><b>Kansas City.</b> They were garbage. Then they went up — and they stayed up. Twelve straight winning seasons, three Super Bowls, same coach the whole way. Then 2025: 6–11. The question is what they did to get in position — and what changed.</p>
+    <p><b>New England.</b> Seven straight seasons of 11 wins or more, three Super Bowls. Then the fall — down to 4–13, twice. Then 2025: 14–3 and a Super Bowl trip under a new coach. The question is what broke, and what came back.</p>
+    <p><b>Philadelphia.</b> Up, down, up, down, up. Super Bowl in 2017. 4–11–1 in 2020. Super Bowl trip in 2022. Super Bowl in 2024. The question is what keeps pulling them back up — and what keeps knocking them down. The collapse is the stuff the numbers alone can't see. That's the drama side, and it comes later.</p>
+  </div>
+
+  <div class="panel" id="panel-joes">
+    <h3>Regular Joes — <span>what it means</span></h3>
+    <p>Some teams get good and stay good. Most don't. This report figures out what the stayers did different — in plain numbers, straight off public data — so any team can steal the parts that fit where they live. The numbers don't decide anything. They just tell you how much your gut is backed up. That's it. That's the whole report.</p>
+  </div>
+</section>
+
+<section id="cases">
+  <h2>Sustain <span>greatness</span></h2>
+  <p class="section-sub">NFL first — the proof sport. Three cases. One question: is there a pattern?</p>
+  <div class="case-grid">
+    <div class="case">
+      <p class="kicker" style="color:var(--gold);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:12px;">The sustainer</p>
+      <h3>Kansas <span>City</span></h3>
+      <p class="record">12 straight winning seasons · 3 Super Bowls</p>
+      <p>From garbage to sustained. 2013–2024, never a losing season — 11 wins or more in ten of those twelve years. Same coach the whole way. Then 2025: 6–11, third in the division, no playoffs.</p>
+      <p class="q"><b>The question:</b> what did they do to get in position to sustain greatness — and what changed in 2025?</p>
+    </div>
+    <div class="case">
+      <p class="kicker" style="color:var(--gold);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:12px;">The fall and the bounce-back</p>
+      <h3>New <span>England</span></h3>
+      <p class="record">7 straight 11+ win seasons · 3 Super Bowls</p>
+      <p>2013–2019, the machine kept running. Then the fall: 7–9, 8–9, 4–13, 4–13. Then 2025: 14–3, first in the division, a Super Bowl trip under a new coach.</p>
+      <p class="q"><b>The question:</b> what broke — and what came back?</p>
+    </div>
+    <div class="case">
+      <p class="kicker" style="color:var(--gold);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:12px;">The burst</p>
+      <h3>Philadel<span>phia</span></h3>
+      <p class="record">Super Bowl 2017 · 4–11–1 in 2020 · Super Bowl 2024</p>
+      <p>Up, down, up, down, up. A Super Bowl, then a 4–11–1 season three years later. A Super Bowl trip, then a Super Bowl. The Eagles are the control case for the whole report: what keeps pulling a burst team back up — and what keeps knocking it down?</p>
+      <p class="q"><b>The question:</b> what separates a burst from a sustain? The collapse is the drama side, and the numbers alone can't see it — yet.</p>
+    </div>
+  </div>
+</section>
+
+<section id="pattern">
+  <h2>The <span>pattern</span></h2>
+  <p class="section-sub">What we're looking for. The report doesn't fully answer these yet — it shows the picture clearer than the emotion side alone, then the other aspects make the picture finer.</p>
+  <ol class="questions">
+    <li>Is there a pattern between what Kansas City did, what the Patriots did, and the other teams that sustain greatness?</li>
+    <li>What separates the sustainers from the bursts — the teams that go up and come back down?</li>
+    <li>How does the pattern translate one-for-one to a team's market, its resources, and its restrictions — what can it do with what it has?</li>
+    <li>What is a team's place in the league — and what can it do from there?</li>
+  </ol>
+  <p style="margin-top:16px;">Coming next: the same lens on soccer, college football, and baseball. The drama-side algorithm — a way to put the emotional side into the numbers so they sit closer to the balanced state — comes later. Pattern first.</p>
+</section>
+
+<section id="rfc">
+  <h2>Built per <span>the RFC</span></h2>
+  <div class="rfcbox">
+    <p>This report is built the way the AI RFC says to build: level 3 going into level 4, eating our own dog food. The RFC is both the spec and the test subject — if the build has to break the RFC to work, the RFC changes in the open, not quietly.</p>
+    <p>The AI experience maturity scale is five levels, no zero. This setup sits at level 3 — the agent wired into its own software, acting as a participant — building toward level 5, where the system works for other people too and gets better from all of them. This report is one step on that road: the same system, doing the work, for the reader.</p>
+    <div class="linkrow">
+      <a href="/way-i-use-ai/">Read the RFC</a>
+      <a href="https://github.com/the-ai-guy-2k/RFC-for-AI">RFC on GitHub</a>
+      <a href="/sports-report/">The old sports page</a>
+    </div>
+    <p class="srcnote" style="margin-top:12px;">Tracked in the Hive — parent PIO <a href="https://taigtsp.duckdns.org/hive-portal/u/timhive/pio/pio/view?id=117">#117 Sustain Greatness — Bad Teams Analytics</a>, with one PIO per sport: <a href="https://taigtsp.duckdns.org/hive-portal/u/timhive/pio/pio/view?id=118">Soccer #118</a> · <a href="https://taigtsp.duckdns.org/hive-portal/u/timhive/pio/pio/view?id=119">NFL #119</a> · <a href="https://taigtsp.duckdns.org/hive-portal/u/timhive/pio/pio/view?id=120">College Football #120</a> · <a href="https://taigtsp.duckdns.org/hive-portal/u/timhive/pio/pio/view?id=121">Baseball #121</a>. The NFL PIO leads with the KC / Patriots / Eagles cases.</p>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+
+<footer class="page">
+  <div class="wrap">
+    <h2 style="font-size:26px;">Prove this <span style="color:var(--gold);">wrong</span></h2>
+    <p>A fact beats a line. If you can prove any part of this report wrong, say so — a GitHub issue on the RFC repo, or a comment on the report's PIO — and the report changes. That standard binds the author too. Nothing decided in private, nothing erased.</p>
+    <p class="muted">TSR v1 — first version for review, Nov 25, 2026. The frame is set; the pattern work is next. The old sports + news page still lives at Tee's Sports Report — its new name is coming (the Sports Ticker). This page replaces nothing until Tee says so.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var btns = document.querySelectorAll('.intake');
+  function show(id){
+    btns.forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.intake === id ? 'true' : 'false'); });
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('open', p.id === 'panel-' + id); });
+  }
+  btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      show(b.dataset.intake);
+      document.getElementById('panel-' + b.dataset.intake).scrollIntoView({ behavior:'smooth', block:'nearest' });
+    });
+  });
+})();
+</script>
+</body>
+</html>
