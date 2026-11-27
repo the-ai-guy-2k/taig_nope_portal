@@ -245,6 +245,9 @@ function settingsOf(state) {
       ? Number(state.settings.usdRate) : DEFAULT_USD_RATE,
     disputeWindowMinutes: Number.isInteger(state.settings && state.settings.disputeWindowMinutes)
       ? state.settings.disputeWindowMinutes : DEFAULT_DISPUTE_WINDOW_MINUTES,
+    sosPhone: typeof (state.settings && state.settings.sosPhone) === 'string' ? state.settings.sosPhone : '',
+    sosLabel: typeof (state.settings && state.settings.sosLabel) === 'string' && state.settings.sosLabel.trim()
+      ? state.settings.sosLabel : 'Giggit emergency contact',
   };
 }
 
@@ -1341,6 +1344,8 @@ function getSettings() {
     rateSource: 'EC$ peg — EC$2.70 per US$1 (fixed peg, configurable if the peg ever moves)',
     disputeWindowMinutes: settings.disputeWindowMinutes,
     disputeWindowRange: [MIN_DISPUTE_WINDOW_MINUTES, MAX_DISPUTE_WINDOW_MINUTES],
+    sosPhone: settings.sosPhone,
+    sosLabel: settings.sosLabel,
   };
 }
 
@@ -1359,6 +1364,19 @@ function updateSettings(body) {
       throw new ValidationError('The dispute window must be between 60 minutes (1 hour) and 1440 minutes (1 day).');
     }
     state.settings.disputeWindowMinutes = mins;
+  }
+  /* SOS (slice 7): the emergency number shown on the SOS panel inside
+     a live job. Blank clears it — no number is invented here. */
+  if (body.sosPhone !== undefined && body.sosPhone !== null) {
+    const phone = cleanText(body.sosPhone, 40);
+    if (phone !== '' && phone.length < 7) {
+      throw new ValidationError('The SOS number needs at least 7 digits — or leave it blank for no number.');
+    }
+    state.settings.sosPhone = phone;
+  }
+  if (body.sosLabel !== undefined && body.sosLabel !== null) {
+    const label = cleanText(body.sosLabel, 60);
+    state.settings.sosLabel = label || 'Giggit emergency contact';
   }
   save(state);
   return getSettings();

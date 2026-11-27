@@ -161,3 +161,7 @@ input[type=text], input[type=tel], input[type=number], select, textarea, input[t
 
 /* Promo codes (slice 5) */
 .promo-line { color: #12592b; font-weight: 600; }
+
+/* SOS (slice 7) */
+.sos-panel { border: 2px solid #9b2c2c; border-radius: 10px; padding: 10px 12px; margin: 10px 0; background: #fdf2f2; }
+.sos-panel h3 { color: #9b2c2c; margin-top: 0; }

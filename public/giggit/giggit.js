@@ -538,6 +538,12 @@ async function renderAdmin() {
   } catch (err) {
     promos = [];
   }
+  let settings = null;
+  try {
+    settings = await api('/api/giggit/settings');
+  } catch (err) {
+    settings = null;
+  }
   const cats = (meta && meta.categories) || [];
   let rows = adminGigs.slice();
   if (adminFilter.status) rows = rows.filter((g) => g.status === adminFilter.status);
@@ -565,7 +571,26 @@ async function renderAdmin() {
     + '<div><label>Max uses (blank = unlimited)</label><input type="number" id="promo-max" min="1" max="1000" step="1"></div></div>'
     + '<label>Note (optional)</label><input type="text" id="promo-note" maxlength="120" placeholder="e.g. Launch week">'
     + '<p><button class="btn small leaf" type="button" onclick="createPromo()">Create promo code</button></p>'
-    + '<div id="promo-msg" class="msg"></div></div>';
+    + '<div id="promo-msg" class="msg"></div></div>'
+    + '<div class="card"><h3>SOS — emergency contact</h3>'
+    + '<p class="meta">The number shown on the SOS panel inside a live job. Leave blank if there is no number yet.</p>'
+    + '<div class="row"><div><label>Emergency number</label><input type="tel" id="sos-phone" maxlength="40" value="' + esc(settings && settings.sosPhone ? settings.sosPhone : '') + '" placeholder="+1 758 …"></div>'
+    + '<div><label>Label</label><input type="text" id="sos-label" maxlength="60" value="' + esc(settings && settings.sosLabel ? settings.sosLabel : 'Giggit emergency contact') + '"></div></div>'
+    + '<p><button class="btn small leaf" type="button" onclick="saveSosSettings()">Save SOS contact</button></p>'
+    + '<div id="sos-msg" class="msg"></div></div>';
+}
+
+async function saveSosSettings() {
+  try {
+    await api('/api/giggit/settings', {
+      method: 'PUT',
+      body: JSON.stringify({ sosPhone: ($('sos-phone') || {}).value || '', sosLabel: ($('sos-label') || {}).value || '' }),
+    });
+    meta = await api('/api/giggit/meta');
+    renderAdmin();
+  } catch (err) {
+    showMsg('sos-msg', err.message, false);
+  }
 }
 
 async function createPromo() {
@@ -647,6 +672,24 @@ async function openGig(id) {
     lastActionNote = '';
   }
   html += progressSteps(g);
+  const sosLive = ['accepted', 'in_progress', 'completion_requested'].includes(g.status)
+    && (role === 'admin' || (me && g.giggerId === me.id) || (clientPhone && g.customerPhone === clientPhone));
+  if (sosLive) {
+    const isGigger = me && g.giggerId === me.id;
+    const isCustomer = clientPhone && g.customerPhone === clientPhone;
+    const links = [];
+    if ((isGigger || role === 'admin') && g.customerPhone) {
+      links.push({ label: 'Call the customer', phone: g.customerPhone });
+    }
+    if ((isCustomer || role === 'admin') && g.giggerPhone) {
+      links.push({ label: 'Call the Gigger', phone: g.giggerPhone });
+    }
+    html += '<div class="sos-panel"><h3>SOS — need help now?</h3>'
+      + links.map((l) => '<p><a class="btn danger" href="tel:' + esc(l.phone.replace(/[^+0-9]/g, '')) + '">' + esc(l.label) + ' — ' + esc(l.phone) + '</a></p>').join('')
+      + '<p class="meta">Job: ' + esc(g.title) + ' • ' + esc(g.parish) + (g.area ? ' — ' + esc(g.area) : '') + '</p>'
+      + ((meta && meta.sosPhone) ? '<p><a class="btn danger" href="tel:' + esc(String(meta.sosPhone).replace(/[^+0-9]/g, '')) + '">Call ' + esc(meta.sosLabel || 'Giggit emergency contact') + ' — ' + esc(meta.sosPhone) + '</a></p>' : '<p class="meta">No emergency number set yet — the admin sets it in the Admin view.</p>')
+      + '</div>';
+  }
   if (g.customerName) {
     html += '<p><b>Customer:</b> ' + esc(g.customerName)
       + (g.customerPhone ? ' • ' + esc(g.customerPhone) : '') + '</p>';

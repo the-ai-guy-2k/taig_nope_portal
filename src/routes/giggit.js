@@ -63,6 +63,8 @@ router.get('/api/giggit/meta', (req, res) => {
     },
     disputeWindowMinutes: settings.disputeWindowMinutes,
     disputeWindowRange: settings.disputeWindowRange,
+    sosPhone: settings.sosPhone,
+    sosLabel: settings.sosLabel,
     ringWindowMinutes: store.RING_WINDOW_MINUTES,
     ringSizes: store.RING_SIZES.map((size) => (Number.isFinite(size) ? size : null)),
     trackingGroups: ['matching', 'supply', 'demand', 'money', 'trust', 'growth'],
