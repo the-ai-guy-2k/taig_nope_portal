@@ -36,7 +36,35 @@ Scripts: `scripts/giggit-smoke-tests.js`, `scripts/giggit-policy-tests.js`,
 | security | 11 passed / 0 failed |
 | Existing 9 stages (structure, syntax, data, workflow, operational, preservation, routes, smoke, operator-visual) | all passed — no regressions |
 
-### Known gaps and deferred items (still open after this build)
+### CI run — same day, PR #6 (GitHub Actions)
+
+The local run passed T9 only because this build machine cannot reach the
+npm registry — the test records that and passes. CI has registry access and
+ran the audit for real. **It failed the build, exactly as designed:**
+
+- **critical 1** — `proxy-addr` (CVSS 9.1, GHSA-jqcg-44mw-7w3h): IP
+  spoofing via IPv4-mapped IPv6 trust subnet. Transitive via express.
+- **high 2** — `body-parser` (DoS via trailing bytes after a compressed
+  body, GHSA-27r3-jxmh-p828) and `brace-expansion` (several DoS issues).
+- **moderate 1** — `qs` (DoS, fixed in 6.16.0).
+
+Fix, done the same day on a temp clone on the Droplet (registry reachable
+there — the build machine's registry is blocked):
+
+- `npm audit fix --omit=dev` cleared the critical and both highs.
+- `npm install express@^4.22.3` (one line in `package.json`, `^4.21.2` →
+  `^4.22.3`) cleared the qs moderate — express 4.22.3 pins qs 6.16.2.
+- Post-fix audit: **0 vulnerabilities** (critical 0, high 0, moderate 0).
+- Lockfile now: express 4.22.3, qs 6.16.2, body-parser 1.20.9,
+  proxy-addr 2.0.8, brace-expansion 2.1.8.
+- Full `npm run validate:all` re-run locally after the bump: **13 stages,
+  all green** (smoke 20/20, policy 16/16, dispute 8/8 + D7 gap, security
+  11/11, existing 9 stages unchanged). The express bump is a minor version
+  and the suite is the proof it broke nothing.
+
+This is the T9 control working as written: a critical dependency
+vulnerability blocked the build until it was fixed, and the fix is recorded
+here with the versions.
 
 - **D7 — Dispute resolve (Decision Point 7).** No resolve function, endpoint,
   or screen exists. A disputed gig is moved only by a deliberate, recorded
