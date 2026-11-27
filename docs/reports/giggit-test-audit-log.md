@@ -147,6 +147,14 @@ with no PII.
 | security | **17 passed / 0 failed** (was 11 — T13–T18 added) |
 | Existing 9 stages | all passed — no regressions |
 
+Count note (so the 17 vs T1–T18 is not misread): the 17 security checks
+are 1 setup check + 16 T-checks (T1–T9, T12–T18). T10 (VAPID key file
+never committed; a missing file logged loudly on generation) is asserted
+inside the T6 check — the store's warning lines include VAPID generation,
+and `.gitignore` includes `nebula_local/`. T11 (the two dead ends) is not
+a runnable security check by design — it is a decision (DP5, DP7),
+recorded by dispute test D7.
+
 ### Pipeline bug found by this build (fixed in the same branch)
 
 While verifying the PR #6 deploy, the live Droplet's disk was found 100%
