@@ -1,5 +1,7 @@
 # TAIG DevOps standard — the right software way
 
+Giggit is the first live production, general public — Uber-level care for its software, security included. That is the bar the public launch has to clear.
+
 One rule, in order: **branch → pull request → CI green → staging → merge → auto-deploy.**
 
 1. **Branch.** All work happens on a feature branch, never on main.
