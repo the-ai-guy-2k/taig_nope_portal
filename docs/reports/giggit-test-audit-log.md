@@ -178,3 +178,20 @@ again.
 Lesson recorded: the watcher needs its own smoke test — a run that proves
 the script at least reaches the remote/local comparison. That check is
 now part of the release checklist in the GVCA artifact.
+
+### Live verification of PR #6 (b757779) — 2026-11-27 ~03:25 UTC
+
+- Headers on `https://taigtsp.duckdns.org/giggit/`: nosniff, SAMEORIGIN,
+  Referrer-Policy — all present.
+- Live gig list carries no `completionCode`.
+- Live `giggit.js` contains the admin-token header code.
+- **PUT settings without the token returned 200, not 401.** Diagnosis:
+  the 03:24 deploy ran the pre-merge watcher script, which has no token
+  code — so the live (and staging) containers started with no
+  `GIGGIT_ADMIN_TOKEN`. The code did its designed job and logged the loud
+  warning (`GIGGIT_ADMIN_TOKEN is not set — admin writes ... are open`).
+  The token is injected by the fixed watcher script in PR #7; until it
+  merges and deploys, admin writes on live are open (pre-public app, Jan
+  test phase only — no public users).
+- The probe itself changed a live setting (`disputeWindowMinutes` 60 →
+  120) and it was **reverted to 60 immediately** and verified back at 60.
