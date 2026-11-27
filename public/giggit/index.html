@@ -117,7 +117,17 @@
         <label for="gig-promo">Promo code (optional)</label>
         <input type="text" id="gig-promo" maxlength="20" placeholder="e.g. SAVE10">
         <div class="hint">A code from Giggit takes a percentage off a set budget. Quote gigs cannot use one yet.</div>
-        <label for="gig-when">When</label>
+        <label>When do you need it?</label>
+        <div class="checks">
+          <label><input type="radio" name="when-mode" value="asap" checked onchange="whenChanged()"> As soon as possible</label>
+          <label><input type="radio" name="when-mode" value="later" onchange="whenChanged()"> Schedule for later</label>
+        </div>
+        <div id="schedule-box" class="hidden">
+          <label for="gig-scheduled">Date and time</label>
+          <input type="datetime-local" id="gig-scheduled">
+          <div class="hint">Within the next 30 days. The gig is posted now and a Gigger accepts now — the work happens at this time.</div>
+        </div>
+        <label for="gig-when">When (in your own words, optional)</label>
         <input type="text" id="gig-when" maxlength="120" placeholder="e.g. Saturday morning">
         <div class="row">
           <div>

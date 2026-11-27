@@ -548,6 +548,7 @@ function publicGig(gig, opts) {
     cancelReason: gig.cancelReason || null,
     dispute: gig.dispute || null,
     when: gig.when || null,
+    scheduledAt: gig.scheduledAt || null,
     rejections: (gig.rejections || []).map((entry) => ({ giggerId: entry.giggerId, giggerName: entry.giggerName, at: entry.at })),
   };
   if (showContacts) {
@@ -634,9 +635,22 @@ function validateGig(body, usdRate) {
   const customerPhone = cleanText(body.customerPhone, 40);
   if (customerPhone.length < 7) throw new ValidationError('Give a phone number so the Gigger can reach you.');
   const when = cleanText(body.when, 120);
+  /* Schedule-for-later (gap-close slice 6): an optional datetime for
+     the job itself. It must be in the future and within 30 days — the
+     ring still runs from posting, so a scheduled gig is posted now,
+     accepted now, and done at the scheduled time. */
+  let scheduledAt = null;
+  if (body.scheduledAt !== undefined && body.scheduledAt !== null && String(body.scheduledAt).trim() !== '') {
+    const at = new Date(String(body.scheduledAt));
+    if (Number.isNaN(at.getTime())) throw new ValidationError('That scheduled time does not look right — pick a date and time.');
+    const now = Date.now();
+    if (at.getTime() <= now) throw new ValidationError('Schedule the job for a time in the future.');
+    if (at.getTime() - now > 30 * 24 * 60 * 60 * 1000) throw new ValidationError('Schedule within the next 30 days.');
+    scheduledAt = at.toISOString();
+  }
   const photo = validatePhoto(body.photo || null);
   const { lat, lng } = cleanLatLng(body);
-  return { category, title, description, parish, area, pricingMode, priceEC, postedIn, postedAmount: pricingMode === 'budget' ? postedAmount : null, customerName, customerPhone, when, photo, lat, lng };
+  return { category, title, description, parish, area, pricingMode, priceEC, postedIn, postedAmount: pricingMode === 'budget' ? postedAmount : null, customerName, customerPhone, when, scheduledAt, photo, lat, lng };
 }
 
 function createGigger(body) {

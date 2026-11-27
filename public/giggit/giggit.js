@@ -314,6 +314,12 @@ function pricingChanged() {
   $('gig-price').required = mode === 'budget';
 }
 
+function whenChanged() {
+  const mode = (document.querySelector('input[name="when-mode"]:checked') || {}).value || 'asap';
+  $('schedule-box').classList.toggle('hidden', mode !== 'later');
+  $('gig-scheduled').required = mode === 'later';
+}
+
 function gigCard(g) {
   const me = giggers.find((entry) => entry.id === whoAmI);
   const canAccept = role === 'gigger' && g.status === 'open' && me && me.skills.includes(g.category) && g.pricingMode !== 'quote';
@@ -326,7 +332,8 @@ function gigCard(g) {
   return '<div class="card">'
     + '<h3>' + esc(g.title) + ' ' + (g.sample ? '<span class="badge sample">SAMPLE</span>' : '') + '</h3>'
     + '<div class="meta">' + esc(g.category) + ' • ' + esc(g.parish) + (g.area ? ' — ' + esc(g.area) : '')
-    + (g.when ? ' • ' + esc(g.when) : '') + '</div>'
+    + (g.when ? ' • ' + esc(g.when) : '')
+    + (g.scheduledAt ? ' • Scheduled ' + esc(new Date(g.scheduledAt).toLocaleString()) : '') + '</div>'
     + '<div class="price">' + esc(moneyText(g)) + ' <small>' + (g.pricingMode === 'quote' && g.priceEC == null ? 'quotes welcome' : 'per gig') + '</small></div>'
     + (g.promoCode ? '<div><span class="badge">PROMO ' + esc(g.promoCode) + ' −' + esc(moneyEC(g.discountEC)) + '</span></div>' : '')
     + (g.status === 'open' ? '<div class="ring-note">Ring ' + (g.ring != null ? g.ring : 0) + ' — ' + (g.ring === 2 ? 'every matching Gigger has the first look.' : 'the ' + (g.ring === 1 ? 'closest 6' : 'closest 3') + ' Giggers have the first look.') + '</div>' : '')
@@ -629,7 +636,8 @@ async function openGig(id) {
   const isMine = me && g.giggerId === me.id;
   let html = '<div class="card"><h3>' + esc(g.title) + ' ' + (g.sample ? '<span class="badge sample">SAMPLE</span>' : '') + '</h3>'
     + '<div class="meta">' + esc(g.category) + ' • ' + esc(g.parish) + (g.area ? ' — ' + esc(g.area) : '')
-    + (g.when ? ' • ' + esc(g.when) : '') + '</div>'
+    + (g.when ? ' • ' + esc(g.when) : '')
+    + (g.scheduledAt ? ' • Scheduled ' + esc(new Date(g.scheduledAt).toLocaleString()) : '') + '</div>'
     + '<div class="price">' + esc(moneyText(g)) + '</div>'
     + (g.promoCode ? '<p class="promo-line">Promo ' + esc(g.promoCode) + ': ' + esc(moneyEC(g.priceBeforePromoEC)) + ' − ' + esc(moneyEC(g.discountEC)) + ' = ' + esc(moneyEC(g.priceEC)) + '</p>' : '')
     + '<p>' + esc(g.description) + '</p>'
@@ -1025,6 +1033,7 @@ async function postGig(event) {
     priceEC: Number($('gig-price').value),
     currency: $('gig-usd').checked ? 'USD' : 'XCD',
     promoCode: $('gig-promo').value,
+    scheduledAt: ((document.querySelector('input[name="when-mode"]:checked') || {}).value === 'later') ? $('gig-scheduled').value : '',
     when: $('gig-when').value,
     customerName: $('gig-name').value,
     customerPhone: $('gig-phone').value,
