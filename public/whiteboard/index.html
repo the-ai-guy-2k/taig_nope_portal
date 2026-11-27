@@ -28,6 +28,25 @@
   .controls button{ font-family:inherit; font-size:20px; line-height:1; width:44px; height:44px; border-radius:10px; border:2px solid #222; background:#FFFB7D; color:#222; }
   .controls button.reset{ width:auto; padding:0 12px; font-size:17px; background:#fff; }
   footer{ padding:8px 0 32px; color:#666; font-size:16px; }
+  .loading{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:10px; z-index:4; color:#666; font-size:18px; background:#fff; }
+  .loading .spin{ width:22px; height:22px; border:3px solid #CFC8B8; border-top-color:#222; border-radius:50%; animation:spin 0.9s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .viewer.done .loading{ display:none; }
+  .phone-hint{ display:none; }
+  @media (max-width:640px){
+    /* Phones: the panels are the readable path — they come first, the full
+       board goes last. The board at phone width is a map, not a read. */
+    main.wrap{ display:flex; flex-direction:column; }
+    #board{ order:6; }
+    .phone-hint{ display:block; background:#FFFB7D; border:2px solid #222; border-radius:10px; padding:10px 14px; margin:14px 0 0; font-size:18px; }
+    .phone-hint a{ color:#222; }
+    /* Viewers fit the image instead of a tall empty box: the board is wide
+       (4939x3354), the panels are square. */
+    .viewer{ height:auto; aspect-ratio:4939 / 3354; max-height:none; }
+    .viewer.tall{ aspect-ratio:1 / 1; }
+    .sheet{ padding:12px; margin:16px 0; }
+    h2{ font-size:22px; }
+  }
 </style>
 </head>
 <body>
@@ -35,6 +54,7 @@
   <p class="eyebrow">TAIG · The Whiteboard</p>
   <h1>Tee's bubble map, zoomable</h1>
   <p class="sub">The taped-together board from Nov 27, redrawn in the order it was sent. Pinch to zoom on your phone, drag to move around, double-tap to zoom in and out. Bottom-left sheet is blank on the board — same here.</p>
+  <p class="phone-hint">On your phone? Start with the panels below — each one zooms to readable size. The full board is at the bottom. <a href="#p1">Jump to panel 1</a></p>
   <nav class="chips">
     <a href="#board">Full board</a>
     <a href="#p1">1 · Nebula + Labor</a>
@@ -50,7 +70,8 @@
     <h2>Full board — all six sheets</h2>
     <p class="hint">Pinch or scroll to zoom · drag to move · double-tap to zoom in and out</p>
     <div class="viewer" data-zoom>
-      <div class="inner"><img src="whiteboard-recreation-2026-11-27.png" alt="Full whiteboard bubble map" draggable="false" /></div>
+      <div class="inner"><img src="whiteboard-recreation-2026-11-27.png" srcset="whiteboard-recreation-1600-2026-11-27.png 1600w, whiteboard-recreation-2026-11-27.png 4939w" sizes="(max-width: 640px) 100vw, 1100px" alt="Full whiteboard bubble map" draggable="false" /></div>
+      <div class="loading"><span class="spin"></span><span>Loading the board…</span></div>
       <div class="controls"><button type="button" data-zoom-in aria-label="Zoom in">+</button><button type="button" data-zoom-out aria-label="Zoom out">−</button><button type="button" class="reset" data-zoom-reset>Reset</button></div>
     </div>
   </section>
@@ -59,7 +80,8 @@
     <h2>1 · Top-left — Nebula question + Labor Work Force</h2>
     <p class="hint">The Nebula question up top, Labor Work Force in yellow below — Puablo, Clerge, clients, workers, intent.</p>
     <div class="viewer tall" data-zoom>
-      <div class="inner"><img src="panel-1-top-left-nebula-labor-2026-11-27.png" alt="Top-left sheet: Nebula question and Labor Work Force" loading="lazy" draggable="false" /></div>
+      <div class="inner"><img src="panel-1-top-left-nebula-labor-2026-11-27.png" srcset="panel-1-top-left-nebula-labor-1200-2026-11-27.png 1200w, panel-1-top-left-nebula-labor-2026-11-27.png 2892w" sizes="(max-width: 640px) 100vw, 1100px" alt="Top-left sheet: Nebula question and Labor Work Force" loading="lazy" draggable="false" /></div>
+      <div class="loading"><span class="spin"></span><span>Loading…</span></div>
       <div class="controls"><button type="button" data-zoom-in aria-label="Zoom in">+</button><button type="button" data-zoom-out aria-label="Zoom out">−</button><button type="button" class="reset" data-zoom-reset>Reset</button></div>
     </div>
   </section>
@@ -68,7 +90,8 @@
     <h2>2 · Top-middle — Social media + TSR</h2>
     <p class="hint">Social media Mgmt system on its own, then TSR — football, college, the conference-money question, baseball.</p>
     <div class="viewer tall" data-zoom>
-      <div class="inner"><img src="panel-2-top-middle-tsr-2026-11-27.png" alt="Top-middle sheet: social media and TAIG Sport Analysis" loading="lazy" draggable="false" /></div>
+      <div class="inner"><img src="panel-2-top-middle-tsr-2026-11-27.png" srcset="panel-2-top-middle-tsr-1200-2026-11-27.png 1200w, panel-2-top-middle-tsr-2026-11-27.png 2892w" sizes="(max-width: 640px) 100vw, 1100px" alt="Top-middle sheet: social media and TAIG Sport Analysis" loading="lazy" draggable="false" /></div>
+      <div class="loading"><span class="spin"></span><span>Loading…</span></div>
       <div class="controls"><button type="button" data-zoom-in aria-label="Zoom in">+</button><button type="button" data-zoom-out aria-label="Zoom out">−</button><button type="button" class="reset" data-zoom-reset>Reset</button></div>
     </div>
   </section>
@@ -77,7 +100,8 @@
     <h2>3 · Top-right — The Hive</h2>
     <p class="hint">Books, comics, anime, the Portal, COTT, public-domain stories.</p>
     <div class="viewer tall" data-zoom>
-      <div class="inner"><img src="panel-3-top-right-hive-2026-11-27.png" alt="Top-right sheet: The Hive" loading="lazy" draggable="false" /></div>
+      <div class="inner"><img src="panel-3-top-right-hive-2026-11-27.png" srcset="panel-3-top-right-hive-1200-2026-11-27.png 1200w, panel-3-top-right-hive-2026-11-27.png 2892w" sizes="(max-width: 640px) 100vw, 1100px" alt="Top-right sheet: The Hive" loading="lazy" draggable="false" /></div>
+      <div class="loading"><span class="spin"></span><span>Loading…</span></div>
       <div class="controls"><button type="button" data-zoom-in aria-label="Zoom in">+</button><button type="button" data-zoom-out aria-label="Zoom out">−</button><button type="button" class="reset" data-zoom-reset>Reset</button></div>
     </div>
   </section>
@@ -86,7 +110,8 @@
     <h2>4 · Bottom-middle — NFL sustain-greatness machine</h2>
     <p class="hint">What made teams great or kept them bad, sustain greatness in numbers, the bad teams at the bottom.</p>
     <div class="viewer tall" data-zoom>
-      <div class="inner"><img src="panel-4-bottom-middle-nfl-2026-11-27.png" alt="Bottom-middle sheet: NFL sustain greatness" loading="lazy" draggable="false" /></div>
+      <div class="inner"><img src="panel-4-bottom-middle-nfl-2026-11-27.png" srcset="panel-4-bottom-middle-nfl-1200-2026-11-27.png 1200w, panel-4-bottom-middle-nfl-2026-11-27.png 2892w" sizes="(max-width: 640px) 100vw, 1100px" alt="Bottom-middle sheet: NFL sustain greatness" loading="lazy" draggable="false" /></div>
+      <div class="loading"><span class="spin"></span><span>Loading…</span></div>
       <div class="controls"><button type="button" data-zoom-in aria-label="Zoom in">+</button><button type="button" data-zoom-out aria-label="Zoom out">−</button><button type="button" class="reset" data-zoom-reset>Reset</button></div>
     </div>
   </section>
@@ -95,7 +120,8 @@
     <h2>5 · Bottom-right — Engineering to shops</h2>
     <p class="hint">Engineering → science → tech → AI → software, robotics, the food truck, bike repair, the Uber-style platform.</p>
     <div class="viewer tall" data-zoom>
-      <div class="inner"><img src="panel-5-bottom-right-engineering-2026-11-27.png" alt="Bottom-right sheet: engineering and shops" loading="lazy" draggable="false" /></div>
+      <div class="inner"><img src="panel-5-bottom-right-engineering-2026-11-27.png" srcset="panel-5-bottom-right-engineering-1200-2026-11-27.png 1200w, panel-5-bottom-right-engineering-2026-11-27.png 2892w" sizes="(max-width: 640px) 100vw, 1100px" alt="Bottom-right sheet: engineering and shops" loading="lazy" draggable="false" /></div>
+      <div class="loading"><span class="spin"></span><span>Loading…</span></div>
       <div class="controls"><button type="button" data-zoom-in aria-label="Zoom in">+</button><button type="button" data-zoom-out aria-label="Zoom out">−</button><button type="button" class="reset" data-zoom-reset>Reset</button></div>
     </div>
   </section>
