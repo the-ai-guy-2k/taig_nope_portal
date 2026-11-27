@@ -129,7 +129,7 @@ const checks = [
     assertEq(q2.status, 201, 're-quote lands');
     assertEq(q2.json.gig.quotes.length, 1, 'one quote per gigger — the re-quote replaced it');
     assertEq(q2.json.gig.quotes[0].amountEC, 80, 'the kept quote is the latest one');
-    const pick = await req(port, 'POST', `/api/giggit/gigs/${S.quoteGigId}/accept-quote`, { giggerId: S.gigger.id });
+    const pick = await req(port, 'POST', `/api/giggit/gigs/${S.quoteGigId}/accept-quote`, { giggerId: S.gigger.id, customerPhone: PHONE });
     assertEq(pick.status, 200, 'picking a quote succeeds');
     assertEq(pick.json.gig.status, 'accepted', 'the pick accepts the gig');
     assertEq(pick.json.gig.priceEC, 80, 'the pick sets the price');
@@ -173,7 +173,7 @@ const checks = [
   ['P8 — Commission tiers: 15% standard, 10% at 20+/month, 5% Pro', async (port) => {
     const g = await registerGigger(port, { name: 'Tier Gigger', phone: '+17585559925' });
     await runGigToRelease(port, g.id, 100);
-    let w = await req(port, 'GET', `/api/giggit/wallet/${g.id}`);
+    let w = await req(port, 'GET', `/api/giggit/wallet/${g.id}`, undefined, { headers: adminHeaders });
     assertEq(w.json.feesEC, 15, 'first gig: 15% standard');
     assertEq(w.json.availableEC, 85, 'first gig: EC$85 payout');
     // Seed 19 more released gigs this month, so the next one is the 21st.
@@ -191,7 +191,7 @@ const checks = [
       }
     });
     await runGigToRelease(port, g.id, 100);
-    w = await req(port, 'GET', `/api/giggit/wallet/${g.id}`);
+    w = await req(port, 'GET', `/api/giggit/wallet/${g.id}`, undefined, { headers: adminHeaders });
     assertEq(w.json.feesEC, 15 + 10, '21st gig this month: 10% volume rate (fees count ledger entries only)');
     assertEq(w.json.availableEC, 85 + 90, '21st gig: EC$90 payout');
     // Pro: flip the flag in the file, run one more gig.
@@ -199,7 +199,7 @@ const checks = [
       data.giggers.find((entry) => entry.id === g.id).pro = true;
     });
     await runGigToRelease(port, g.id, 100);
-    w = await req(port, 'GET', `/api/giggit/wallet/${g.id}`);
+    w = await req(port, 'GET', `/api/giggit/wallet/${g.id}`, undefined, { headers: adminHeaders });
     assertEq(w.json.feesEC, 15 + 10 + 5, 'Pro gigger: 5% rate');
     assertEq(w.json.availableEC, 85 + 90 + 95, 'Pro gig: EC$95 payout');
   }],
@@ -248,7 +248,7 @@ const checks = [
     const g = await registerGigger(port, { name: 'Rating Gigger', phone: '+17585559927' });
     const gig = await req(port, 'POST', '/api/giggit/gigs', gigBody({ title: 'Policy rating gig' }));
     const id = gig.json.gig.id;
-    const early = await req(port, 'POST', `/api/giggit/gigs/${id}/rate`, { by: 'customer', stars: 5 });
+    const early = await req(port, 'POST', `/api/giggit/gigs/${id}/rate`, { by: 'customer', stars: 5, customerPhone: PHONE });
     assertEq(early.status, 400, 'rating before release is refused');
     await runGigToRelease(port, g.id, 100);
     // The run above released a different gig; release this one too.
@@ -267,11 +267,11 @@ const checks = [
     });
     const rel = await req(port, 'GET', `/api/giggit/gigs/${id}`);
     assertEq(rel.json.gig.status, 'released', 'rating gig released');
-    const noComment = await req(port, 'POST', `/api/giggit/gigs/${id}/rate`, { by: 'customer', stars: 2 });
+    const noComment = await req(port, 'POST', `/api/giggit/gigs/${id}/rate`, { by: 'customer', stars: 2, customerPhone: PHONE });
     assertEq(noComment.status, 400, 'under 3 stars without a comment is refused');
-    const withComment = await req(port, 'POST', `/api/giggit/gigs/${id}/rate`, { by: 'customer', stars: 2, comment: 'Left the bathroom unfinished.' });
+    const withComment = await req(port, 'POST', `/api/giggit/gigs/${id}/rate`, { by: 'customer', stars: 2, comment: 'Left the bathroom unfinished.', customerPhone: PHONE });
     assertEq(withComment.status, 200, 'under 3 stars with a comment lands');
-    const giggerRate = await req(port, 'POST', `/api/giggit/gigs/${id}/rate`, { by: 'gigger', stars: 4, comment: 'Good customer.' });
+    const giggerRate = await req(port, 'POST', `/api/giggit/gigs/${id}/rate`, { by: 'gigger', stars: 4, comment: 'Good customer.', giggerId: g.id });
     assertEq(giggerRate.status, 200, 'the gigger rates the client');
     const detail = await req(port, 'GET', `/api/giggit/gigs/${id}`);
     assert(!('customerRatingAvg' in detail.json.gig), 'no client score is computed from the gigger rating');
@@ -279,7 +279,7 @@ const checks = [
   }],
 
   ['P14 — Dispute endpoint exists and guards the state (full scenarios in dispute tests)', async (port) => {
-    const r = await req(port, 'POST', `/api/giggit/gigs/${S.gigId}/dispute`, { by: 'customer', reason: 'Policy probe.' });
+    const r = await req(port, 'POST', `/api/giggit/gigs/${S.gigId}/dispute`, { by: 'customer', reason: 'Policy probe.', customerPhone: PHONE });
     assertEq(r.status, 400, 'disputing an open gig is refused');
   }],
 

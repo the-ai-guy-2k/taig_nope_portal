@@ -1057,7 +1057,7 @@ async function submitQuote(id) {
 }
 
 async function acceptQuote(id, giggerId) {
-  await gigAction(id, 'accept-quote', { giggerId });
+  await gigAction(id, 'accept-quote', { giggerId, customerPhone: clientPhone || '' });
 }
 
 async function confirmComplete(id) {
@@ -1069,13 +1069,13 @@ async function disputeGig(id) {
   const reason = prompt('What went wrong? (short, plain words)');
   if (reason === null) return;
   const by = whoAmI ? 'gigger' : 'customer';
-  await gigAction(id, 'dispute', { by, reason });
+  await gigAction(id, 'dispute', { by, reason, giggerId: whoAmI || '', customerPhone: clientPhone || '' });
 }
 
 async function cancelGig(id) {
   if (!confirm('Cancel this gig? Escrow held on it goes back.')) return;
   const by = whoAmI ? 'gigger' : 'customer';
-  await gigAction(id, 'cancel', { by, reason: 'Cancelled in the app' });
+  await gigAction(id, 'cancel', { by, reason: 'Cancelled in the app', giggerId: whoAmI || '', customerPhone: clientPhone || '' });
 }
 
 async function rateGig(id) {
@@ -1085,7 +1085,7 @@ async function rateGig(id) {
   }
   const by = whoAmI ? 'gigger' : 'customer';
   const comment = ($('rate-comment') || {}).value || '';
-  await gigAction(id, 'rate', { by, stars: pickedStars, comment });
+  await gigAction(id, 'rate', { by, stars: pickedStars, comment, giggerId: whoAmI || '', customerPhone: clientPhone || '' });
   pickedStars = 0;
 }
 

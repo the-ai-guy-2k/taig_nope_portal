@@ -81,7 +81,7 @@ step, not this build.
 |----|--------------|---------------------------|------------------------|------|
 | T1 | Anyone on the internet can change Giggit settings (USD rate, dispute window, SOS number) — `PUT /api/giggit/settings` has no auth | Verified: open, validated ranges only | C1 — operator token. `GIGGIT_ADMIN_TOKEN` env; when set, admin writes require header `x-giggit-admin-token`. When unset, endpoints stay open for local dev AND the server logs a loud startup warning | Security test: PUT settings without the token → 401 when the token is set; with the token → 200. Live/staging audit checks the token is active |
 | T2 | Anyone can read phone numbers off open gigs with `?contacts=1` | Verified: `listGigs` / `getGig` honour `?contacts=1` with no auth | C1 — same operator token gates `?contacts=1` | Security test: open-gig list/detail with `?contacts=1` and no token → no phone numbers; with the token → numbers present |
-| T3 | Anyone can read a gig's completion code and confirm a job they never saw | Verified: `publicGig` includes `completionCode` for any caller while the gig is accepted / in_progress / completion_requested | C2 — the code leaves list responses entirely; the detail endpoint includes it only for a party (matching customer phone or the accepted Gigger's id) or the admin token | Security test: stranger detail fetch → no code; party detail fetch → code present; wrong code → refused |
+| T3 | Anyone can read a gig's completion code and confirm a job they never saw | Verified: `publicGig` includes `completionCode` for any caller while the gig is accepted / in_progress / completion_requested | C2 — the code leaves list responses entirely; the detail endpoint includes it only for the posting customer or the admin token — never the Gigger (the client gives it at the door) | Security test: stranger detail fetch → no code; party detail fetch → code present; gigger detail fetch → no code; wrong code → refused |
 | T4 | Cross-site script injection through user text (gig titles, descriptions, bios, chat) rendered in the app | Front end has `esc()` and a scan finds no unescaped `${}` in `innerHTML` templates — but that was a hand check, not a test. Verified in this build: `cleanText()` also strips HTML tags at the door, so stored text carries no markup at all | C3 — the escaping rule becomes a test, not a habit: the security script statically scans `giggit.js` for every `innerHTML` assignment and fails if any interpolated value is not passed through `esc()`; plus a live probe post with a script payload and confirms no markup survives in storage | Security test: static scan passes; live probe gig stores the payload as plain text |
 | T5 | Missing security headers on the portal (clickjacking, MIME sniffing) | Verified: `app.js` sets no security headers | C4 — `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin` on every portal response | Security test: `GET /giggit/` returns all three headers |
 | T6 | Silent data loss: the store falls back to seed data if the live file cannot be read, with no error anywhere | Verified in the engine doc (Nov 24) | C5 — loud logging: the fallback logs a warning line with the reason; the events-cap drop (500) is counted and logged; the wallet returns the LAST 50 entries, newest first, instead of the first 50 oldest-first | Security/policy test: fallback path logs; wallet order is newest-first |
@@ -91,6 +91,74 @@ step, not this build.
 | T10 | Push subscriptions orphaned if the VAPID key file is deleted | Verified in the engine doc: fresh keys are generated silently and every old subscription stops working | Document + test: the key file is never committed (gitignored), and a missing key file is logged loudly on generation instead of silently | Security test: VAPID path is gitignored; generation logs |
 | T11 | Disputed / never-verified gigs stuck forever (the two dead ends) | Verified: no resolve path; no timeout on `completion_requested` | No code change in this build — this is a decision (DP5, DP7), not a bug to patch quietly. Recorded in Section 2 (D7) and in the audit log | Dispute test D7 records the gap |
 | T12 | Cross-site request forgery on state-changing writes | No auth today, so no session to hijack; after C1, admin writes need a custom header, which a cross-origin form cannot set without a preflight the server does not grant | C1's header token is the control for admin writes. Non-admin writes (post, accept, rate) stay open by design at this stage — pretend money, known testers — and are recorded here as an accepted risk until accounts exist | Security test: admin write with no token → 401; admin write from a cross-origin form shape (no custom header) → 401 |
+| T13 | Anyone can rewrite a Gigger's profile (bio) or add/remove their gallery photos | Verified in the manual review: `PUT /giggers/:id`, `POST /giggers/:id/gallery`, `DELETE /giggers/:id/gallery/:index` have no auth. Blast radius is one text field and photos (bio only — `updateGigger` touches nothing else), but it is still an unauthenticated write | C1 — the three routes now require the operator token. Profile edits go through the operator in the test phase (the app sends the token when it is saved on the device) | Security test: bio/gallery write without the token → 401; with the token → 200/201 |
+| T14 | Anyone can read any Gigger's wallet — earnings, ledger, fees | Verified in the manual review: `GET /wallet/:giggerId` has no auth and no party check | C1 — the route now requires the operator token. Tradeoff, recorded: the Gigger's own wallet view in the app needs the token saved on that device until per-Gigger auth lands (V2) | Security test: wallet read without the token → 401; with the token → 200 |
+| T15 | Anyone can read any gig's chat by passing `by=admin` | Verified in the manual review: `checkChatParty` trusted the word `admin` with no token check. The party checks for customer/gigger were already enforced | C1 — the routes now pass `isAdmin` (checked against the operator token) into the chat party check; `by=admin` without a valid token is refused | Security test: chat read as admin without the token → 400; with the token → 200 |
+| T16 | Anyone can dispute any completed gig by saying `by=customer` | Verified in the manual review: `disputeGig` took the caller's word for who they were, no proof | C7 — proof-of-party: the disputer proves it — the customer by the phone that posted the gig, the Gigger by the id on the gig (`checkGigParty` in the store). The front end sends the proof with the call | Security test: dispute with no proof → 400; with the wrong phone → 400; with the right phone → 200 |
+| T17 | Anyone can cancel any gig or rate any gig by saying `by=customer` | Verified in the manual review: `cancelGig` and `rateGig` took the caller's word, no proof | C7 — same proof-of-party as T16, in `cancelGig` and `rateGig` | Security test: cancel/rate with no proof → 400; with the wrong phone → 400; with the right phone → 200 |
+| T18 | Anyone can pick a quote on any quote gig — the pick sets the price and accepts | Verified in the manual review: `acceptQuote` took only the giggerId and never checked who was picking | C7 — the pick requires the customer phone that posted the gig (`acceptQuote` checks it). The front end sends the customer's saved phone | Security test: quote-pick with no phone → 400; with the wrong phone → 400; with the right phone → 200 |
+
+### Manual review (Nov 26 — Tee's Uber-level direction, done by hand)
+
+The automated suites are not the whole story. A human read of every Giggit
+route (`src/routes/giggit.js`) and every store function
+(`src/services/giggitStore.js`) was done the way a team of coders would do
+it — looking for what the tests cannot see: who can do what to whom, and
+what the code trusts without checking. Findings R1–R7 became T13–T18 above
+(the chart is the record; the review is how they were found):
+
+- **R1 — Chat admin read bypass (T15).** `by=admin` read any gig's chat
+  with no token check. Fixed: the route passes the real admin check in.
+- **R2 — Dispute without proof (T16).** Anyone could dispute any completed
+  gig. Fixed: proof-of-party.
+- **R3 — Cancel without proof (T17).** Anyone could cancel any open or
+  accepted gig. Fixed: proof-of-party.
+- **R4 — Rate without proof (T17).** Anyone could rate any released gig.
+  Fixed: proof-of-party.
+- **R5 — Quote-pick without proof (T18).** Anyone could pick a quote and
+  set the price. Fixed: the customer phone must match.
+- **R6 — Wallet readable by anyone (T14).** Earnings exposed to any caller.
+  Fixed: operator token.
+- **R7 — Profile writes unauthenticated (T13).** Bio and gallery writes
+  open. Fixed: operator token. Blast radius was one text field and photos
+  only — `updateGigger` touches bio and nothing else — but an open write is
+  an open write.
+
+**Verified clean in the same read (no change needed, recorded so the next
+reviewer does not re-litigate them):**
+
+- Mass assignment: `validateGig`, `validateGigger`, `updateGig` and
+  `updateSettings` all allowlist their fields — extra body fields
+  (`status`, `escrow`, `completionCode`, `verified`, `tier`, `pro`) are
+  dropped. `createGigger` sets tier/pro/rating server-side.
+- Completion code: generated at accept, shown only to the posting customer
+  or the admin, never in lists, never to the Gigger; `confirmComplete`
+  checks the code.
+- Contacts: party-only after accept, admin lane token-gated.
+- Accept / start / arrived / request-complete: the store enforces the
+  assigned Gigger (`gig.giggerId !== giggerId` → refused).
+- Photos: JPEG/PNG/WebP, under 2 MB each, max 6, validated server-side.
+- Inputs: `cleanText` strips tags and control characters and truncates;
+  `cleanMoney` caps at EC$10,000; coordinates are range-checked.
+- Settings read is public by design (rates, SOS number, dispute window are
+  shown in the app). Events and stats are aggregates with no PII.
+- Headers, throttle, dependency audit: covered by T5, T7, T9.
+
+**Known limitations — no accounts yet, so they cannot be fixed at this
+stage. Recorded honestly, not hidden:**
+
+- **L1 — Gigger identity is bearer.** Anyone who knows a giggerId can act
+  as that Gigger (accept, quote, reject, start, arrive, request-complete).
+  Mitigations at this stage: ring + skill checks bind accepts, and the
+  accepted Gigger's real phone is shown to the customer, so impersonation
+  surfaces on first contact. Fixed properly by accounts/login (V2).
+- **L2 — Push subscriptions are caller-asserted.** Anyone can subscribe a
+  victim's giggerId with their own endpoint and receive that Gigger's push
+  titles (titles + prices only, low sensitivity). Fixed by accounts (V2).
+- **L3 — The customer proves themselves by phone number.** Anyone who
+  knows a customer's phone can act as them (dispute, cancel, rate,
+  quote-pick, chat). That is the MVP's identity model; fixed by accounts
+  (V2).
 
 Deferred with a reason (not in this build): full accounts/login and per-user
 permissions (public-launch step); real-money rails (blocked — no processor);

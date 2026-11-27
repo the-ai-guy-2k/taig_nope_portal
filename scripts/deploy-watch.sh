@@ -15,6 +15,8 @@ IMAGE_PREVIOUS=taig-nope-portal:previous
 LIVE_PORT=3000
 STAGING_PORT=3005
 
+log() { echo "$(date -u '+%Y-%m-%dT%H:%M:%SZ') $*" | tee -a "$LOG"; }
+
 # Operator token for Giggit admin writes (security, Nov 26). The token lives
 # in a file on the Droplet host, never in the repo: /etc/taig/giggit-admin-token
 # (one line). If the file is missing, the containers start without the token
@@ -28,8 +30,6 @@ if [ -r "$TOKEN_FILE" ]; then
 else
   log "WARNING: Giggit operator token file not found at $TOKEN_FILE — admin writes are open"
 fi
-
-log() { echo "$(date -u '+%Y-%m-%dT%H:%M:%SZ') $*" | tee -a "$LOG"; }
 
 # One run at a time; a second tick exits quietly.
 exec 9>"$LOCK"

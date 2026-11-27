@@ -147,7 +147,7 @@ router.get('/api/giggit/giggers/:id/gallery/:index', (req, res) => {
   res.type(photo.type).send(buf);
 });
 
-router.put('/api/giggit/giggers/:id', throttleWrites, (req, res) => {
+router.put('/api/giggit/giggers/:id', throttleWrites, requireAdmin, (req, res) => {
   try {
     res.json({ gigger: store.updateGigger(req.params.id, req.body || {}) });
   } catch (err) {
@@ -155,7 +155,7 @@ router.put('/api/giggit/giggers/:id', throttleWrites, (req, res) => {
   }
 });
 
-router.post('/api/giggit/giggers/:id/gallery', throttleWrites, (req, res) => {
+router.post('/api/giggit/giggers/:id/gallery', throttleWrites, requireAdmin, (req, res) => {
   try {
     res.status(201).json({ gigger: store.addGiggerPhoto(req.params.id, (req.body || {}).photo || null) });
   } catch (err) {
@@ -163,7 +163,7 @@ router.post('/api/giggit/giggers/:id/gallery', throttleWrites, (req, res) => {
   }
 });
 
-router.delete('/api/giggit/giggers/:id/gallery/:index', throttleWrites, (req, res) => {
+router.delete('/api/giggit/giggers/:id/gallery/:index', throttleWrites, requireAdmin, (req, res) => {
   try {
     res.json({ gigger: store.removeGiggerPhoto(req.params.id, req.params.index) });
   } catch (err) {
@@ -242,7 +242,7 @@ router.post('/api/giggit/gigs/:id/quotes', throttleWrites, (req, res) => {
 router.post('/api/giggit/gigs/:id/accept-quote', throttleWrites, async (req, res) => {
   let gig;
   try {
-    gig = store.acceptQuote(req.params.id, String((req.body || {}).giggerId || ''));
+    gig = store.acceptQuote(req.params.id, String((req.body || {}).giggerId || ''), String((req.body || {}).customerPhone || ''));
   } catch (err) {
     return badRequest(res, err);
   }
@@ -353,7 +353,7 @@ router.post('/api/giggit/gigs/:id/confirm-complete', throttleWrites, (req, res) 
 router.post('/api/giggit/gigs/:id/dispute', throttleWrites, (req, res) => {
   try {
     const body = req.body || {};
-    res.json({ gig: store.disputeGig(req.params.id, String(body.by || ''), String(body.reason || '')) });
+    res.json({ gig: store.disputeGig(req.params.id, String(body.by || ''), String(body.reason || ''), String(body.giggerId || ''), String(body.customerPhone || '')) });
   } catch (err) {
     badRequest(res, err);
   }
@@ -362,7 +362,7 @@ router.post('/api/giggit/gigs/:id/dispute', throttleWrites, (req, res) => {
 router.post('/api/giggit/gigs/:id/cancel', throttleWrites, (req, res) => {
   try {
     const body = req.body || {};
-    res.json({ gig: store.cancelGig(req.params.id, String(body.by || ''), String(body.reason || '')) });
+    res.json({ gig: store.cancelGig(req.params.id, String(body.by || ''), String(body.reason || ''), String(body.giggerId || ''), String(body.customerPhone || '')) });
   } catch (err) {
     badRequest(res, err);
   }
@@ -371,20 +371,22 @@ router.post('/api/giggit/gigs/:id/cancel', throttleWrites, (req, res) => {
 router.post('/api/giggit/gigs/:id/rate', throttleWrites, (req, res) => {
   try {
     const body = req.body || {};
-    res.json({ gig: store.rateGig(req.params.id, String(body.by || ''), body.stars, String(body.comment || '')) });
+    res.json({ gig: store.rateGig(req.params.id, String(body.by || ''), body.stars, String(body.comment || ''), String(body.giggerId || ''), String(body.customerPhone || '')) });
   } catch (err) {
     badRequest(res, err);
   }
 });
 
-/* ---- In-app chat (slice 2): messages live inside the job, both sides. */
+/* ---- In-app chat (slice 2): messages live inside the job, both sides.
+   The admin read passes isAdmin, checked against the operator token —
+   by=admin on its own is not proof (manual review, Nov 26). */
 router.get('/api/giggit/gigs/:id/messages', (req, res) => {
   try {
     res.json({ messages: store.listMessages(req.params.id, {
       by: String(req.query.by || ''),
       giggerId: String(req.query.giggerId || ''),
       customerPhone: String(req.query.customerPhone || ''),
-    }) });
+    }, { isAdmin: isAdminRequest(req) }) });
   } catch (err) {
     badRequest(res, err);
   }
@@ -392,13 +394,17 @@ router.get('/api/giggit/gigs/:id/messages', (req, res) => {
 
 router.post('/api/giggit/gigs/:id/messages', throttleWrites, (req, res) => {
   try {
-    res.status(201).json({ message: store.sendMessage(req.params.id, req.body || {}) });
+    res.status(201).json({ message: store.sendMessage(req.params.id, req.body || {}, { isAdmin: isAdminRequest(req) }) });
   } catch (err) {
     badRequest(res, err);
   }
 });
 
-router.get('/api/giggit/wallet/:giggerId', (req, res) => {
+/* Wallet: a Gigger's earnings. Operator-only at this stage — any caller
+   could read any Gigger's money before this gate (manual review, Nov 26).
+   The Gigger's own wallet view in the app sends the operator token when
+   it is saved on the device; per-Gigger auth is the V2 step. */
+router.get('/api/giggit/wallet/:giggerId', requireAdmin, (req, res) => {
   try {
     res.json(store.walletFor(req.params.giggerId));
   } catch (err) {

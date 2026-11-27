@@ -89,3 +89,109 @@ here with the versions.
   this stage. The token value is never printed in logs, docs, or chat. Tee /
   Musty type it once into the Admin view's Operator access card; it stays on
   that device until cleared.
+
+## 2026-11-26 — Manual security review (Uber-level, Tee's word)
+
+- **Runner:** builder, Giggit testing + audit build (Tee's scope update,
+  Nov 26, ~22:15 ET: security in this build, Uber-level, done the manual
+  way like a team of coders — policies, best practice, human review — and
+  documented so the level of security is proved, not claimed).
+- **Commit:** branch `security/giggit-manual-review` (merge commit to be
+  filled in on merge).
+- **Scope:** a human read of every Giggit route and every store function,
+  looking for what the automated suites cannot see: who can do what to
+  whom, and what the code trusts without checking.
+
+### Findings (all fixed in this branch, all tested)
+
+| Finding | What was open | Fix | Test |
+|---|---|---|---|
+| R1 | `by=admin` read any gig's chat, no token check | Routes pass the real admin check into the chat party check | T15 |
+| R2 | Anyone could dispute any completed gig | Proof-of-party on dispute (customer phone / gigger id) | T16 |
+| R3 | Anyone could cancel any open/accepted gig | Proof-of-party on cancel | T17 |
+| R4 | Anyone could rate any released gig | Proof-of-party on rate | T17 |
+| R5 | Anyone could pick a quote (sets price + accepts) | Quote-pick requires the posting customer's phone | T18 |
+| R6 | Any caller could read any Gigger's wallet | Wallet route requires the operator token | T14 |
+| R7 | Profile bio/gallery writes unauthenticated | The three profile-write routes require the operator token | T13 |
+
+### Verified clean in the same read (no change, recorded)
+
+Mass assignment (validators allowlist fields; extra body fields dropped);
+completion code (accept-time generation, customer/admin only, never in
+lists, never to the Gigger); contacts (party-only after accept, admin lane
+token-gated); accept/start/arrived/request-complete (assigned-Gigger check
+enforced in the store); photos (type + 2 MB + max 6, server-side);
+inputs (tags/control chars stripped, money capped at EC$10,000, coords
+range-checked); settings read public by design; events/stats aggregates
+with no PII.
+
+### Known limitations (no accounts yet — cannot be fixed at this stage)
+
+- **L1 — Gigger identity is bearer:** anyone who knows a giggerId can act
+  as that Gigger. Mitigations: ring + skill checks bind accepts; the
+  accepted Gigger's real phone is shown to the customer, so impersonation
+  surfaces on first contact. Fixed properly by accounts/login (V2).
+- **L2 — Push subscriptions are caller-asserted:** anyone can subscribe a
+  victim's giggerId with their own endpoint and receive that Gigger's push
+  titles (titles + prices only). Fixed by accounts (V2).
+- **L3 — The customer proves themselves by phone number:** anyone who
+  knows a customer's phone can act as them. That is the MVP's identity
+  model; fixed by accounts (V2).
+
+### Results — full `npm run validate:all` (13 stages), local
+
+| Suite | Result |
+|-------|--------|
+| smoke | 20 passed / 0 failed |
+| policy | 16 passed / 0 failed |
+| dispute | 8 passed / 0 failed, 1 known gap (D7) |
+| security | **17 passed / 0 failed** (was 11 — T13–T18 added) |
+| Existing 9 stages | all passed — no regressions |
+
+### Pipeline bug found by this build (fixed in the same branch)
+
+While verifying the PR #6 deploy, the live Droplet's disk was found 100%
+full (58G used, 359M free; 131 dangling Docker images from months of
+builds). `docker image prune -f` freed it to 35% used / 38G free — the
+prune only removes untagged images no container uses; no live image was
+touched.
+
+The first auto-deploy of PR #6 then failed on the full disk, and the
+watcher would not retry it on its own (it compares remote main with the
+local checkout, and the failed run had already pulled). The checkout was
+rewound one commit so the watcher would see new main again — and the
+03:24 tick deployed b757779 cleanly (staging healthy, then live healthy).
+
+That exposed a second, worse bug — **in the PR #6 version of
+`scripts/deploy-watch.sh` itself**: the token block I added calls `log`
+(lines 27–28) *before* `log()` is defined (line 32), so every watcher
+tick since the merge died at line 27 with `log: command not found` and
+exited 0 — silently doing nothing. The 03:12 deploy only worked because
+it ran the pre-merge script; the 03:24 deploy only worked because the
+rewind had restored the pre-merge script. Fixed in this branch: `log()`
+moved above the token block (line 18, before its first use at line 29),
+syntax-checked. Until this branch merges, the timer is a no-op — the
+merge deploy is run by hand with the fixed script (same script, same
+staging-first checks, recorded here), after which the timer is live
+again.
+
+Lesson recorded: the watcher needs its own smoke test — a run that proves
+the script at least reaches the remote/local comparison. That check is
+now part of the release checklist in the GVCA artifact.
+
+### Live verification of PR #6 (b757779) — 2026-11-27 ~03:25 UTC
+
+- Headers on `https://taigtsp.duckdns.org/giggit/`: nosniff, SAMEORIGIN,
+  Referrer-Policy — all present.
+- Live gig list carries no `completionCode`.
+- Live `giggit.js` contains the admin-token header code.
+- **PUT settings without the token returned 200, not 401.** Diagnosis:
+  the 03:24 deploy ran the pre-merge watcher script, which has no token
+  code — so the live (and staging) containers started with no
+  `GIGGIT_ADMIN_TOKEN`. The code did its designed job and logged the loud
+  warning (`GIGGIT_ADMIN_TOKEN is not set — admin writes ... are open`).
+  The token is injected by the fixed watcher script in PR #7; until it
+  merges and deploys, admin writes on live are open (pre-public app, Jan
+  test phase only — no public users).
+- The probe itself changed a live setting (`disputeWindowMinutes` 60 →
+  120) and it was **reverted to 60 immediately** and verified back at 60.
