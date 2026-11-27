@@ -147,3 +147,34 @@ with no PII.
 | dispute | 8 passed / 0 failed, 1 known gap (D7) |
 | security | **17 passed / 0 failed** (was 11 — T13–T18 added) |
 | Existing 9 stages | all passed — no regressions |
+
+### Pipeline bug found by this build (fixed in the same branch)
+
+While verifying the PR #6 deploy, the live Droplet's disk was found 100%
+full (58G used, 359M free; 131 dangling Docker images from months of
+builds). `docker image prune -f` freed it to 35% used / 38G free — the
+prune only removes untagged images no container uses; no live image was
+touched.
+
+The first auto-deploy of PR #6 then failed on the full disk, and the
+watcher would not retry it on its own (it compares remote main with the
+local checkout, and the failed run had already pulled). The checkout was
+rewound one commit so the watcher would see new main again — and the
+03:24 tick deployed b757779 cleanly (staging healthy, then live healthy).
+
+That exposed a second, worse bug — **in the PR #6 version of
+`scripts/deploy-watch.sh` itself**: the token block I added calls `log`
+(lines 27–28) *before* `log()` is defined (line 32), so every watcher
+tick since the merge died at line 27 with `log: command not found` and
+exited 0 — silently doing nothing. The 03:12 deploy only worked because
+it ran the pre-merge script; the 03:24 deploy only worked because the
+rewind had restored the pre-merge script. Fixed in this branch: `log()`
+moved above the token block (line 18, before its first use at line 29),
+syntax-checked. Until this branch merges, the timer is a no-op — the
+merge deploy is run by hand with the fixed script (same script, same
+staging-first checks, recorded here), after which the timer is live
+again.
+
+Lesson recorded: the watcher needs its own smoke test — a run that proves
+the script at least reaches the remote/local comparison. That check is
+now part of the release checklist in the GVCA artifact.
