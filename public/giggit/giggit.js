@@ -557,12 +557,81 @@ async function openGig(id) {
     html += '<h3>Ratings</h3>' + g.ratings.map((r) =>
       '<p>★'.repeat(r.stars) + '☆'.repeat(5 - r.stars) + ' — ' + esc(r.by) + (r.comment ? ': ' + esc(r.comment) : '') + '</p>').join('');
   }
+  const chatStatuses = ['accepted', 'in_progress', 'completion_requested', 'completed', 'released', 'disputed'];
+  const chatParty = chatStatuses.includes(g.status)
+    && (role === 'admin' || (me && g.giggerId === me.id) || (clientPhone && g.customerPhone === clientPhone));
+  if (chatParty) {
+    html += '<div id="chat-box"><p class="meta">Loading chat…</p></div>';
+  }
   html += '<div id="matches-box"><p class="meta">Finding the closest Giggers…</p></div>';
   html += '<div id="edit-box"></div>';
   html += '<p><button class="btn ghost small" type="button" onclick="closeDetail()">Back to gigs</button></p></div>';
   $('gig-detail').innerHTML = html;
   $('gig-detail').scrollIntoView({ behavior: 'smooth', block: 'start' });
   renderMatches(id);
+  renderChat(id, g);
+}
+
+/* ---- In-app chat (slice 2) ---- */
+function chatIdentity(g) {
+  if (role === 'admin') return { by: 'admin', giggerId: '', customerPhone: '' };
+  const me = giggers.find((entry) => entry.id === whoAmI);
+  if (me && g.giggerId === me.id) return { by: 'gigger', giggerId: me.id, customerPhone: '' };
+  if (clientPhone && g.customerPhone === clientPhone) return { by: 'customer', giggerId: '', customerPhone: clientPhone };
+  return null;
+}
+
+async function renderChat(id, g) {
+  const box = $('chat-box');
+  if (!box) return;
+  const who = chatIdentity(g);
+  if (!who) {
+    box.innerHTML = '';
+    return;
+  }
+  let messages = [];
+  try {
+    const params = new URLSearchParams({ by: who.by, giggerId: who.giggerId, customerPhone: who.customerPhone });
+    messages = (await api('/api/giggit/gigs/' + encodeURIComponent(id) + '/messages?' + params.toString())).messages || [];
+  } catch (err) {
+    box.innerHTML = '<div class="msg err" style="display:block">' + esc(err.message) + '</div>';
+    return;
+  }
+  const canSend = who.by !== 'admin';
+  box.innerHTML = '<h3>Chat — inside this job</h3>'
+    + (messages.length ? messages.map((m) =>
+      '<div class="chat-msg ' + (m.by === who.by ? 'mine' : 'theirs') + '"><b>' + (m.by === 'customer' ? 'Customer' : 'Gigger') + '</b> <span class="meta">' + esc(new Date(m.at).toLocaleString()) + '</span><br>' + esc(m.text) + '</div>').join('')
+      : '<p class="meta">No messages yet — say hello, confirm the details.</p>')
+    + (canSend
+      ? '<div class="row"><input type="text" id="chat-input" maxlength="1000" placeholder="Message the ' + (who.by === 'customer' ? 'Gigger' : 'customer') + '…">'
+        + '<button class="btn small leaf" type="button" onclick="sendChat(\'' + esc(id) + '\')">Send</button></div>'
+      : '<p class="meta">Admin is read-only here.</p>')
+    + '<div id="chat-msg" class="msg"></div>';
+  const input = $('chat-input');
+  if (input) input.addEventListener('keydown', (event) => { if (event.key === 'Enter') sendChat(id); });
+}
+
+async function sendChat(id) {
+  const input = $('chat-input');
+  const text = (input && input.value || '').trim();
+  if (!text) return;
+  let g;
+  try {
+    g = (await api('/api/giggit/gigs/' + encodeURIComponent(id))).gig;
+  } catch (err) {
+    showMsg('chat-msg', err.message, false);
+    return;
+  }
+  const who = chatIdentity(g);
+  if (!who || who.by === 'admin') return;
+  try {
+    await api('/api/giggit/gigs/' + encodeURIComponent(id) + '/messages', {
+      method: 'POST', body: JSON.stringify({ by: who.by, giggerId: who.giggerId, customerPhone: who.customerPhone, text }),
+    });
+    renderChat(id, g);
+  } catch (err) {
+    showMsg('chat-msg', err.message, false);
+  }
 }
 
 async function renderMatches(id) {

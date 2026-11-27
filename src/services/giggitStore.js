@@ -1069,6 +1069,65 @@ function walletFor(giggerId) {
   };
 }
 
+/* ---- In-app chat (gap-close slice 2, Nov 26) ---- */
+/* Chat opens at accept — the same moment contacts unlock — and stays
+   open through release. Messages are plain text, 1–1000 chars. A gig
+   keeps its last 200 messages; the store keeps the last 5000 overall.
+   Identity follows the MVP's own rule: the Gigger by id, the customer
+   by phone. Admin can read (the admin lane already sees both numbers)
+   but never sends. */
+
+const CHAT_STATUSES = ['accepted', 'in_progress', 'completion_requested', 'completed', 'released', 'disputed'];
+
+function checkChatParty(gig, by, giggerId, customerPhone) {
+  const who = cleanText(by, 20);
+  if (who !== 'customer' && who !== 'gigger' && who !== 'admin') {
+    throw new ValidationError('Say whether you are the customer, the Gigger, or the admin.');
+  }
+  if (!CHAT_STATUSES.includes(gig.status)) {
+    throw new ValidationError('Chat opens once a Gigger accepts this gig.');
+  }
+  if (who === 'gigger' && gig.giggerId !== cleanText(giggerId || '', 40)) {
+    throw new ValidationError('Only the accepted Gigger can chat on this gig.');
+  }
+  if (who === 'customer' && gig.customerPhone !== cleanText(customerPhone || '', 40)) {
+    throw new ValidationError('Only the customer who posted this gig can chat on it.');
+  }
+  return who;
+}
+
+function sendMessage(gigId, body) {
+  const state = load();
+  const gig = findGigOrThrow(state, gigId);
+  const who = checkChatParty(gig, body.by, body.giggerId, body.customerPhone);
+  if (who === 'admin') throw new ValidationError('Only the customer or the Gigger can send messages here.');
+  const text = cleanText(body.text, 1000);
+  if (text.length < 1) throw new ValidationError('Write a message first.');
+  const message = {
+    id: `msg-${randomUUID().slice(0, 8)}`,
+    gigId: gig.id,
+    by: who,
+    text,
+    at: nowIso(),
+  };
+  state.messages.push(message);
+  const gigMessages = state.messages.filter((entry) => entry.gigId === gig.id);
+  if (gigMessages.length > 200) {
+    const drop = new Set(gigMessages.slice(0, gigMessages.length - 200).map((entry) => entry.id));
+    state.messages = state.messages.filter((entry) => !drop.has(entry.id));
+  }
+  if (state.messages.length > 5000) state.messages = state.messages.slice(-5000);
+  save(state);
+  return message;
+}
+
+function listMessages(gigId, query) {
+  const state = load();
+  const gig = findGigOrThrow(state, gigId);
+  checkChatParty(gig, query.by, query.giggerId, query.customerPhone);
+  return state.messages.filter((entry) => entry.gigId === gig.id);
+}
+
 /* ---- Settings, events, stats (tracking) ---- */
 
 function getSettings() {
@@ -1261,6 +1320,8 @@ module.exports = {
   disputeGig,
   cancelGig,
   rateGig,
+  sendMessage,
+  listMessages,
   walletFor,
   getSettings,
   updateSettings,

@@ -293,6 +293,27 @@ router.post('/api/giggit/gigs/:id/rate', throttleWrites, (req, res) => {
   }
 });
 
+/* ---- In-app chat (slice 2): messages live inside the job, both sides. */
+router.get('/api/giggit/gigs/:id/messages', (req, res) => {
+  try {
+    res.json({ messages: store.listMessages(req.params.id, {
+      by: String(req.query.by || ''),
+      giggerId: String(req.query.giggerId || ''),
+      customerPhone: String(req.query.customerPhone || ''),
+    }) });
+  } catch (err) {
+    badRequest(res, err);
+  }
+});
+
+router.post('/api/giggit/gigs/:id/messages', throttleWrites, (req, res) => {
+  try {
+    res.status(201).json({ message: store.sendMessage(req.params.id, req.body || {}) });
+  } catch (err) {
+    badRequest(res, err);
+  }
+});
+
 router.get('/api/giggit/wallet/:giggerId', (req, res) => {
   try {
     res.json(store.walletFor(req.params.giggerId));
