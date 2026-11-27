@@ -173,6 +173,38 @@ function updateWhoAmI() {
 }
 
 let pendingPhoto = null;
+let pendingGallery = [];
+
+function handleGalleryInput(event) {
+  const files = Array.from(event.target.files || []);
+  const status = $('gallery-status');
+  if (!files.length) return;
+  let added = 0;
+  let rejected = 0;
+  const readNext = (index) => {
+    if (index >= files.length) {
+      status.textContent = added ? added + ' photo' + (added > 1 ? 's' : '') + ' attached (up to 6).' : '';
+      if (rejected) status.textContent += ' ' + rejected + ' skipped (over 2 MB or not a JPEG/PNG/WebP).';
+      $('gallery-previews').innerHTML = pendingGallery.map((p) => '<img class="thumb small" src="' + esc(p.dataUrl) + '" alt="">').join('');
+      event.target.value = '';
+      return;
+    }
+    const file = files[index];
+    if (pendingGallery.length >= 6 || file.size > 2 * 1024 * 1024 || !/^image\/(jpeg|png|webp)$/.test(file.type)) {
+      rejected++;
+      readNext(index + 1);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      pendingGallery.push({ name: file.name, type: file.type, dataUrl: reader.result });
+      added++;
+      readNext(index + 1);
+    };
+    reader.readAsDataURL(file);
+  };
+  readNext(0);
+}
 
 function captureLocation(prefix) {
   const status = $(prefix + '-loc-status');
@@ -230,6 +262,7 @@ async function loadAll() {
   fillClientIdentity();
   showTab(ROLE_TABS[role][0][0]);
   $('gig-photo').addEventListener('change', handlePhotoInput);
+  $('reg-gallery').addEventListener('change', handleGalleryInput);
 }
 
 async function refreshData() {
@@ -336,7 +369,109 @@ function renderGiggers() {
       + ' • ' + g.gigsCompleted + ' gigs done</div>'
       + g.skills.map((s) => '<span class="tag">' + esc(s) + '</span>').join('')
       + ((g.certifications || []).length ? '<br>' + g.certifications.map((c) => '<span class="tag cert">★ ' + esc(c.name) + (c.issuer ? ' — ' + esc(c.issuer) : '') + '</span>').join('') : '')
+      + '<br><button class="btn small" type="button" onclick="openGigger(\'' + esc(g.id) + '\')">View profile</button>'
       + '</div>').join('') : '<div class="card">No Giggers yet — be the first.</div>');
+}
+
+/* ---- Provider profiles (slice 3) ---- */
+async function openGigger(id) {
+  let data;
+  try {
+    data = await api('/api/giggit/giggers/' + encodeURIComponent(id));
+  } catch (err) {
+    $('gigger-detail').innerHTML = '<div class="msg err" style="display:block">' + esc(err.message) + '</div>';
+    return;
+  }
+  const g = data.gigger;
+  const ratings = data.ratings || [];
+  const isMine = g.id === whoAmI;
+  let html = '<div class="card"><h3>' + esc(g.name) + ' '
+    + (g.sample ? '<span class="badge sample">SAMPLE</span>' : '')
+    + ' <span class="badge tier">LEVEL ' + g.tier + '</span>' + (g.pro ? ' <span class="badge tier">PRO</span>' : '') + '</h3>'
+    + '<div class="meta">' + esc(g.parish) + (g.area ? ' — ' + esc(g.area) : '')
+    + (g.ratingAvg != null ? ' • ★ ' + g.ratingAvg + ' (' + g.ratingCount + ' ratings)' : ' • No ratings yet')
+    + ' • ' + g.gigsCompleted + ' gigs done</div>'
+    + (g.bio ? '<p>' + esc(g.bio) + '</p>' : '<p class="meta">No bio yet.</p>')
+    + g.skills.map((s) => '<span class="tag">' + esc(s) + '</span>').join('')
+    + ((g.certifications || []).length ? '<br>' + g.certifications.map((c) => '<span class="tag cert">★ ' + esc(c.name) + (c.issuer ? ' — ' + esc(c.issuer) : '') + '</span>').join('') : '');
+  if (g.galleryCount) {
+    html += '<h3>Work photos (' + g.galleryCount + ')</h3><div class="gallery-grid">'
+      + Array.from({ length: g.galleryCount }, (_, i) =>
+        '<div class="gallery-item"><img class="thumb" src="/api/giggit/giggers/' + esc(g.id) + '/gallery/' + i + '" alt="Profile photo ' + (i + 1) + '" loading="lazy">'
+        + (isMine ? '<br><button class="btn small ghost" type="button" onclick="removeGiggerPhoto(\'' + esc(g.id) + '\', ' + i + ')">Remove</button>' : '')
+        + '</div>').join('') + '</div>';
+  } else {
+    html += '<p class="meta">No photos yet.</p>';
+  }
+  if (ratings.length) {
+    html += '<h3>Customer ratings</h3>' + ratings.map((r) =>
+      '<p>★'.repeat(r.stars) + '☆'.repeat(5 - r.stars) + ' — ' + esc(r.gigTitle) + (r.comment ? ': ' + esc(r.comment) : '') + ' <span class="meta">(' + esc(new Date(r.at).toLocaleDateString()) + ')</span></p>').join('');
+  }
+  if (isMine) {
+    html += '<h3>Edit my profile</h3>'
+      + '<label for="profile-bio">About you</label><textarea id="profile-bio" maxlength="500">' + esc(g.bio) + '</textarea>'
+      + '<button class="btn small leaf" type="button" onclick="saveGiggerBio(\'' + esc(g.id) + '\')">Save bio</button> '
+      + '<label for="profile-photo">Add a photo (up to 6)</label><input type="file" id="profile-photo" accept="image/*">'
+      + '<div class="hint" id="profile-photo-status"></div>'
+      + '<div id="profile-msg" class="msg"></div>';
+  }
+  html += '<p><button class="btn ghost small" type="button" onclick="closeGiggerDetail()">Back to Giggers</button></p></div>';
+  $('gigger-detail').innerHTML = html;
+  $('gigger-detail').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const photoInput = $('profile-photo');
+  if (photoInput) photoInput.addEventListener('change', (event) => addGiggerPhoto(id, event));
+}
+
+function closeGiggerDetail() {
+  $('gigger-detail').innerHTML = '';
+}
+
+async function saveGiggerBio(id) {
+  try {
+    await api('/api/giggit/giggers/' + encodeURIComponent(id), { method: 'PUT', body: JSON.stringify({ bio: $('profile-bio').value }) });
+    await refreshData();
+    renderGiggers();
+    openGigger(id);
+  } catch (err) {
+    showMsg('profile-msg', err.message, false);
+  }
+}
+
+async function addGiggerPhoto(id, event) {
+  const file = event.target.files && event.target.files[0];
+  const status = $('profile-photo-status');
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    status.textContent = 'That photo is over 2 MB — pick a smaller one.';
+    event.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = async () => {
+    try {
+      await api('/api/giggit/giggers/' + encodeURIComponent(id) + '/gallery', {
+        method: 'POST', body: JSON.stringify({ photo: { name: file.name, type: file.type, dataUrl: reader.result } }),
+      });
+      await refreshData();
+      renderGiggers();
+      openGigger(id);
+    } catch (err) {
+      showMsg('profile-msg', err.message, false);
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+async function removeGiggerPhoto(id, index) {
+  if (!confirm('Remove this photo from your profile?')) return;
+  try {
+    await api('/api/giggit/giggers/' + encodeURIComponent(id) + '/gallery/' + index, { method: 'DELETE' });
+    await refreshData();
+    renderGiggers();
+    openGigger(id);
+  } catch (err) {
+    alert(err.message);
+  }
 }
 
 /* ---- Client view: my gigs (matched by the phone saved in the client box) ---- */
@@ -872,6 +1007,8 @@ async function registerGigger(event) {
     idNumber: $('reg-idnum').value,
     skills,
     certifications: $('reg-certs').value.split(',').map((s) => s.trim()).filter(Boolean),
+    bio: $('reg-bio').value,
+    gallery: pendingGallery,
     lat: $('reg-lat').value ? Number($('reg-lat').value) : null,
     lng: $('reg-lng').value ? Number($('reg-lng').value) : null,
   };
@@ -879,6 +1016,9 @@ async function registerGigger(event) {
     const data = await api('/api/giggit/giggers', { method: 'POST', body: JSON.stringify(body) });
     showMsg('reg-msg', 'Welcome in, ' + data.gigger.name + ' — you are Level 1. Pick yourself in “Testing as” to start accepting gigs.', true);
     $('reg-form').reset();
+    pendingGallery = [];
+    $('gallery-previews').innerHTML = '';
+    $('gallery-status').textContent = '';
     await refreshData();
     updateWhoAmI();
     renderGiggers();

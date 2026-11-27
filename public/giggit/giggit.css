@@ -145,3 +145,8 @@ input[type=text], input[type=tel], input[type=number], select, textarea, input[t
 .chat-msg { border: 1px solid #d8e8d2; border-radius: 10px; padding: 8px 10px; margin: 6px 0; background: #fff; }
 .chat-msg.mine { background: #eaf6e4; border-color: #bfe3c6; }
 .chat-msg.theirs { background: #f4f9ef; }
+
+/* Provider profiles (slice 3) */
+.gallery-grid { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0; }
+.gallery-item { text-align: center; }
+.gallery-item .thumb { max-width: 160px; }

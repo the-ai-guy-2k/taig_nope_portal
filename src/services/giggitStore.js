@@ -481,6 +481,9 @@ function publicGigger(gigger) {
     ratingAvg: gigger.ratingAvg || null,
     ratingCount: gigger.ratingCount || 0,
     gigsCompleted: gigger.gigsCompleted || 0,
+    bio: gigger.bio || '',
+    galleryCount: Array.isArray(gigger.gallery) ? gigger.gallery.length : 0,
+    hasGallery: Array.isArray(gigger.gallery) && gigger.gallery.length > 0,
     sample: !!gigger.sample,
     createdAt: gigger.createdAt,
   };
@@ -583,8 +586,15 @@ function validateGigger(body) {
         return [cert.name.toLowerCase(), cert];
       })).values()].filter((cert) => cert.name.length >= 2).slice(0, 6)
     : [];
+  /* Profile (gap-close slice 3): a short bio and up to 6 gallery photos.
+     Photos follow the same rule as gig photos — JPEG/PNG/WebP, under
+     2 MB each. One bad photo fails the registration with a plain error. */
+  const bio = cleanText(body.bio, 500);
+  const gallery = Array.isArray(body.gallery)
+    ? body.gallery.slice(0, 6).map((entry) => validatePhoto(entry)).filter(Boolean)
+    : [];
   const { lat, lng } = cleanLatLng(body);
-  return { name, phone, parish, area, idType, idNumber, skills, certifications, lat, lng };
+  return { name, phone, parish, area, idType, idNumber, skills, certifications, bio, gallery, lat, lng };
 }
 
 function validateGig(body, usdRate) {
@@ -641,6 +651,76 @@ function createGigger(body) {
 
 function listGiggers() {
   return load().giggers.map(publicGigger);
+}
+
+/* ---- Provider profiles (gap-close slice 3) ---- */
+/* A profile is the Gigger's public face: bio, gallery photos, and the
+   customer ratings their released gigs earned. Photos are stored like
+   gig photos (data URL in state, raw bytes via the gallery endpoint)
+   and never leak the phone or ID number. */
+
+function giggerProfile(id) {
+  const state = load();
+  const gigger = state.giggers.find((entry) => entry.id === id);
+  if (!gigger) throw new ValidationError('That Gigger was not found.');
+  return { gigger: publicGigger(gigger), ratings: giggerRatings(id) };
+}
+
+function giggerRatings(giggerId) {
+  const state = load();
+  return state.ratings
+    .filter((entry) => entry.by === 'customer')
+    .map((entry) => {
+      const gig = state.gigs.find((item) => item.id === entry.gigId);
+      return gig && gig.giggerId === giggerId
+        ? { gigId: gig.id, gigTitle: gig.title, category: gig.category, stars: entry.stars, comment: entry.comment, at: entry.at }
+        : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
+}
+
+function giggerPhoto(id, index) {
+  const state = load();
+  const gigger = state.giggers.find((entry) => entry.id === id);
+  if (!gigger || !Array.isArray(gigger.gallery)) return null;
+  const i = Number(index);
+  return gigger.gallery[i] || null;
+}
+
+function updateGigger(id, body) {
+  const state = load();
+  const gigger = state.giggers.find((entry) => entry.id === id);
+  if (!gigger) throw new ValidationError('That Gigger was not found.');
+  if (body.bio !== undefined) gigger.bio = cleanText(body.bio, 500);
+  save(state);
+  return publicGigger(gigger);
+}
+
+function addGiggerPhoto(id, photo) {
+  const state = load();
+  const gigger = state.giggers.find((entry) => entry.id === id);
+  if (!gigger) throw new ValidationError('That Gigger was not found.');
+  if (!Array.isArray(gigger.gallery)) gigger.gallery = [];
+  if (gigger.gallery.length >= 6) throw new ValidationError('A profile holds up to 6 photos — remove one first.');
+  const clean = validatePhoto(photo);
+  if (!clean) throw new ValidationError('Photo must be a JPEG, PNG or WebP image.');
+  gigger.gallery.push(clean);
+  save(state);
+  return publicGigger(gigger);
+}
+
+function removeGiggerPhoto(id, index) {
+  const state = load();
+  const gigger = state.giggers.find((entry) => entry.id === id);
+  if (!gigger) throw new ValidationError('That Gigger was not found.');
+  const i = Number(index);
+  if (!Array.isArray(gigger.gallery) || !Number.isInteger(i) || i < 0 || i >= gigger.gallery.length) {
+    throw new ValidationError('That photo was not found.');
+  }
+  gigger.gallery.splice(i, 1);
+  save(state);
+  return publicGigger(gigger);
 }
 
 function createGig(body) {
@@ -1299,6 +1379,12 @@ module.exports = {
   getVapidKeys,
   createGigger,
   listGiggers,
+  giggerProfile,
+  giggerRatings,
+  giggerPhoto,
+  updateGigger,
+  addGiggerPhoto,
+  removeGiggerPhoto,
   createGig,
   listGigs,
   getGig,

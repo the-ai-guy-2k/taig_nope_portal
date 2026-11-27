@@ -103,6 +103,47 @@ router.post('/api/giggit/giggers', throttleWrites, (req, res) => {
   }
 });
 
+/* ---- Provider profiles (slice 3): public profile, gallery, ratings. */
+router.get('/api/giggit/giggers/:id', (req, res) => {
+  try {
+    res.json(store.giggerProfile(req.params.id));
+  } catch (err) {
+    badRequest(res, err);
+  }
+});
+
+router.get('/api/giggit/giggers/:id/gallery/:index', (req, res) => {
+  const photo = store.giggerPhoto(req.params.id, req.params.index);
+  if (!photo) return res.status(404).end();
+  const base64 = String(photo.dataUrl.split(',')[1] || '');
+  const buf = Buffer.from(base64, 'base64');
+  res.type(photo.type).send(buf);
+});
+
+router.put('/api/giggit/giggers/:id', throttleWrites, (req, res) => {
+  try {
+    res.json({ gigger: store.updateGigger(req.params.id, req.body || {}) });
+  } catch (err) {
+    badRequest(res, err);
+  }
+});
+
+router.post('/api/giggit/giggers/:id/gallery', throttleWrites, (req, res) => {
+  try {
+    res.status(201).json({ gigger: store.addGiggerPhoto(req.params.id, (req.body || {}).photo || null) });
+  } catch (err) {
+    badRequest(res, err);
+  }
+});
+
+router.delete('/api/giggit/giggers/:id/gallery/:index', throttleWrites, (req, res) => {
+  try {
+    res.json({ gigger: store.removeGiggerPhoto(req.params.id, req.params.index) });
+  } catch (err) {
+    badRequest(res, err);
+  }
+});
+
 router.get('/api/giggit/gigs', (req, res) => {
   const { status, parish, category, customerPhone, q } = req.query;
   res.json({ gigs: store.listGigs({ status, parish, category, customerPhone, q, includeContacts: req.query.contacts === '1' }) });

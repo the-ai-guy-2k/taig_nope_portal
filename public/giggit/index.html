@@ -173,10 +173,17 @@
         <label for="reg-certs">Certifications (optional, up to 6)</label>
         <input type="text" id="reg-certs" maxlength="500" placeholder="e.g. Food Hygiene Certificate, Horticulture Certificate">
         <div class="hint">Optional — separate with commas. Your ID card is what verifies you.</div>
+        <label for="reg-bio">About you (optional)</label>
+        <textarea id="reg-bio" maxlength="500" placeholder="A line or two — what you do best, how long you have done it"></textarea>
+        <label for="reg-gallery">Profile photos (optional, up to 6)</label>
+        <input type="file" id="reg-gallery" accept="image/*" multiple>
+        <div class="hint">Your work, your tools, you on the job — customers see these on your profile. <span id="gallery-status"></span></div>
+        <div id="gallery-previews"></div>
         <button class="btn" type="submit">Join as a Gigger</button>
       </form>
     </div>
     <div id="gigger-list"></div>
+    <div id="gigger-detail"></div>
   </div>
 
   <div id="view-wallet" class="hidden"></div>
