@@ -505,6 +505,9 @@ function publicGig(gig, opts) {
     priceUSD: xcdToUsd(rate, gig.priceEC),
     postedIn: gig.postedIn || 'XCD',
     postedAmount: gig.postedAmount != null ? gig.postedAmount : null,
+    promoCode: gig.promoCode || null,
+    priceBeforePromoEC: gig.priceBeforePromoEC != null ? gig.priceBeforePromoEC : null,
+    discountEC: gig.discountEC != null ? gig.discountEC : null,
     priceGuide: PRICE_GUIDE[gig.category] || null,
     quotes: (gig.quotes || []).map((quote) => ({
       giggerId: quote.giggerId,
@@ -732,6 +735,15 @@ function removeGiggerPhoto(id, index) {
 function createGig(body) {
   const state = load();
   const fields = validateGig(body, settingsOf(state).usdRate);
+  /* Promo (slice 5): a code at booking discounts a set-budget gig.
+     Quote gigs have no price yet, so they refuse the code plainly. */
+  let promo = null;
+  if (body.promoCode !== undefined && body.promoCode !== null && String(body.promoCode).trim() !== '') {
+    if (fields.pricingMode === 'quote') {
+      throw new ValidationError('Promo codes apply to set-budget gigs — this one asks for quotes.');
+    }
+    promo = findUsablePromo(state, body.promoCode);
+  }
   const gig = {
     id: `gig-${randomUUID().slice(0, 8)}`,
     ...fields,
@@ -745,8 +757,18 @@ function createGig(body) {
     quotes: [],
     rejections: [],
     ring: 0,
+    promoCode: null,
+    priceBeforePromoEC: null,
+    discountEC: null,
     createdAt: nowIso(),
   };
+  if (promo) {
+    gig.promoCode = promo.code;
+    gig.priceBeforePromoEC = fields.priceEC;
+    gig.discountEC = Math.round(fields.priceEC * promo.percentOff) / 100;
+    gig.priceEC = Math.round((fields.priceEC - gig.discountEC) * 100) / 100;
+    promo.uses += 1;
+  }
   state.gigs.unshift(gig);
   logEvent(state, 'demand', 'gig_posted', gig.id, { category: gig.category, parish: gig.parish, pricingMode: gig.pricingMode, priceEC: gig.priceEC, postedIn: gig.postedIn });
   if (!state.gigs.some((other) => other !== gig && other.customerPhone === gig.customerPhone)) {
@@ -1231,6 +1253,71 @@ function listMessages(gigId, query) {
   return state.messages.filter((entry) => entry.gigId === gig.id);
 }
 
+/* ---- Promo codes (gap-close slice 5, Nov 26) ---- */
+/* A promo is a percent-off code, created in the admin lane and handed
+   out by Tee/Musty. It applies at booking on set-budget gigs only —
+   a quote gig has no price yet, so there is nothing to discount.
+   The discount comes off the posted budget; escrow holds the reduced
+   price, and commission is computed on it. */
+
+function publicPromo(promo) {
+  return {
+    code: promo.code,
+    percentOff: promo.percentOff,
+    maxUses: promo.maxUses,
+    uses: promo.uses,
+    active: promo.active,
+    note: promo.note || '',
+    createdAt: promo.createdAt,
+  };
+}
+
+function createPromo(body) {
+  const code = cleanText(body.code, 20).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (code.length < 3) throw new ValidationError('Promo code needs at least 3 letters or numbers.');
+  const percentOff = Number(body.percentOff);
+  if (!Number.isInteger(percentOff) || percentOff < 5 || percentOff > 50) {
+    throw new ValidationError('Promo discount must be 5% to 50%.');
+  }
+  const maxUses = body.maxUses === undefined || body.maxUses === null || body.maxUses === ''
+    ? null
+    : Number(body.maxUses);
+  if (maxUses !== null && (!Number.isInteger(maxUses) || maxUses < 1 || maxUses > 1000)) {
+    throw new ValidationError('Max uses must be 1 to 1000, or blank for unlimited.');
+  }
+  const state = load();
+  if (state.promos.some((entry) => entry.code === code)) {
+    throw new ValidationError('That promo code already exists.');
+  }
+  const promo = {
+    code,
+    percentOff,
+    maxUses,
+    uses: 0,
+    active: true,
+    note: cleanText(body.note, 120),
+    createdAt: nowIso(),
+  };
+  state.promos.unshift(promo);
+  save(state);
+  return publicPromo(promo);
+}
+
+function listPromos() {
+  return load().promos.map(publicPromo);
+}
+
+function findUsablePromo(state, code) {
+  const clean = cleanText(code, 20).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const promo = state.promos.find((entry) => entry.code === clean);
+  if (!promo) throw new ValidationError('That promo code does not exist.');
+  if (!promo.active) throw new ValidationError('That promo code is no longer active.');
+  if (promo.maxUses !== null && promo.uses >= promo.maxUses) {
+    throw new ValidationError('That promo code has been used up.');
+  }
+  return promo;
+}
+
 /* ---- Settings, events, stats (tracking) ---- */
 
 function getSettings() {
@@ -1432,6 +1519,8 @@ module.exports = {
   rateGig,
   sendMessage,
   listMessages,
+  createPromo,
+  listPromos,
   walletFor,
   getSettings,
   updateSettings,

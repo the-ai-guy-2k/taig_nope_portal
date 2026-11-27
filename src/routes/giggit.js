@@ -374,6 +374,19 @@ router.get('/api/giggit/wallet/:giggerId', (req, res) => {
   }
 });
 
+/* ---- Promo codes (slice 5): create in the admin lane, use at booking. */
+router.get('/api/giggit/promos', (req, res) => {
+  res.json({ promos: store.listPromos() });
+});
+
+router.post('/api/giggit/promos', throttleWrites, (req, res) => {
+  try {
+    res.status(201).json({ promo: store.createPromo(req.body || {}) });
+  } catch (err) {
+    badRequest(res, err);
+  }
+});
+
 /* ---- Web push ---- */
 
 router.get('/api/giggit/push/vapid-public-key', (req, res) => {

@@ -328,6 +328,7 @@ function gigCard(g) {
     + '<div class="meta">' + esc(g.category) + ' • ' + esc(g.parish) + (g.area ? ' — ' + esc(g.area) : '')
     + (g.when ? ' • ' + esc(g.when) : '') + '</div>'
     + '<div class="price">' + esc(moneyText(g)) + ' <small>' + (g.pricingMode === 'quote' && g.priceEC == null ? 'quotes welcome' : 'per gig') + '</small></div>'
+    + (g.promoCode ? '<div><span class="badge">PROMO ' + esc(g.promoCode) + ' −' + esc(moneyEC(g.discountEC)) + '</span></div>' : '')
     + (g.status === 'open' ? '<div class="ring-note">Ring ' + (g.ring != null ? g.ring : 0) + ' — ' + (g.ring === 2 ? 'every matching Gigger has the first look.' : 'the ' + (g.ring === 1 ? 'closest 6' : 'closest 3') + ' Giggers have the first look.') + '</div>' : '')
     + (g.hasPhoto ? '<img class="thumb small" src="/api/giggit/gigs/' + esc(g.id) + '/photo" alt="Photo of the problem" loading="lazy">' : '')
     + '<p>' + esc(g.description) + '</p>'
@@ -524,6 +525,12 @@ async function renderAdmin() {
   } catch (err) {
     adminGigs = gigs;
   }
+  let promos = [];
+  try {
+    promos = (await api('/api/giggit/promos')).promos || [];
+  } catch (err) {
+    promos = [];
+  }
   const cats = (meta && meta.categories) || [];
   let rows = adminGigs.slice();
   if (adminFilter.status) rows = rows.filter((g) => g.status === adminFilter.status);
@@ -543,7 +550,30 @@ async function renderAdmin() {
     + '<p class="hint">Tap a row to open the gig — open gigs can be edited from there. The admin sees both phone numbers on every gig.</p></div>'
     + (rows.length ? '<div class="table-wrap"><table class="admin-table"><thead><tr><th>Gig</th><th>Category</th><th>Customer</th><th>Gigger</th><th>Status</th><th>Price</th><th>Posted</th></tr></thead><tbody>'
       + rows.map((g) => '<tr onclick="openGig(\'' + esc(g.id) + '\')"><td><b>' + esc(g.title) + '</b>' + (g.sample ? ' <span class="badge sample">SAMPLE</span>' : '') + '</td><td>' + esc(g.category) + '</td><td>' + esc(g.customerName || '—') + '</td><td>' + esc(g.giggerName || '—') + '</td><td><span class="status ' + esc(g.status) + '">' + esc(statusLabel(g.status)) + '</span></td><td>' + esc(moneyText(g)) + '</td><td>' + esc(new Date(g.createdAt).toLocaleDateString()) + '</td></tr>').join('')
-      + '</tbody></table></div>' : '<div class="card">No gigs match those filters.</div>');
+      + '</tbody></table></div>' : '<div class="card">No gigs match those filters.</div>')
+    + '<div class="card"><h3>Promo codes</h3>'
+    + (promos.length ? promos.map((p) => '<p><b>' + esc(p.code) + '</b> — ' + p.percentOff + '% off • used ' + p.uses + (p.maxUses != null ? ' / ' + p.maxUses : ' (unlimited)') + (p.note ? ' • ' + esc(p.note) : '') + '</p>').join('') : '<p class="meta">No promo codes yet — create one below and hand it out.</p>')
+    + '<div class="row"><div><label>Code</label><input type="text" id="promo-code" maxlength="20" placeholder="SAVE10"></div>'
+    + '<div><label>Discount % (5–50)</label><input type="number" id="promo-percent" min="5" max="50" step="1" placeholder="10"></div>'
+    + '<div><label>Max uses (blank = unlimited)</label><input type="number" id="promo-max" min="1" max="1000" step="1"></div></div>'
+    + '<label>Note (optional)</label><input type="text" id="promo-note" maxlength="120" placeholder="e.g. Launch week">'
+    + '<p><button class="btn small leaf" type="button" onclick="createPromo()">Create promo code</button></p>'
+    + '<div id="promo-msg" class="msg"></div></div>';
+}
+
+async function createPromo() {
+  const body = {
+    code: ($('promo-code') || {}).value || '',
+    percentOff: Number(($('promo-percent') || {}).value || 0),
+    maxUses: ($('promo-max') || {}).value || '',
+    note: ($('promo-note') || {}).value || '',
+  };
+  try {
+    await api('/api/giggit/promos', { method: 'POST', body: JSON.stringify(body) });
+    renderAdmin();
+  } catch (err) {
+    showMsg('promo-msg', err.message, false);
+  }
 }
 
 function adminFilterChanged() {
@@ -601,6 +631,7 @@ async function openGig(id) {
     + '<div class="meta">' + esc(g.category) + ' • ' + esc(g.parish) + (g.area ? ' — ' + esc(g.area) : '')
     + (g.when ? ' • ' + esc(g.when) : '') + '</div>'
     + '<div class="price">' + esc(moneyText(g)) + '</div>'
+    + (g.promoCode ? '<p class="promo-line">Promo ' + esc(g.promoCode) + ': ' + esc(moneyEC(g.priceBeforePromoEC)) + ' − ' + esc(moneyEC(g.discountEC)) + ' = ' + esc(moneyEC(g.priceEC)) + '</p>' : '')
     + '<p>' + esc(g.description) + '</p>'
     + '<p><span class="status ' + esc(g.status) + '">' + esc(statusLabel(g.status)) + '</span></p>';
   if (lastActionNote) {
@@ -993,6 +1024,7 @@ async function postGig(event) {
     pricingMode: (document.querySelector('input[name="pricing"]:checked') || {}).value || 'budget',
     priceEC: Number($('gig-price').value),
     currency: $('gig-usd').checked ? 'USD' : 'XCD',
+    promoCode: $('gig-promo').value,
     when: $('gig-when').value,
     customerName: $('gig-name').value,
     customerPhone: $('gig-phone').value,
