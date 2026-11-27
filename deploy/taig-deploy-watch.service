@@ -1,0 +1,8 @@
+[Unit]
+Description=TAIG deploy watcher — deploy main to staging then live
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/root/taig_nope_portal/scripts/deploy-watch.sh
