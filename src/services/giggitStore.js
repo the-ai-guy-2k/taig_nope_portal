@@ -989,11 +989,18 @@ function submitQuote(id, giggerId, amount, currency) {
   return publicGig(gig, { rate, showContacts: false });
 }
 
-function acceptQuote(id, giggerId) {
+/* Manual review (Nov 26): anyone could pick a quote on any quote gig —
+   the route took only the giggerId, never checked who was picking. The
+   pick sets the price and accepts the gig, so it is the customer's act:
+   the caller's phone must match the phone that posted the gig. */
+function acceptQuote(id, giggerId, customerPhone) {
   const state = load();
   const gig = findGigOrThrow(state, id);
   if (gig.status !== 'open') throw new ValidationError('That gig is no longer open.');
   if (gig.pricingMode !== 'quote') throw new ValidationError('This gig has a set budget — accept it directly.');
+  if (gig.customerPhone !== cleanText(customerPhone || '', 40)) {
+    throw new ValidationError('Only the customer who posted this gig can pick a quote.');
+  }
   const quote = (gig.quotes || []).find((entry) => entry.giggerId === giggerId);
   if (!quote) throw new ValidationError('That Gigger has not quoted on this gig yet.');
   const gigger = state.giggers.find((entry) => entry.id === giggerId);
@@ -1140,7 +1147,25 @@ function confirmComplete(id, code) {
   return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
 }
 
-function disputeGig(id, by, reason) {
+/* Manual review (Nov 26, Tee's Uber-level direction): dispute, cancel
+   and rate took the caller's word for who they were — anyone could
+   dispute, cancel or rate any gig by saying by=customer. Now the caller
+   proves it: the customer by the phone that posted the gig, the Gigger
+   by the id on the gig. No accounts yet, so the phone/id IS the proof
+   at this stage — recorded as limitation L3 in the spec. */
+function checkGigParty(gig, by, giggerId, customerPhone) {
+  const who = cleanText(by, 20);
+  if (who !== 'customer' && who !== 'gigger') throw new ValidationError('Say whether you are the customer or the Gigger.');
+  if (who === 'customer' && gig.customerPhone !== cleanText(customerPhone || '', 40)) {
+    throw new ValidationError('Only the customer who posted this gig can do that.');
+  }
+  if (who === 'gigger' && gig.giggerId !== cleanText(giggerId || '', 40)) {
+    throw new ValidationError('Only the Gigger on this gig can do that.');
+  }
+  return who;
+}
+
+function disputeGig(id, by, reason, giggerId, customerPhone) {
   const state = load();
   const gig = findGigOrThrow(state, id);
   if (gig.status !== 'completed') {
@@ -1149,8 +1174,7 @@ function disputeGig(id, by, reason) {
   if (gig.escrow && gig.escrow.releaseAt && Date.parse(gig.escrow.releaseAt) <= Date.now()) {
     throw new ValidationError('The dispute window has closed — escrow already released.');
   }
-  const who = cleanText(by, 20);
-  if (who !== 'customer' && who !== 'gigger') throw new ValidationError('Say whether you are the customer or the Gigger.');
+  const who = checkGigParty(gig, by, giggerId, customerPhone);
   gig.status = 'disputed';
   gig.dispute = { by: who, reason: cleanText(reason, 500), at: nowIso() };
   if (gig.escrow) gig.escrow.status = 'frozen';
@@ -1159,14 +1183,13 @@ function disputeGig(id, by, reason) {
   return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
 }
 
-function cancelGig(id, by, reason) {
+function cancelGig(id, by, reason, giggerId, customerPhone) {
   const state = load();
   const gig = findGigOrThrow(state, id);
   if (gig.status === 'released' || gig.status === 'cancelled' || gig.status === 'completed') {
     throw new ValidationError('That gig can no longer be cancelled.');
   }
-  const who = cleanText(by, 20);
-  if (who !== 'customer' && who !== 'gigger') throw new ValidationError('Say whether you are the customer or the Gigger.');
+  const who = checkGigParty(gig, by, giggerId, customerPhone);
   gig.status = 'cancelled';
   gig.cancelledBy = who;
   gig.cancelReason = cleanText(reason, 500);
@@ -1175,12 +1198,11 @@ function cancelGig(id, by, reason) {
   return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
 }
 
-function rateGig(id, by, stars, comment) {
+function rateGig(id, by, stars, comment, giggerId, customerPhone) {
   const state = load();
   const gig = findGigOrThrow(state, id);
   if (gig.status !== 'released') throw new ValidationError('You can rate once the gig is released.');
-  const who = cleanText(by, 20);
-  if (who !== 'customer' && who !== 'gigger') throw new ValidationError('Say whether you are the customer or the Gigger.');
+  const who = checkGigParty(gig, by, giggerId, customerPhone);
   const n = Number(stars);
   if (!Number.isInteger(n) || n < 1 || n > 5) throw new ValidationError('Stars must be 1 to 5.');
   const text = cleanText(comment, 500);
@@ -1241,10 +1263,17 @@ function walletFor(giggerId) {
 
 const CHAT_STATUSES = ['accepted', 'in_progress', 'completion_requested', 'completed', 'released', 'disputed'];
 
-function checkChatParty(gig, by, giggerId, customerPhone) {
+/* Manual review (Nov 26, Tee's Uber-level direction): the admin lane in
+   chat must prove the token. Anyone could pass by=admin and read any
+   gig's chat — the store trusted the word. Now an admin read needs a
+   real admin request, checked by the route and passed in here. */
+function checkChatParty(gig, by, giggerId, customerPhone, isAdmin) {
   const who = cleanText(by, 20);
   if (who !== 'customer' && who !== 'gigger' && who !== 'admin') {
     throw new ValidationError('Say whether you are the customer, the Gigger, or the admin.');
+  }
+  if (who === 'admin' && !isAdmin) {
+    throw new ValidationError('Operator access only — that needs the admin token.');
   }
   if (!CHAT_STATUSES.includes(gig.status)) {
     throw new ValidationError('Chat opens once a Gigger accepts this gig.');
@@ -1258,10 +1287,10 @@ function checkChatParty(gig, by, giggerId, customerPhone) {
   return who;
 }
 
-function sendMessage(gigId, body) {
+function sendMessage(gigId, body, opts) {
   const state = load();
   const gig = findGigOrThrow(state, gigId);
-  const who = checkChatParty(gig, body.by, body.giggerId, body.customerPhone);
+  const who = checkChatParty(gig, body.by, body.giggerId, body.customerPhone, !!(opts && opts.isAdmin));
   if (who === 'admin') throw new ValidationError('Only the customer or the Gigger can send messages here.');
   /* Refuse an over-long message instead of silently cutting it — the person
      typed those words and should know they did not all send. */
@@ -1288,10 +1317,10 @@ function sendMessage(gigId, body) {
   return message;
 }
 
-function listMessages(gigId, query) {
+function listMessages(gigId, query, opts) {
   const state = load();
   const gig = findGigOrThrow(state, gigId);
-  checkChatParty(gig, query.by, query.giggerId, query.customerPhone);
+  checkChatParty(gig, query.by, query.giggerId, query.customerPhone, !!(opts && opts.isAdmin));
   return state.messages.filter((entry) => entry.gigId === gig.id);
 }
 

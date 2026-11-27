@@ -160,7 +160,7 @@ const checks = [
     assertEq(m1.status, 201, 'gigger message status');
     const m2 = await req(port, 'POST', `/api/giggit/gigs/${S.gigId}/messages`, { by: 'customer', customerPhone: CUSTOMER.phone, text: 'Great, the gate code is 1234.' });
     assertEq(m2.status, 201, 'customer message status');
-    const list = await req(port, 'GET', `/api/giggit/gigs/${S.gigId}/messages?by=admin`);
+    const list = await req(port, 'GET', `/api/giggit/gigs/${S.gigId}/messages?by=admin`, undefined, { headers: adminHeaders });
     assertEq(list.json.messages.length, 2, 'admin reads both messages');
     const stranger = await req(port, 'GET', `/api/giggit/gigs/${S.gigId}/messages?by=customer&customerPhone=%2B17580000000`);
     assertEq(stranger.status, 400, 'a stranger cannot read the chat');
@@ -210,7 +210,7 @@ const checks = [
     });
     const r = await req(port, 'GET', `/api/giggit/gigs/${S.gigId}`);
     assertEq(r.json.gig.status, 'released', 'gig is released once the window passes');
-    const w = await req(port, 'GET', `/api/giggit/wallet/${G1.id}`);
+    const w = await req(port, 'GET', `/api/giggit/wallet/${G1.id}`, undefined, { headers: adminHeaders });
     assertEq(w.json.availableEC, 102, 'gigger has EC$102 available (120 minus 15%)');
     assertEq(w.json.feesEC, 18, 'Giggit kept EC$18 commission');
     const types = w.json.entries.map((e) => e.type);
@@ -219,11 +219,11 @@ const checks = [
   }],
 
   ['Both sides rate once; a second rating is refused', async (port) => {
-    const c = await req(port, 'POST', `/api/giggit/gigs/${S.gigId}/rate`, { by: 'customer', stars: 5, comment: 'Spotless work, on time.' });
+    const c = await req(port, 'POST', `/api/giggit/gigs/${S.gigId}/rate`, { by: 'customer', stars: 5, comment: 'Spotless work, on time.', customerPhone: CUSTOMER.phone });
     assertEq(c.status, 200, 'customer rating status');
-    const g = await req(port, 'POST', `/api/giggit/gigs/${S.gigId}/rate`, { by: 'gigger', stars: 5, comment: 'Lovely customer.' });
+    const g = await req(port, 'POST', `/api/giggit/gigs/${S.gigId}/rate`, { by: 'gigger', stars: 5, comment: 'Lovely customer.', giggerId: G1.id });
     assertEq(g.status, 200, 'gigger rating status');
-    const again = await req(port, 'POST', `/api/giggit/gigs/${S.gigId}/rate`, { by: 'customer', stars: 4 });
+    const again = await req(port, 'POST', `/api/giggit/gigs/${S.gigId}/rate`, { by: 'customer', stars: 4, customerPhone: CUSTOMER.phone });
     assertEq(again.status, 400, 'second rating by the same side is refused');
     const prof = await req(port, 'GET', `/api/giggit/giggers/${G1.id}`);
     assertEq(prof.json.gigger.ratingAvg, 5, 'the client rating rolls up to the gigger average');
@@ -254,15 +254,15 @@ const checks = [
   }],
 
   ['Cancel rules: open gig cancels, finished gig refuses', async (port) => {
-    const c = await req(port, 'POST', `/api/giggit/gigs/${S.openGigId}/cancel`, { by: 'customer', reason: 'Test cleanup cancel.' });
+    const c = await req(port, 'POST', `/api/giggit/gigs/${S.openGigId}/cancel`, { by: 'customer', reason: 'Test cleanup cancel.', customerPhone: CUSTOMER.phone });
     assertEq(c.status, 200, 'an open gig cancels');
     assertEq(c.json.gig.status, 'cancelled', 'cancelled status');
-    const done = await req(port, 'POST', `/api/giggit/gigs/${S.gigId}/cancel`, { by: 'customer', reason: 'Too late.' });
+    const done = await req(port, 'POST', `/api/giggit/gigs/${S.gigId}/cancel`, { by: 'customer', reason: 'Too late.', customerPhone: CUSTOMER.phone });
     assertEq(done.status, 400, 'a released gig cannot be cancelled');
   }],
 
   ['Wallet entries are newest first', async (port) => {
-    const w = await req(port, 'GET', `/api/giggit/wallet/${G1.id}`);
+    const w = await req(port, 'GET', `/api/giggit/wallet/${G1.id}`, undefined, { headers: adminHeaders });
     const times = w.json.entries.map((e) => new Date(e.at).getTime());
     const sorted = [...times].sort((a, b) => b - a);
     assertEq(JSON.stringify(times), JSON.stringify(sorted), 'wallet entries run newest first');

@@ -89,3 +89,61 @@ here with the versions.
   this stage. The token value is never printed in logs, docs, or chat. Tee /
   Musty type it once into the Admin view's Operator access card; it stays on
   that device until cleared.
+
+## 2026-11-26 — Manual security review (Uber-level, Tee's word)
+
+- **Runner:** builder, Giggit testing + audit build (Tee's scope update,
+  Nov 26, ~22:15 ET: security in this build, Uber-level, done the manual
+  way like a team of coders — policies, best practice, human review — and
+  documented so the level of security is proved, not claimed).
+- **Commit:** branch `security/giggit-manual-review` (merge commit to be
+  filled in on merge).
+- **Scope:** a human read of every Giggit route and every store function,
+  looking for what the automated suites cannot see: who can do what to
+  whom, and what the code trusts without checking.
+
+### Findings (all fixed in this branch, all tested)
+
+| Finding | What was open | Fix | Test |
+|---|---|---|---|
+| R1 | `by=admin` read any gig's chat, no token check | Routes pass the real admin check into the chat party check | T15 |
+| R2 | Anyone could dispute any completed gig | Proof-of-party on dispute (customer phone / gigger id) | T16 |
+| R3 | Anyone could cancel any open/accepted gig | Proof-of-party on cancel | T17 |
+| R4 | Anyone could rate any released gig | Proof-of-party on rate | T17 |
+| R5 | Anyone could pick a quote (sets price + accepts) | Quote-pick requires the posting customer's phone | T18 |
+| R6 | Any caller could read any Gigger's wallet | Wallet route requires the operator token | T14 |
+| R7 | Profile bio/gallery writes unauthenticated | The three profile-write routes require the operator token | T13 |
+
+### Verified clean in the same read (no change, recorded)
+
+Mass assignment (validators allowlist fields; extra body fields dropped);
+completion code (accept-time generation, customer/admin only, never in
+lists, never to the Gigger); contacts (party-only after accept, admin lane
+token-gated); accept/start/arrived/request-complete (assigned-Gigger check
+enforced in the store); photos (type + 2 MB + max 6, server-side);
+inputs (tags/control chars stripped, money capped at EC$10,000, coords
+range-checked); settings read public by design; events/stats aggregates
+with no PII.
+
+### Known limitations (no accounts yet — cannot be fixed at this stage)
+
+- **L1 — Gigger identity is bearer:** anyone who knows a giggerId can act
+  as that Gigger. Mitigations: ring + skill checks bind accepts; the
+  accepted Gigger's real phone is shown to the customer, so impersonation
+  surfaces on first contact. Fixed properly by accounts/login (V2).
+- **L2 — Push subscriptions are caller-asserted:** anyone can subscribe a
+  victim's giggerId with their own endpoint and receive that Gigger's push
+  titles (titles + prices only). Fixed by accounts (V2).
+- **L3 — The customer proves themselves by phone number:** anyone who
+  knows a customer's phone can act as them. That is the MVP's identity
+  model; fixed by accounts (V2).
+
+### Results — full `npm run validate:all` (13 stages), local
+
+| Suite | Result |
+|-------|--------|
+| smoke | 20 passed / 0 failed |
+| policy | 16 passed / 0 failed |
+| dispute | 8 passed / 0 failed, 1 known gap (D7) |
+| security | **17 passed / 0 failed** (was 11 — T13–T18 added) |
+| Existing 9 stages | all passed — no regressions |

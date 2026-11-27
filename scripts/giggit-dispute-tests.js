@@ -78,7 +78,7 @@ const checks = [
 
   ['D1 — Customer disputes inside the window: frozen, never releases', async (port) => {
     const id = await driveToCompleted(port, S.gigger.id, { title: 'Dispute D1 gig' });
-    const d = await req(port, 'POST', `/api/giggit/gigs/${id}/dispute`, { by: 'customer', reason: 'The bathroom was left unfinished.' });
+    const d = await req(port, 'POST', `/api/giggit/gigs/${id}/dispute`, { by: 'customer', reason: 'The bathroom was left unfinished.', customerPhone: PHONE });
     assertEq(d.status, 200, 'dispute lands');
     assertEq(d.json.gig.status, 'disputed', 'gig is disputed');
     assertEq(d.json.gig.escrow.status, 'frozen', 'escrow is frozen');
@@ -88,7 +88,7 @@ const checks = [
     const after = await releaseGig(port, id);
     assertEq(after.status, 'disputed', 'disputed gig stays disputed after the window');
     assertEq(after.escrow.status, 'frozen', 'escrow stays frozen');
-    const w = await req(port, 'GET', `/api/giggit/wallet/${S.gigger.id}`);
+    const w = await req(port, 'GET', `/api/giggit/wallet/${S.gigger.id}`, undefined, { headers: adminHeaders });
     assert(!w.json.entries.some((e) => e.gigId === id && e.type === 'release'), 'no release entry for the disputed gig');
     const events = await req(port, 'GET', `/api/giggit/events?gigId=${id}&type=dispute_opened`);
     assertEq(events.json.events.length, 1, 'a dispute_opened event is logged');
@@ -96,7 +96,7 @@ const checks = [
 
   ['D2 — Gigger disputes inside the window: same freeze', async (port) => {
     const id = await driveToCompleted(port, S.gigger.id, { title: 'Dispute D2 gig' });
-    const d = await req(port, 'POST', `/api/giggit/gigs/${id}/dispute`, { by: 'gigger', reason: 'Customer refused to let me in.' });
+    const d = await req(port, 'POST', `/api/giggit/gigs/${id}/dispute`, { by: 'gigger', reason: 'Customer refused to let me in.', giggerId: S.gigger.id });
     assertEq(d.status, 200, 'gigger dispute lands');
     assertEq(d.json.gig.status, 'disputed', 'gig is disputed');
     assertEq(d.json.gig.dispute.by, 'gigger', 'dispute records the gigger');
@@ -106,37 +106,37 @@ const checks = [
     const id = await driveToCompleted(port, S.gigger.id, { title: 'Dispute D3 gig' });
     const released = await releaseGig(port, id);
     assertEq(released.status, 'released', 'gig released before the dispute attempt');
-    const d = await req(port, 'POST', `/api/giggit/gigs/${id}/dispute`, { by: 'customer', reason: 'Too late to complain.' });
+    const d = await req(port, 'POST', `/api/giggit/gigs/${id}/dispute`, { by: 'customer', reason: 'Too late to complain.', customerPhone: PHONE });
     assertEq(d.status, 400, 'disputing a released gig is refused');
   }],
 
   ['D4 — Dispute before completion is refused in every state', async (port) => {
     const gig = await req(port, 'POST', '/api/giggit/gigs', gigBody({ title: 'Dispute D4 gig' }));
     const id = gig.json.gig.id;
-    const open = await req(port, 'POST', `/api/giggit/gigs/${id}/dispute`, { by: 'customer', reason: 'Too early.' });
+    const open = await req(port, 'POST', `/api/giggit/gigs/${id}/dispute`, { by: 'customer', reason: 'Too early.', customerPhone: PHONE });
     assertEq(open.status, 400, 'disputing an open gig is refused');
     tweakLiveData((data) => {
       const g = data.gigs.find((entry) => entry.id === id);
       g.createdAt = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     });
     await req(port, 'POST', `/api/giggit/gigs/${id}/accept`, { giggerId: S.gigger.id });
-    const accepted = await req(port, 'POST', `/api/giggit/gigs/${id}/dispute`, { by: 'customer', reason: 'Too early.' });
+    const accepted = await req(port, 'POST', `/api/giggit/gigs/${id}/dispute`, { by: 'customer', reason: 'Too early.', customerPhone: PHONE });
     assertEq(accepted.status, 400, 'disputing an accepted gig is refused');
     await req(port, 'POST', `/api/giggit/gigs/${id}/start`, { giggerId: S.gigger.id });
-    const inProgress = await req(port, 'POST', `/api/giggit/gigs/${id}/dispute`, { by: 'customer', reason: 'Too early.' });
+    const inProgress = await req(port, 'POST', `/api/giggit/gigs/${id}/dispute`, { by: 'customer', reason: 'Too early.', customerPhone: PHONE });
     assertEq(inProgress.status, 400, 'disputing an in-progress gig is refused');
     await req(port, 'POST', `/api/giggit/gigs/${id}/request-complete`, { giggerId: S.gigger.id });
-    const requested = await req(port, 'POST', `/api/giggit/gigs/${id}/dispute`, { by: 'customer', reason: 'Too early.' });
+    const requested = await req(port, 'POST', `/api/giggit/gigs/${id}/dispute`, { by: 'customer', reason: 'Too early.', customerPhone: PHONE });
     assertEq(requested.status, 400, 'disputing a completion-requested gig is refused');
   }],
 
   ['D5 — A gig can be disputed only once', async (port) => {
-    const second = await req(port, 'POST', `/api/giggit/gigs/${S.d1}/dispute`, { by: 'gigger', reason: 'Second dispute.' });
+    const second = await req(port, 'POST', `/api/giggit/gigs/${S.d1}/dispute`, { by: 'gigger', reason: 'Second dispute.', giggerId: S.gigger.id });
     assertEq(second.status, 400, 'a second dispute on the same gig is refused');
   }],
 
   ['D6 — A disputed gig’s money never moves', async (port) => {
-    const w = await req(port, 'GET', `/api/giggit/wallet/${S.gigger.id}`);
+    const w = await req(port, 'GET', `/api/giggit/wallet/${S.gigger.id}`, undefined, { headers: adminHeaders });
     const forD1 = w.json.entries.filter((e) => e.gigId === S.d1);
     assertEq(forD1.filter((e) => e.type === 'release').length, 0, 'no release entry for the disputed gig');
     assertEq(forD1.filter((e) => e.type === 'fee').length, 0, 'no fee entry for the disputed gig');

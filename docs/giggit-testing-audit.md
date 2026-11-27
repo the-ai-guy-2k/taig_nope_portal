@@ -61,16 +61,28 @@ day-to-day, and what the security layer changes for you.
 - **Contacts** — customer phones stay hidden until a gig is accepted, and
   then only to the two people on the job (or to you, as admin). A stranger
   asking for a gig's details sees no phone numbers. This is tested (P15).
-- **Completion code** — the customer gets the code when they post the gig.
-  They give it to the Gigger at the door; the Gigger enters it to mark the
-  job done. The code is never shown to the Gigger through the app, and never
-  in a list. Tested (P16).
+- **Completion code** — the code is created when a Gigger accepts the
+  gig (not at posting — there is no code before accept). After accept, the
+  customer sees the code in their gig detail and gives it to the Gigger at
+  the door; the Gigger enters it to mark the job done. The code is never
+  shown to the Gigger through the app, and never in a list. Tested (P16,
+  T3).
 - **Escrow** — simulated for now (pretend money in the January test phase).
   Real money rails are a separate decision, not part of this build.
 - **Disputes** — a client or a Gigger can open a dispute; the gig freezes
   (no release, no completion while disputed). Resolving a dispute is not
   built yet — that is Decision Point 7, and it needs your decision with Tee
-  on who resolves and what the outcomes are.
+  on who resolves and what the outcomes are. **New in this build:** a
+  dispute, a cancel, and a rating now need proof of who is acting — the
+  customer by the phone that posted the gig, the Gigger by the id on the
+  gig. Nobody can dispute, cancel, or rate somebody else's gig any more.
+  Tested (T16, T17).
+- **Wallets and profiles** — a Gigger's wallet is operator-only now: any
+  caller could read any Gigger's earnings before this build. Profile edits
+  (bio, gallery photos) are operator-only too. In the January test phase
+  that means profile and wallet work goes through you, or through a device
+  with the operator token saved on it. Per-Gigger login is the V2 step.
+  Tested (T13, T14).
 
 **The security chart (threat → protection → test):**
 
@@ -83,11 +95,29 @@ day-to-day, and what the security layer changes for you.
 | Browser tricks (clickjacking, MIME sniffing) | Security headers on every response | T5 |
 | Silent failures (bad data file, missing keys) | Loud warnings in the server log | T6 |
 | A flood of writes | 30 writes a minute per address, then 429 | T7 |
-| A flood of reads | Read endpoints are public by design; no throttle (monitored) | T8 |
+| Bad input crashes or corrupts the store | Every field validated; bad input is a 400 with a plain-words reason | T8 |
 | A hole in a dependency | `npm audit` in CI blocks the build on any critical | T9 |
-| Forged admin request from another site | Same-origin form shape; admin writes need the token | T10 |
-| Data file corruption | Corrupt file falls back to seed with a loud warning | T11 |
-| Fake admin write via form data | Admin writes need the token, any content type | T12 |
+| Push subscriptions orphaned if the key file is deleted | The key file is never committed; a missing file is logged loudly | T10 |
+| Disputed / never-verified gigs stuck forever | No resolve path — a decision (DP5, DP7), not a bug; recorded | T11 |
+| Forged admin request from another site | Admin writes need the token header, which a form cannot set | T12 |
+| Stranger rewrites a Gigger's profile or gallery | Profile writes need the operator token | T13 |
+| Stranger reads a Gigger's wallet | Wallet reads need the operator token | T14 |
+| Stranger reads a gig's chat as "admin" | Admin chat reads need the operator token | T15 |
+| Stranger disputes / cancels / rates someone else's gig | The actor must prove it: customer phone or Gigger id | T16, T17 |
+| Stranger picks a quote and sets the price | The pick needs the posting customer's phone | T18 |
+
+**The manual review (how T13–T18 were found):** the automated suites are
+not the whole story. A human read every Giggit route and every store
+function the way a team of coders would — looking for what the tests cannot
+see: who can do what to whom, and what the code trusts without checking.
+That read found seven holes (R1–R7, now T13–T18), verified six areas clean
+(mass assignment, the code rule, contacts, the assigned-Gigger checks,
+photo validation, input cleaning), and recorded three honest limitations
+that only accounts/login can fix (a Gigger's id is bearer identity, push
+subscriptions are caller-asserted, a customer proves themselves by phone).
+The full review, with the clean list and the limitations, is in the spec
+(`docs/giggit-testing-spec.md` §3) and the audit log
+(`docs/reports/giggit-test-audit-log.md`).
 
 **Deferred, with the reason (not built in this build):** full accounts and
 login (public-launch step); real-money rails (no processor); SMS
@@ -118,7 +148,10 @@ chat.
   job is not marked done.
 - Your pay: the escrow is released to you when the job is completed. The
   commission is 15% normally, 10% once you have done 20 gigs in a month,
-  5% if you are Pro. The test suite checks the maths.
+  5% if you are Pro. The test suite checks the maths. Your wallet is
+  operator-only in this test phase — the operator reads it for you, or it
+  is read from a device with the operator token saved on it. Your own
+  login to the wallet is the V2 step.
 - If something goes wrong — the client is not there, the work cannot be
   done, the client disagrees about payment — you can open a dispute, and
   the gig freezes until it is sorted. (How a dispute gets resolved is still
@@ -136,9 +169,10 @@ chat.
   EC$2.70 peg). You pick a Gigger from the bids, or take a fixed price.
 - Your phone number is hidden until you accept a Gigger — and then only
   that Gigger sees it.
-- You get a completion code when you post. Keep it: you give it to the
-  Gigger at the door, and they enter it to mark the job done. Nobody else
-  can see the code.
+- You get a completion code when a Gigger accepts your gig. Keep it: you
+  give it to the Gigger at the door, and they enter it to mark the job
+  done. Nobody else can see the code — not even the Gigger, through the
+  app.
 - The money sits in escrow until the job is done. (Pretend money in the
   January test phase; real money is a later decision.)
 - If the work is not done, the Gigger does not show, or something is
