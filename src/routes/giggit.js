@@ -10,15 +10,19 @@ const store = require('../services/giggitStore');
 
 const router = express.Router();
 
-/* Light per-IP throttle on writes: 30 POSTs a minute per IP. */
+/* Light per-IP throttle on writes: 30 POSTs a minute per IP.
+   Test mode (GIGGIT_TEST_MODE=1, set only by the Giggit test scripts for
+   the server they spawn) relaxes the limit so a suite can run its writes
+   without tripping its own throttle. Never set in production. */
 const writeHits = new Map();
 function throttleWrites(req, res, next) {
   const now = Date.now();
   const key = req.ip || 'unknown';
+  const limit = process.env.GIGGIT_TEST_MODE === '1' ? 1000 : 30;
   const hits = (writeHits.get(key) || []).filter((time) => now - time < 60000);
   hits.push(now);
   writeHits.set(key, hits);
-  if (hits.length > 30) {
+  if (hits.length > limit) {
     return res.status(429).json({ error: 'Too many requests — slow down a minute.' });
   }
   return next();
@@ -29,6 +33,27 @@ function badRequest(res, err) {
     return res.status(400).json({ error: err.message });
   }
   return res.status(500).json({ error: 'Something went wrong saving that.' });
+}
+
+/* Operator token (security, Nov 26): the shared secret Tee/Musty hold.
+   When GIGGIT_ADMIN_TOKEN is set, admin writes and the ?contacts=1 lane
+   need header x-giggit-admin-token. When it is NOT set (local dev only),
+   those endpoints stay open as today — and the server says so loudly at
+   startup so nobody mistakes open for secured. */
+const ADMIN_TOKEN = process.env.GIGGIT_ADMIN_TOKEN || '';
+if (!ADMIN_TOKEN) {
+  console.warn('[giggit] GIGGIT_ADMIN_TOKEN is not set — admin writes and ?contacts=1 are open. Set it on staging and live.');
+}
+function isAdminRequest(req) {
+  return ADMIN_TOKEN !== '' && req.headers['x-giggit-admin-token'] === ADMIN_TOKEN;
+}
+function adminLaneOpen(req) {
+  return ADMIN_TOKEN === '' || isAdminRequest(req);
+}
+function requireAdmin(req, res, next) {
+  if (ADMIN_TOKEN === '') return next(); // no token configured: open (local dev only)
+  if (isAdminRequest(req)) return next();
+  return res.status(401).json({ error: 'Operator access only — that needs the admin token.' });
 }
 
 /* Widen pushes: when a ring advances, the newly-included giggers get a
@@ -76,7 +101,7 @@ router.get('/api/giggit/settings', (req, res) => {
   res.json(store.getSettings());
 });
 
-router.put('/api/giggit/settings', throttleWrites, (req, res) => {
+router.put('/api/giggit/settings', throttleWrites, requireAdmin, (req, res) => {
   try {
     res.json(store.updateSettings(req.body || {}));
   } catch (err) {
@@ -148,7 +173,7 @@ router.delete('/api/giggit/giggers/:id/gallery/:index', throttleWrites, (req, re
 
 router.get('/api/giggit/gigs', (req, res) => {
   const { status, parish, category, customerPhone, q } = req.query;
-  res.json({ gigs: store.listGigs({ status, parish, category, customerPhone, q, includeContacts: req.query.contacts === '1' }) });
+  res.json({ gigs: store.listGigs({ status, parish, category, customerPhone, q, includeContacts: req.query.contacts === '1' && adminLaneOpen(req) }) });
   drainWidenPushes();
 });
 
@@ -194,7 +219,12 @@ router.get('/api/giggit/gigs/:id/photo', (req, res) => {
 });
 
 router.get('/api/giggit/gigs/:id', (req, res) => {
-  const gig = store.getGig(req.params.id, req.query.contacts === '1');
+  const gig = store.getGig(req.params.id, {
+    includeContacts: req.query.contacts === '1' && adminLaneOpen(req),
+    customerPhone: String(req.query.customerPhone || ''),
+    giggerId: String(req.query.giggerId || ''),
+    isAdmin: isAdminRequest(req),
+  });
   if (!gig) return res.status(404).json({ error: 'Gig not found.' });
   drainWidenPushes();
   return res.json({ gig });
@@ -264,7 +294,7 @@ router.post('/api/giggit/gigs/:id/reject', throttleWrites, (req, res) => {
 });
 
 /* Admin edit: correct an open gig before anyone accepts. */
-router.put('/api/giggit/gigs/:id', throttleWrites, (req, res) => {
+router.put('/api/giggit/gigs/:id', throttleWrites, requireAdmin, (req, res) => {
   try {
     res.json({ gig: store.updateGig(req.params.id, req.body || {}) });
   } catch (err) {
@@ -381,7 +411,7 @@ router.get('/api/giggit/promos', (req, res) => {
   res.json({ promos: store.listPromos() });
 });
 
-router.post('/api/giggit/promos', throttleWrites, (req, res) => {
+router.post('/api/giggit/promos', throttleWrites, requireAdmin, (req, res) => {
   try {
     res.status(201).json({ promo: store.createPromo(req.body || {}) });
   } catch (err) {
@@ -407,7 +437,7 @@ router.post('/api/giggit/push/subscribe', throttleWrites, (req, res) => {
 /* MVP test endpoint: sends a test notification to the most recent
    subscription (or one named by endpoint). Rate-limited like other
    writes; this is a pilot testing aid, not a broadcast tool. */
-router.post('/api/giggit/push/test', throttleWrites, async (req, res) => {
+router.post('/api/giggit/push/test', throttleWrites, requireAdmin, async (req, res) => {
   try {
     const webPush = require('web-push');
     const keys = store.getVapidKeys();

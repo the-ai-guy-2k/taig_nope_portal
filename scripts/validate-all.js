@@ -21,6 +21,10 @@ const SUITE = [
   { label: 'Local preservation', file: 'scripts/validate-preservation.js' },
   { label: 'Route availability', file: 'scripts/validate-routes.js' },
   { label: 'End-to-end smoke tests', file: 'scripts/smoke-tests.js' },
+  { label: 'Giggit smoke tests (full lifecycle)', file: 'scripts/giggit-smoke-tests.js' },
+  { label: 'Giggit policy tests (Musty P1–P16)', file: 'scripts/giggit-policy-tests.js' },
+  { label: 'Giggit dispute tests (D1–D8)', file: 'scripts/giggit-dispute-tests.js' },
+  { label: 'Giggit security tests (T1–T12)', file: 'scripts/giggit-security-tests.js' },
   { label: 'Operator visual verification', file: 'scripts/validate-operator-visual.js' },
 ];
 

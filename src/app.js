@@ -30,6 +30,17 @@ app.use((req, res, next) => {
   next();
 });
 
+/* Security headers on every portal response (Giggit testing + audit build,
+   Nov 26). Placed BEFORE the static middleware so served files carry them
+   too. No Content-Security-Policy yet — the portal's EJS views use inline
+   scripts, and a CSP needs a whole-portal audit first (V2). */
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(express.json({ limit: '10mb' })); /* Lucian Job Connect resumes arrive as base64 in JSON. */
 app.use(express.urlencoded({ extended: true }));

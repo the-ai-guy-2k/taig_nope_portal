@@ -33,12 +33,27 @@ function esc(s) {
 }
 
 async function api(path, opts) {
-  const res = await fetch(path, Object.assign({
-    headers: { 'Content-Type': 'application/json' },
-  }, opts || {}));
+  const headers = { 'Content-Type': 'application/json' };
+  const adminToken = localStorage.getItem('giggit-admin-token') || '';
+  if (adminToken) headers['x-giggit-admin-token'] = adminToken;
+  const merged = Object.assign({}, opts || {}, { headers: Object.assign(headers, (opts && opts.headers) || {}) });
+  const res = await fetch(path, merged);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || ('Request failed (' + res.status + ')'));
   return data;
+}
+
+function saveAdminToken() {
+  const token = ($('admin-token') || {}).value || '';
+  if (token) localStorage.setItem('giggit-admin-token', token);
+  else localStorage.removeItem('giggit-admin-token');
+  showMsg('admin-token-msg', token ? 'Token saved on this device.' : 'Token cleared.', true);
+  renderAdmin();
+}
+
+function clearAdminToken() {
+  localStorage.removeItem('giggit-admin-token');
+  renderAdmin();
 }
 
 function showMsg(id, text, ok) {
@@ -564,6 +579,11 @@ async function renderAdmin() {
     + (rows.length ? '<div class="table-wrap"><table class="admin-table"><thead><tr><th>Gig</th><th>Category</th><th>Customer</th><th>Gigger</th><th>Status</th><th>Price</th><th>Posted</th></tr></thead><tbody>'
       + rows.map((g) => '<tr onclick="openGig(\'' + esc(g.id) + '\')"><td><b>' + esc(g.title) + '</b>' + (g.sample ? ' <span class="badge sample">SAMPLE</span>' : '') + '</td><td>' + esc(g.category) + '</td><td>' + esc(g.customerName || '—') + '</td><td>' + esc(g.giggerName || '—') + '</td><td><span class="status ' + esc(g.status) + '">' + esc(statusLabel(g.status)) + '</span></td><td>' + esc(moneyText(g)) + '</td><td>' + esc(new Date(g.createdAt).toLocaleDateString()) + '</td></tr>').join('')
       + '</tbody></table></div>' : '<div class="card">No gigs match those filters.</div>')
+    + '<div class="card"><h3>Operator access</h3>'
+    + '<p class="meta">Admin writes (settings, promos) and the phone-number lane need the operator token. Enter it once — it stays on this device until you clear it.</p>'
+    + '<div class="row"><div><label>Operator token</label><input type="password" id="admin-token" maxlength="100" value="' + esc(localStorage.getItem('giggit-admin-token') || '') + '" placeholder="Paste the operator token"></div></div>'
+    + '<p><button class="btn small leaf" type="button" onclick="saveAdminToken()">Save token</button> <button class="btn small ghost" type="button" onclick="clearAdminToken()">Clear token</button></p>'
+    + '<div id="admin-token-msg" class="msg"></div></div>'
     + '<div class="card"><h3>Promo codes</h3>'
     + (promos.length ? promos.map((p) => '<p><b>' + esc(p.code) + '</b> — ' + p.percentOff + '% off • used ' + p.uses + (p.maxUses != null ? ' / ' + p.maxUses : ' (unlimited)') + (p.note ? ' • ' + esc(p.note) : '') + '</p>').join('') : '<p class="meta">No promo codes yet — create one below and hand it out.</p>')
     + '<div class="row"><div><label>Code</label><input type="text" id="promo-code" maxlength="20" placeholder="SAVE10"></div>'
@@ -652,7 +672,12 @@ async function openGig(id) {
   detailId = id;
   let g;
   try {
-    g = (await api('/api/giggit/gigs/' + encodeURIComponent(id) + (role === 'admin' ? '?contacts=1' : ''))).gig;
+    const params = new URLSearchParams();
+    if (role === 'admin') params.set('contacts', '1');
+    if (clientPhone) params.set('customerPhone', clientPhone);
+    if (whoAmI) params.set('giggerId', whoAmI);
+    const qs = params.toString();
+    g = (await api('/api/giggit/gigs/' + encodeURIComponent(id) + (qs ? '?' + qs : ''))).gig;
   } catch (err) {
     $('gig-detail').innerHTML = '<div class="msg err" style="display:block">' + esc(err.message) + '</div>';
     return;

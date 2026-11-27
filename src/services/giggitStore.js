@@ -203,7 +203,9 @@ function load() {
       state = parsed;
     }
   } catch (err) {
-    /* No live file yet (or corrupt) — fall through to seed. */
+    /* No live file yet (or corrupt) — fall through to seed. Loud, not
+       silent: a corrupt live file must never look like a fresh start. */
+    console.warn(`[giggit] live data unreadable, seeding from data/giggit.json (${err.message})`);
   }
   if (!state) {
     state = loadSeed();
@@ -267,6 +269,7 @@ function usdToXcd(rate, usd) {
 /* Tracking events for the six groups (matching, supply, demand, money,
    trust, growth). The events feed is what the later dashboard reads;
    the store keeps the last 500. */
+let warnedEventCap = false;
 function logEvent(state, group, type, gigId, data) {
   if (!Array.isArray(state.events)) state.events = [];
   state.events.unshift({
@@ -277,7 +280,13 @@ function logEvent(state, group, type, gigId, data) {
     at: nowIso(),
     data: data || {},
   });
-  if (state.events.length > 500) state.events.length = 500;
+  if (state.events.length > 500) {
+    if (!warnedEventCap) {
+      console.warn('[giggit] events feed hit the 500 cap — oldest events are being dropped');
+      warnedEventCap = true;
+    }
+    state.events.length = 500;
+  }
 }
 
 /* Which ring an open gig is in right now: 0 for the first ~2 minutes,
@@ -528,7 +537,7 @@ function publicGig(gig, opts) {
     status: gig.status,
     giggerId: gig.giggerId || null,
     giggerName: gig.giggerName || null,
-    completionCode: gig.status === 'accepted' || gig.status === 'in_progress' || gig.status === 'completion_requested'
+    completionCode: opts && opts.showCode && (gig.status === 'accepted' || gig.status === 'in_progress' || gig.status === 'completion_requested')
       ? gig.completionCode : undefined,
     escrow: gig.escrow ? {
       amountEC: gig.escrow.amountEC,
@@ -811,14 +820,25 @@ function listGigs(filter) {
   return gigs.map((gig) => publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: !!(filter && filter.includeContacts) }));
 }
 
-function getGig(id, includeContacts) {
+function getGig(id, opts) {
   const state = load();
   const gig = state.gigs.find((entry) => entry.id === id);
   if (!gig) return null;
-  /* Contacts are visible once a Gigger has accepted — both sides need
-     each other to coordinate. Before that, numbers stay hidden — except
-     for the admin lane (includeContacts), which sees them on every gig. */
-  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: includeContacts || gig.status !== 'open', includePhoto: true });
+  const includeContacts = opts === true || !!(opts && opts.includeContacts);
+  const customerPhone = opts && typeof opts === 'object' ? String(opts.customerPhone || '') : '';
+  const giggerId = opts && typeof opts === 'object' ? String(opts.giggerId || '') : '';
+  const isAdmin = !!(opts && opts.isAdmin);
+  /* Contacts are visible to a party of the gig once a Gigger has accepted
+     — both sides need each other to coordinate. Before accept, numbers stay
+     hidden — except for the admin lane (includeContacts), which sees them on
+     every gig. The completion code goes only to the customer who posted the
+     gig (they give it to the Gigger at the door) or the admin — never to the
+     Gigger through the API, and never in a list. */
+  const isParty = (customerPhone !== '' && customerPhone === gig.customerPhone)
+    || (giggerId !== '' && giggerId === gig.giggerId);
+  const showContacts = includeContacts || (gig.status !== 'open' && isParty);
+  const showCode = isAdmin || (customerPhone !== '' && customerPhone === gig.customerPhone);
+  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts, includePhoto: true, showCode });
 }
 
 /* Closest-first matching (Musty's notebook flow): rank the pool by skill
@@ -1207,7 +1227,7 @@ function walletFor(giggerId) {
     heldEC: Math.round(held * 100) / 100,
     availableEC: Math.round(available * 100) / 100,
     feesEC: Math.round(fees * 100) / 100,
-    entries: entries.slice(0, 50),
+    entries: entries.slice(-50).reverse(),
   };
 }
 
@@ -1243,6 +1263,11 @@ function sendMessage(gigId, body) {
   const gig = findGigOrThrow(state, gigId);
   const who = checkChatParty(gig, body.by, body.giggerId, body.customerPhone);
   if (who === 'admin') throw new ValidationError('Only the customer or the Gigger can send messages here.');
+  /* Refuse an over-long message instead of silently cutting it — the person
+     typed those words and should know they did not all send. */
+  if (String(body.text || '').length > 1000) {
+    throw new ValidationError('Keep messages under 1000 characters.');
+  }
   const text = cleanText(body.text, 1000);
   if (text.length < 1) throw new ValidationError('Write a message first.');
   const message = {
@@ -1478,6 +1503,7 @@ function getVapidKeys() {
   }
   const webPush = require('web-push');
   const keys = webPush.generateVAPIDKeys();
+  console.warn('[giggit] no VAPID key file found — generated a fresh pair; every existing push subscription is now orphaned and must re-subscribe');
   const dir = path.dirname(VAPID_PATH);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(VAPID_PATH, JSON.stringify(keys, null, 2), 'utf8');

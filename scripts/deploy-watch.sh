@@ -15,6 +15,20 @@ IMAGE_PREVIOUS=taig-nope-portal:previous
 LIVE_PORT=3000
 STAGING_PORT=3005
 
+# Operator token for Giggit admin writes (security, Nov 26). The token lives
+# in a file on the Droplet host, never in the repo: /etc/taig/giggit-admin-token
+# (one line). If the file is missing, the containers start without the token
+# and the app logs a loud warning — admin writes stay open, exactly as today.
+# Never print the token value in logs.
+TOKEN_FILE=${GIGGIT_ADMIN_TOKEN_FILE:-/etc/taig/giggit-admin-token}
+TOKEN_ARGS=()
+if [ -r "$TOKEN_FILE" ]; then
+  TOKEN_ARGS=(-e "GIGGIT_ADMIN_TOKEN=$(cat "$TOKEN_FILE")")
+  log "Giggit operator token: set (from $TOKEN_FILE)"
+else
+  log "WARNING: Giggit operator token file not found at $TOKEN_FILE — admin writes are open"
+fi
+
 log() { echo "$(date -u '+%Y-%m-%dT%H:%M:%SZ') $*" | tee -a "$LOG"; }
 
 # One run at a time; a second tick exits quietly.
@@ -62,6 +76,7 @@ docker rm -f nope-portal-staging 2>/dev/null || true
 if ! docker run -d --name nope-portal-staging --restart unless-stopped \
     -p "127.0.0.1:${STAGING_PORT}:3000" \
     -v nope-nebula-staging:/app/nebula_local \
+    ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"} \
     "$IMAGE_STAGING" >>"$LOG" 2>&1; then
   log "ERROR: staging container failed to start — live untouched"
   exit 1
@@ -90,11 +105,13 @@ docker rm -f nope-portal 2>/dev/null || true
 if ! docker run -d --name nope-portal --restart unless-stopped \
     -p 3000:3000 \
     -v nope-nebula-local:/app/nebula_local \
+    ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"} \
     "$IMAGE_LOCAL" >>"$LOG" 2>&1; then
   log "ERROR: live container failed to start — rolling back"
   docker rm -f nope-portal 2>/dev/null || true
   docker run -d --name nope-portal --restart unless-stopped \
     -p 3000:3000 -v nope-nebula-local:/app/nebula_local \
+    ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"} \
     "$IMAGE_PREVIOUS" >>"$LOG" 2>&1 || true
   exit 1
 fi
@@ -104,6 +121,7 @@ if ! wait_healthy "$LIVE_PORT"; then
   docker rm -f nope-portal 2>/dev/null || true
   docker run -d --name nope-portal --restart unless-stopped \
     -p 3000:3000 -v nope-nebula-local:/app/nebula_local \
+    ${TOKEN_ARGS[@]+"${TOKEN_ARGS[@]}"} \
     "$IMAGE_PREVIOUS" >>"$LOG" 2>&1 || true
   if wait_healthy "$LIVE_PORT"; then log "Rollback healthy"; else log "ERROR: rollback also unhealthy — needs a human"; fi
   exit 1

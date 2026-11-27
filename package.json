@@ -28,7 +28,12 @@
     "docker:run": "docker run --rm -p 3000:3000 -v nope-nebula-local:/app/nebula_local taig-nope-portal:local",
     "docker:pull": "docker pull taig2k/taig_nope_portal:deployable",
     "docker:run:published": "docker run --rm -p 3000:3000 -v nope-nebula-local:/app/nebula_local taig2k/taig_nope_portal:deployable",
-    "preserve:snapshot": "node -e \"require('./src/services/localPreservation').savePreservationSnapshot(); console.log('Preservation snapshot saved.');\""
+    "preserve:snapshot": "node -e \"require('./src/services/localPreservation').savePreservationSnapshot(); console.log('Preservation snapshot saved.');\"",
+    "giggit:smoke": "node scripts/giggit-smoke-tests.js",
+    "giggit:policy": "node scripts/giggit-policy-tests.js",
+    "giggit:dispute": "node scripts/giggit-dispute-tests.js",
+    "giggit:security": "node scripts/giggit-security-tests.js",
+    "giggit:test": "node scripts/giggit-smoke-tests.js && node scripts/giggit-policy-tests.js && node scripts/giggit-dispute-tests.js && node scripts/giggit-security-tests.js"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -42,7 +47,7 @@
   "private": true,
   "dependencies": {
     "ejs": "^3.1.10",
-    "express": "^4.21.2",
+    "express": "^4.22.3",
     "maxmind": "^5.1.0",
     "sql.js": "^1.16.0",
     "web-push": "^4.0.0"

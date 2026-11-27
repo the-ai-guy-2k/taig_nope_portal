@@ -28,7 +28,11 @@ npm run validate:all
 | 6 | `validate:preservation` | Local preservation save/load/restore |
 | 7 | `validate:routes` | 13 HTTP routes (port 3099) |
 | 8 | `smoke` | E2E HTTP workflows (port 3100) |
-| 9 | `validate:operator-visual` | Operator HTML checks (port 3099) |
+| 9 | `giggit:smoke` | Giggit full lifecycle, human-logic (port 3102) |
+| 10 | `giggit:policy` | Musty policy criteria P1–P16 (port 3103) |
+| 11 | `giggit:dispute` | Dispute scenarios D1–D8 (port 3104) |
+| 12 | `giggit:security` | Security chart T1–T12 (port 3105, throttle probe 3106) |
+| 13 | `validate:operator-visual` | Operator HTML checks (port 3099) |
 
 Timing report: `ci-reports/validate-all.json`
 
@@ -43,7 +47,27 @@ npm run validate:operational
 npm run validate:preservation
 npm run validate:routes
 npm run smoke
+npm run giggit:smoke
+npm run giggit:policy
+npm run giggit:dispute
+npm run giggit:security
 npm run validate:operator-visual
+```
+
+## Giggit Tests
+
+The Giggit scripts (`scripts/giggit-*.js`) implement
+`docs/giggit-testing-spec.md`: the full gig lifecycle the way a person uses
+it, one pass/fail check per Musty policy (P1–P16), dispute scenarios D1–D8
+(D7, dispute-resolve, is a recorded known gap — no resolve path exists yet),
+and the security chart T1–T12. Each script spawns its own isolated server
+with a fresh seed; the live data dir (`nebula_local/`) is moved aside before
+the run and restored after, so no test data survives. Time-travel (release
+windows, ring widening) is done by editing the live store file between
+requests — the store re-reads it on every call.
+
+```bash
+npm run giggit:test   # all four Giggit scripts in order
 ```
 
 ## Operator Port Audit (Running Server)
