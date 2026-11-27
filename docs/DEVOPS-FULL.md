@@ -301,6 +301,17 @@ taig-deploy-watch.timer` stops it across reboots. Re-enable with `enable
 **Main deploys need no GitHub secrets.** The watcher pulls over plain git
 (the repo is reachable from the Droplet) and builds locally. That is deliberate.
 
+**Secrets audit (Nov 26, 2026).** Audited when this standard was written:
+no secret files are tracked in the repo (no `.env`, `.pem`, `.key`, or
+credential files), no private-key material in any tracked file, no hardcoded
+credentials in `src/`, `scripts/`, or `.github/`; `.gitignore` excludes
+`.env`, `.env.*`, `nebula_local/`, `.nebula/`, `aiw_local/`; the only secrets
+the pipeline uses are the two GitHub repo secrets above; the live checkout
+holds no `.env` / `.pem` / `.key` files (only the known untracked
+music-store media). Re-run the audit after any change that adds a
+credential: `git ls-files | grep -iE '\.env|pem$|\.key$|secret|credential'`
+must print nothing.
+
 ## 8. End-to-end verification (the proof, Nov 26, 2026)
 
 How the pipeline was proved the day it was built. A future engineer can
@@ -362,6 +373,7 @@ To recreate this whole setup on a fresh repo + Droplet:
 | Staging serves v7 | Yes — public `https://taigtsp.duckdns.org:8443/giggit/sw.js` = `giggit-v7`; `/health` 200; `/giggit/` 200; API 3 seed gigs |
 | Live serves v7 | Yes — public `https://taigtsp.duckdns.org/giggit/sw.js` = `giggit-v7`; `/health` 200; `/giggit/` 200; API 3 gigs |
 | Staging data separate | Yes — `docker inspect`: live mounts `nope-nebula-local`, staging mounts `nope-nebula-staging`; staging seeded its own `giggit.json` (6,844 bytes) in its own volume |
+| Secrets audit | Nov 26, 2026 — clean: no tracked secret files, no private keys, no hardcoded credentials; `.gitignore` excludes `.env` + `nebula_local/`; only 2 GitHub secrets (Docker Hub), publish job only |
 
 ## 11. Emergency procedures
 
