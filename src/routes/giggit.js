@@ -166,20 +166,48 @@ router.post('/api/giggit/gigs/:id/quotes', throttleWrites, (req, res) => {
   }
 });
 
-router.post('/api/giggit/gigs/:id/accept-quote', throttleWrites, (req, res) => {
+router.post('/api/giggit/gigs/:id/accept-quote', throttleWrites, async (req, res) => {
+  let gig;
   try {
-    res.json({ gig: store.acceptQuote(req.params.id, String((req.body || {}).giggerId || '')) });
+    gig = store.acceptQuote(req.params.id, String((req.body || {}).giggerId || ''));
   } catch (err) {
-    badRequest(res, err);
+    return badRequest(res, err);
   }
+  /* Step 10 — escrow-funded notice to the accepted Gigger. Best-effort,
+     never blocks the accept for long — 5s max, same as the post-gig push. */
+  let escrowNotified = { notified: null, reason: 'Notice skipped.' };
+  try {
+    escrowNotified = await Promise.race([
+      store.notifyEscrowHeld(gig),
+      new Promise((resolve) => setTimeout(
+        () => resolve({ notified: null, reason: 'Push timed out — the gig shows it in the app.' }), 5000)),
+    ]);
+  } catch (err) {
+    escrowNotified = { notified: null, reason: 'Push failed — the gig shows it in the app.' };
+  }
+  return res.json({ gig, escrowNotified });
 });
 
-router.post('/api/giggit/gigs/:id/accept', throttleWrites, (req, res) => {
+router.post('/api/giggit/gigs/:id/accept', throttleWrites, async (req, res) => {
+  let gig;
   try {
-    res.json({ gig: store.acceptGig(req.params.id, String((req.body || {}).giggerId || '')) });
+    gig = store.acceptGig(req.params.id, String((req.body || {}).giggerId || ''));
   } catch (err) {
-    badRequest(res, err);
+    return badRequest(res, err);
   }
+  /* Step 10 — escrow-funded notice to the accepted Gigger. Best-effort,
+     never blocks the accept for long — 5s max, same as the post-gig push. */
+  let escrowNotified = { notified: null, reason: 'Notice skipped.' };
+  try {
+    escrowNotified = await Promise.race([
+      store.notifyEscrowHeld(gig),
+      new Promise((resolve) => setTimeout(
+        () => resolve({ notified: null, reason: 'Push timed out — the gig shows it in the app.' }), 5000)),
+    ]);
+  } catch (err) {
+    escrowNotified = { notified: null, reason: 'Push failed — the gig shows it in the app.' };
+  }
+  return res.json({ gig, escrowNotified });
 });
 
 /* Reject: a Gigger passes on an open gig. The gig stays open for
@@ -209,12 +237,25 @@ router.post('/api/giggit/gigs/:id/start', throttleWrites, (req, res) => {
   }
 });
 
-router.post('/api/giggit/gigs/:id/request-complete', throttleWrites, (req, res) => {
+router.post('/api/giggit/gigs/:id/request-complete', throttleWrites, async (req, res) => {
+  let gig;
   try {
-    res.json({ gig: store.requestComplete(req.params.id, String((req.body || {}).giggerId || '')) });
+    gig = store.requestComplete(req.params.id, String((req.body || {}).giggerId || ''));
   } catch (err) {
-    badRequest(res, err);
+    return badRequest(res, err);
   }
+  /* Step 14 — verify notice to the customer. Best-effort, 5s max. */
+  let verifyNotified = { notified: null, reason: 'Notice skipped.' };
+  try {
+    verifyNotified = await Promise.race([
+      store.notifyVerifyNeeded(gig),
+      new Promise((resolve) => setTimeout(
+        () => resolve({ notified: null, reason: 'Push timed out — the gig shows it in the app.' }), 5000)),
+    ]);
+  } catch (err) {
+    verifyNotified = { notified: null, reason: 'Push failed — the gig shows it in the app.' };
+  }
+  return res.json({ gig, verifyNotified });
 });
 
 router.post('/api/giggit/gigs/:id/confirm-complete', throttleWrites, (req, res) => {
@@ -269,7 +310,7 @@ router.get('/api/giggit/push/vapid-public-key', (req, res) => {
 router.post('/api/giggit/push/subscribe', throttleWrites, (req, res) => {
   try {
     const body = req.body || {};
-    res.json(store.savePushSubscription(body.subscription || body, String(body.giggerId || '')));
+    res.json(store.savePushSubscription(body.subscription || body, String(body.giggerId || ''), String(body.customerPhone || '')));
   } catch (err) {
     badRequest(res, err);
   }

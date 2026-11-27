@@ -467,8 +467,12 @@ async function openGig(id) {
     + (g.when ? ' • ' + esc(g.when) : '') + '</div>'
     + '<div class="price">' + esc(moneyText(g)) + '</div>'
     + '<p>' + esc(g.description) + '</p>'
-    + '<p><span class="status ' + esc(g.status) + '">' + esc(statusLabel(g.status)) + '</span></p>'
-    + '<div class="timeline">Posted ' + esc(new Date(g.createdAt).toLocaleString())
+    + '<p><span class="status ' + esc(g.status) + '">' + esc(statusLabel(g.status)) + '</span></p>';
+  if (lastActionNote) {
+    html += '<div class="hint">' + esc(lastActionNote) + '</div>';
+    lastActionNote = '';
+  }
+  html += '<div class="timeline">Posted ' + esc(new Date(g.createdAt).toLocaleString())
     + (g.acceptedAt ? '<br>Accepted ' + esc(new Date(g.acceptedAt).toLocaleString()) + (g.giggerName ? ' by <b>' + esc(g.giggerName) + '</b>' : '') : '')
     + (g.completedAt ? '<br>Completed ' + esc(new Date(g.completedAt).toLocaleString()) : '')
     + '</div>';
@@ -595,6 +599,7 @@ function closeDetail() {
 }
 
 let pickedStars = 0;
+let lastActionNote = '';
 function pickStars(n) {
   pickedStars = n;
   document.querySelectorAll('#rate-stars button').forEach((btn) => {
@@ -604,9 +609,20 @@ function pickStars(n) {
 
 async function gigAction(id, action, body) {
   try {
-    await api('/api/giggit/gigs/' + encodeURIComponent(id) + '/' + action, {
+    const data = await api('/api/giggit/gigs/' + encodeURIComponent(id) + '/' + action, {
       method: 'POST', body: JSON.stringify(body || {}),
     });
+    if (data.escrowNotified) {
+      lastActionNote = data.escrowNotified.notified
+        ? 'Gigger notified — escrow is held, they can start.'
+        : 'Escrow held. ' + (data.escrowNotified.reason || '');
+    } else if (data.verifyNotified) {
+      lastActionNote = data.verifyNotified.notified
+        ? 'Customer notified — the job is marked done, they can verify.'
+        : 'Marked done. ' + (data.verifyNotified.reason || '');
+    } else {
+      lastActionNote = '';
+    }
     await refreshData();
     openGig(id);
     renderCurrentTab();
@@ -889,8 +905,8 @@ async function enablePush() {
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(publicKey),
     });
-    await api('/api/giggit/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription: sub, giggerId: whoAmI || null }) });
-    showMsg('push-msg', 'Notifications on — new gigs will reach you here. (iPhone: add Giggit to your Home Screen first.)', true);
+    await api('/api/giggit/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription: sub, giggerId: whoAmI || null, customerPhone: clientPhone || null }) });
+    showMsg('push-msg', 'Notifications on — Giggers get pinged about new gigs and escrow, customers get pinged when their gig is marked done. (iPhone: add Giggit to your Home Screen first.)', true);
   } catch (err) {
     showMsg('push-msg', err.message, false);
   }

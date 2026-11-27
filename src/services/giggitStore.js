@@ -184,7 +184,14 @@ function emptyState() {
   return {
     giggers: [], gigs: [], ratings: [], ledger: [], pushSubscriptions: [],
     events: [],
-    settings: { usdRate: DEFAULT_USD_RATE, disputeWindowMinutes: DEFAULT_DISPUTE_WINDOW_MINUTES },
+    messages: [],
+    promos: [],
+    settings: {
+      usdRate: DEFAULT_USD_RATE,
+      disputeWindowMinutes: DEFAULT_DISPUTE_WINDOW_MINUTES,
+      sosPhone: '',
+      sosLabel: 'Giggit emergency contact',
+    },
   };
 }
 
@@ -201,7 +208,7 @@ function load() {
   if (!state) {
     state = loadSeed();
   }
-  for (const key of ['giggers', 'gigs', 'ratings', 'ledger', 'pushSubscriptions']) {
+  for (const key of ['giggers', 'gigs', 'ratings', 'ledger', 'pushSubscriptions', 'messages', 'promos']) {
     if (!Array.isArray(state[key])) state[key] = [];
   }
   if (!Array.isArray(state.events)) state.events = [];
@@ -211,6 +218,10 @@ function load() {
   state.settings.disputeWindowMinutes = Number.isInteger(state.settings.disputeWindowMinutes)
     ? Math.min(MAX_DISPUTE_WINDOW_MINUTES, Math.max(MIN_DISPUTE_WINDOW_MINUTES, state.settings.disputeWindowMinutes))
     : DEFAULT_DISPUTE_WINDOW_MINUTES;
+  if (typeof state.settings.sosPhone !== 'string') state.settings.sosPhone = '';
+  if (typeof state.settings.sosLabel !== 'string' || !state.settings.sosLabel.trim()) {
+    state.settings.sosLabel = 'Giggit emergency contact';
+  }
   /* Lazy escrow sweep: release anything whose dispute window closed. */
   if (sweepReleases(state)) save(state);
   /* Lazy ring widening: advance any open gig past its window. */
@@ -363,6 +374,53 @@ async function notifyRinged(job) {
       'Giggit: a ' + job.category + ' gig near you opened up',
       job.title + ' — it just widened to your ring. Open Giggit to accept.');
   }
+}
+
+/* Client pushes (gap-close, Nov 26): a subscription can link to a
+   customer phone instead of a Gigger id, so the client side of a gig
+   can be reached too. */
+async function sendPushToCustomer(state, customerPhone, title, body) {
+  const phone = String(customerPhone || '').trim();
+  if (!phone) return false;
+  const sub = state.pushSubscriptions.find((entry) => entry.customerPhone === phone);
+  if (!sub) return false;
+  try {
+    const webPush = require('web-push');
+    const keys = getVapidKeys();
+    webPush.setVapidDetails('mailto:taig2k@outlook.com', keys.publicKey, keys.privateKey);
+    await webPush.sendNotification(sub, JSON.stringify({ title, body, url: '/giggit/' }));
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+/* Step 10 — escrow-funded notice: the accepted Gigger gets a push the
+   moment escrow holds. Best-effort; returns whether it landed. */
+async function notifyEscrowHeld(gig) {
+  if (!gig || !gig.giggerId) return { notified: null, reason: 'No Gigger on this gig yet.' };
+  const state = load();
+  const hasSub = state.pushSubscriptions.some((entry) => entry.giggerId === gig.giggerId);
+  if (!hasSub) return { notified: null, reason: 'Gigger has no push subscription yet — the gig shows it in the app.' };
+  const sent = await sendPushToGigger(state, gig.giggerId,
+    'Giggit: escrow held — EC$' + Number(gig.priceEC).toFixed(2) + ' for ' + gig.title,
+    'The money is held for "' + gig.title + '". Go do the job.');
+  if (!sent) return { notified: null, reason: 'Push failed to send — the gig shows it in the app.' };
+  return { notified: gig.giggerId };
+}
+
+/* Step 14 — verify notice: the customer gets a push the moment the
+   Gigger marks the job done, so they can verify with the code. */
+async function notifyVerifyNeeded(gig) {
+  if (!gig || !gig.customerPhone) return { notified: null, reason: 'No customer phone on this gig.' };
+  const state = load();
+  const hasSub = state.pushSubscriptions.some((entry) => entry.customerPhone === gig.customerPhone);
+  if (!hasSub) return { notified: null, reason: 'Customer has no push subscription yet — the gig shows it in the app.' };
+  const sent = await sendPushToCustomer(state, gig.customerPhone,
+    'Giggit: your ' + gig.category + ' gig is marked done',
+    '"' + gig.title + '" is done — open Giggit to verify with your completion code.');
+  if (!sent) return { notified: null, reason: 'Push failed to send — the gig shows it in the app.' };
+  return { notified: gig.customerPhone };
 }
 
 /* Release escrow for completed gigs past the dispute window. Returns
@@ -1145,17 +1203,18 @@ function getVapidKeys() {
   return keys;
 }
 
-function savePushSubscription(subscription, giggerId) {
+function savePushSubscription(subscription, giggerId, customerPhone) {
   const endpoint = String((subscription && subscription.endpoint) || '');
   const keys = (subscription && subscription.keys) || {};
   if (!endpoint.startsWith('https://') || !keys.p256dh || !keys.auth) {
     throw new ValidationError('That push subscription does not look right.');
   }
   const gid = cleanText(giggerId || '', 40);
+  const phone = cleanText(customerPhone || '', 40);
   const state = load();
   const linkedId = gid && state.giggers.some((entry) => entry.id === gid) ? gid : null;
   state.pushSubscriptions = state.pushSubscriptions.filter((entry) => entry.endpoint !== endpoint);
-  state.pushSubscriptions.unshift({ endpoint, keys, giggerId: linkedId, createdAt: nowIso() });
+  state.pushSubscriptions.unshift({ endpoint, keys, giggerId: linkedId, customerPhone: phone || null, createdAt: nowIso() });
   save(state);
   return { saved: true, count: state.pushSubscriptions.length };
 }
@@ -1188,6 +1247,8 @@ module.exports = {
   matchesForGig,
   notifyClosest,
   notifyRinged,
+  notifyEscrowHeld,
+  notifyVerifyNeeded,
   drainWidenQueue,
   acceptGig,
   rejectGig,
