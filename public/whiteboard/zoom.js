@@ -17,6 +17,19 @@
     var pointers = new Map();
     var pinchStart = null;
 
+    // Loading state: hide the overlay once the image is actually in, so a
+    // cold load never sits as a blank white box.
+    var loading = viewer.querySelector(".loading");
+    function hideLoading() { viewer.classList.add("done"); }
+    if (img.complete && img.naturalWidth > 0) {
+      hideLoading();
+    } else {
+      img.addEventListener("load", hideLoading);
+      img.addEventListener("error", function () {
+        if (loading) loading.querySelector("span:last-child").textContent = "Image didn't load — reload the page.";
+      });
+    }
+
     function apply() {
       inner.style.transform = "translate(" + tx + "px," + ty + "px) scale(" + scale + ")";
     }
