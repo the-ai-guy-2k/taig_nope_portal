@@ -278,6 +278,17 @@ router.post('/api/giggit/gigs/:id/start', throttleWrites, (req, res) => {
   }
 });
 
+/* Slice 4 — arrival check-in: the Gigger taps "I've arrived" between
+   accept and start. It is a marker on the progress steps, not a new
+   status, and it needs no GPS — arrival is the Gigger saying so. */
+router.post('/api/giggit/gigs/:id/arrived', throttleWrites, (req, res) => {
+  try {
+    res.json({ gig: store.arriveGig(req.params.id, String((req.body || {}).giggerId || '')) });
+  } catch (err) {
+    badRequest(res, err);
+  }
+});
+
 router.post('/api/giggit/gigs/:id/request-complete', throttleWrites, async (req, res) => {
   let gig;
   try {

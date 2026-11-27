@@ -607,10 +607,7 @@ async function openGig(id) {
     html += '<div class="hint">' + esc(lastActionNote) + '</div>';
     lastActionNote = '';
   }
-  html += '<div class="timeline">Posted ' + esc(new Date(g.createdAt).toLocaleString())
-    + (g.acceptedAt ? '<br>Accepted ' + esc(new Date(g.acceptedAt).toLocaleString()) + (g.giggerName ? ' by <b>' + esc(g.giggerName) + '</b>' : '') : '')
-    + (g.completedAt ? '<br>Completed ' + esc(new Date(g.completedAt).toLocaleString()) : '')
-    + '</div>';
+  html += progressSteps(g);
   if (g.customerName) {
     html += '<p><b>Customer:</b> ' + esc(g.customerName)
       + (g.customerPhone ? ' • ' + esc(g.customerPhone) : '') + '</p>';
@@ -661,6 +658,9 @@ async function openGig(id) {
   }
   if (g.rejections && g.rejections.length) {
     html += '<p class="meta">Passed on this gig: ' + g.rejections.map((r) => esc(r.giggerName) + ' (' + esc(new Date(r.at).toLocaleDateString()) + ')').join(', ') + '</p>';
+  }
+  if (isMine && g.status === 'accepted' && !g.arrivedAt) {
+    html += '<button class="btn" type="button" onclick="gigAction(\'' + esc(g.id) + '\', \'arrived\', {giggerId: whoAmI})">I’ve arrived at the job</button> ';
   }
   if (isMine && g.status === 'accepted') {
     html += '<button class="btn" type="button" onclick="gigAction(\'' + esc(g.id) + '\', \'start\', {giggerId: whoAmI})">Start the job</button> ';
@@ -800,6 +800,42 @@ function closeDetail() {
   detailId = null;
   $('gig-detail').innerHTML = '';
   renderCurrentTab();
+}
+
+/* ---- Job progress steps (slice 4): Posted → Accepted → Arrived →
+   Started → Marked done → Verified → Released, like the GoferHandy
+   video's customer side. Arrival is optional — a Gigger can start
+   without tapping it — so it shows done only when it happened. */
+function progressSteps(g) {
+  const steps = [
+    { label: 'Posted', at: g.createdAt, required: true },
+    { label: 'Accepted — escrow held', at: g.acceptedAt, required: true },
+    { label: 'Gigger arrived', at: g.arrivedAt, required: false },
+    { label: 'Job started', at: g.startedAt, required: true },
+    { label: 'Marked done', at: g.doneRequestedAt, required: true },
+    { label: 'Verified', at: g.completedAt, required: true },
+    { label: 'Released — paid', at: g.escrow && g.escrow.releasedAt, required: true },
+  ];
+  const live = !['cancelled', 'disputed'].includes(g.status);
+  let currentFound = false;
+  const rows = steps.map((step) => {
+    let state = 'pending';
+    if (step.at) state = 'done';
+    else if (live && step.required && !currentFound) {
+      state = 'current';
+      currentFound = true;
+    }
+    const mark = state === 'done' ? '✓' : state === 'current' ? '●' : '○';
+    return '<div class="step ' + state + '"><span class="step-mark">' + mark + '</span> <b>' + esc(step.label) + '</b>'
+      + (step.at ? ' <span class="meta">' + esc(new Date(step.at).toLocaleString()) + '</span>' : '')
+      + (state === 'current' ? ' <span class="meta">— next</span>' : '') + '</div>';
+  }).join('');
+  const tail = g.status === 'cancelled'
+    ? '<div class="step cancelled-step"><span class="step-mark">✕</span> <b>Cancelled</b>' + (g.cancelReason ? ' — ' + esc(g.cancelReason) : '') + '</div>'
+    : g.status === 'disputed'
+      ? '<div class="step disputed-step"><span class="step-mark">!</span> <b>Disputed — escrow frozen</b></div>'
+      : '';
+  return '<div class="steps"><h3>Job progress</h3>' + rows + tail + '</div>';
 }
 
 let pickedStars = 0;

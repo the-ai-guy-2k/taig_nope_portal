@@ -150,3 +150,11 @@ input[type=text], input[type=tel], input[type=number], select, textarea, input[t
 .gallery-grid { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0; }
 .gallery-item { text-align: center; }
 .gallery-item .thumb { max-width: 160px; }
+
+/* Job progress steps (slice 4) */
+.steps { margin: 10px 0; }
+.step { padding: 4px 0; color: #5b6b58; }
+.step.done { color: #12592b; }
+.step.current { color: #12592b; font-weight: 600; }
+.step .step-mark { display: inline-block; width: 18px; }
+.step.cancelled-step, .step.disputed-step { color: #9b2c2c; font-weight: 600; }

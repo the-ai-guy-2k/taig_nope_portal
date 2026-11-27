@@ -537,7 +537,13 @@ function publicGig(gig, opts) {
     sample: !!gig.sample,
     createdAt: gig.createdAt,
     acceptedAt: gig.acceptedAt || null,
+    arrivedAt: gig.arrivedAt || null,
+    startedAt: gig.startedAt || null,
+    doneRequestedAt: gig.doneRequestedAt || null,
     completedAt: gig.completedAt || null,
+    cancelledBy: gig.cancelledBy || null,
+    cancelReason: gig.cancelReason || null,
+    dispute: gig.dispute || null,
     when: gig.when || null,
     rejections: (gig.rejections || []).map((entry) => ({ giggerId: entry.giggerId, giggerName: entry.giggerName, at: entry.at })),
   };
@@ -1020,12 +1026,26 @@ function updateGig(id, body) {
   return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: false });
 }
 
+function arriveGig(id, giggerId) {
+  const state = load();
+  const gig = findGigOrThrow(state, id);
+  if (gig.status !== 'accepted') throw new ValidationError('Only an accepted gig can be marked arrived — this one is ' + gig.status + '.');
+  if (gig.giggerId !== giggerId) throw new ValidationError('Only the accepted Gigger can mark arrival on this gig.');
+  if (gig.arrivedAt) throw new ValidationError('Arrival is already marked on this gig.');
+  gig.arrivedAt = nowIso();
+  logEvent(state, 'matching', 'job_arrived', gig.id, { giggerId });
+  save(state);
+  return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
+}
+
 function startGig(id, giggerId) {
   const state = load();
   const gig = findGigOrThrow(state, id);
   if (gig.status !== 'accepted') throw new ValidationError('Only an accepted gig can start.');
   if (gig.giggerId !== giggerId) throw new ValidationError('Only the accepted Gigger can start this gig.');
   gig.status = 'in_progress';
+  gig.startedAt = nowIso();
+  logEvent(state, 'matching', 'job_started', gig.id, { giggerId });
   save(state);
   return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
 }
@@ -1038,6 +1058,8 @@ function requestComplete(id, giggerId) {
   }
   if (gig.giggerId !== giggerId) throw new ValidationError('Only the accepted Gigger can mark this gig done.');
   gig.status = 'completion_requested';
+  gig.doneRequestedAt = nowIso();
+  logEvent(state, 'matching', 'job_done_requested', gig.id, { giggerId });
   save(state);
   return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
 }
@@ -1054,6 +1076,7 @@ function confirmComplete(id, code) {
   gig.status = 'completed';
   gig.completedAt = nowIso();
   gig.escrow.releaseAt = new Date(Date.now() + disputeWindowMs(state)).toISOString();
+  logEvent(state, 'matching', 'job_confirmed', gig.id, { giggerId: gig.giggerId });
   save(state);
   return publicGig(gig, { rate: settingsOf(state).usdRate, showContacts: true });
 }
@@ -1400,6 +1423,7 @@ module.exports = {
   updateGig,
   submitQuote,
   acceptQuote,
+  arriveGig,
   startGig,
   requestComplete,
   confirmComplete,
