@@ -12,7 +12,7 @@ Scripts: `scripts/giggit-smoke-tests.js`, `scripts/giggit-policy-tests.js`,
 ## 2026-11-26 — Testing + audit build (local run, pre-merge)
 
 - **Runner:** builder, Giggit testing + audit build (Tee's word, Nov 26, 21:38 ET).
-- **Commit:** branch `testing/giggit-testing-audit` (merge commit to be filled in on merge).
+- **Commit:** branch `testing/giggit-testing-audit`, merged as PR #6, merge commit `b757779` (2026-11-27 03:10:29Z).
 - **Scope:** first Giggit test suites + stage-appropriate security controls
   (operator token, completion-code party rule, security headers, loud
   fallback logging, wallet newest-first, chat over-long refusal).
@@ -96,8 +96,7 @@ here with the versions.
   Nov 26, ~22:15 ET: security in this build, Uber-level, done the manual
   way like a team of coders — policies, best practice, human review — and
   documented so the level of security is proved, not claimed).
-- **Commit:** branch `security/giggit-manual-review` (merge commit to be
-  filled in on merge).
+- **Commit:** branch `security/giggit-manual-review`, merged as PR #7, merge commit `eca9a57` (2026-11-27 03:36:51Z).
 - **Scope:** a human read of every Giggit route and every store function,
   looking for what the automated suites cannot see: who can do what to
   whom, and what the code trusts without checking.
@@ -178,6 +177,41 @@ again.
 Lesson recorded: the watcher needs its own smoke test — a run that proves
 the script at least reaches the remote/local comparison. That check is
 now part of the release checklist in the GVCA artifact.
+
+### PR #7 — CI, staging proof, merge, deploy (2026-11-27)
+
+- **CI on head `91f93f8`:** Validation + Smoke Tests pass, Docker Build
+  pass, Pipeline Report pass.
+- **Staging proof v3 (public staging URL, pr7 image, token active): 46
+  passed / 0 failed.** Re-proved the PR #6 controls on the new image
+  (headers, settings 401 without the token, no completion codes in lists
+  / stranger detail / accept response, code to the posting customer only
+  after accept, contacts=1 gated by the operator token) plus the new
+  T13–T18 checks: profile bio/gallery writes 401 without the token and
+  working with it, wallet 401/200, chat `by=admin` 400/200, dispute /
+  cancel / rate refused without proof and with the wrong phone and
+  landing with the right phone, quote-pick the same. Two probe lessons:
+  the first v3 run's T18 section failed because the probe made 31 writes
+  in under a minute from one address and tripped the write throttle (T7
+  working as designed) — the probe now runs in three windows separated
+  by 70-second sleeps; a second run tripped the same throttle at its
+  first write because the previous run's writes were still inside the
+  60-second window.
+- **Merge:** PR #7 merged 2026-11-27 03:36:51Z → main `eca9a57`.
+- **Deploy:** the fixed watcher script was run by hand once on the
+  Droplet (the timer was a no-op until this deploy — see the pipeline bug
+  above). `2026-11-27T03:37:55Z Deployed eca9a57 — staging OK, live OK`.
+  The hand-run itself printed one `log: command not found` line — it ran
+  the pre-merge script text (loaded before the pull); the token block's
+  assignment still ran, the token was passed, and the deploy completed.
+  The live checkout is now at `eca9a57`, so the timer's next tick runs
+  the fixed script (`log()` at line 18).
+- **Live verification of PR #7 (2026-11-27 ~03:38 UTC):** live container
+  carries `GIGGIT_ADMIN_TOKEN` (env confirmed); no "not set" warning in
+  live logs; **PUT settings without the token now returns 401 — the PR
+  #6 caveat is closed**; the dispute window is unchanged at 60; headers
+  all present; live gig list has no completion code. Disk 38% used / 36G
+  free after the deploy.
 
 ### Live verification of PR #6 (b757779) — 2026-11-27 ~03:25 UTC
 

@@ -37,7 +37,17 @@ runs the whole suite (13 stages) → staging proof → merge → auto-deploy.
 Nothing goes straight to the live app. CI also runs a dependency audit that
 blocks the build on any critical vulnerability — it caught one on the first
 run of this build (a critical IP-spoofing hole in a dependency) and the fix
-is recorded in the audit log.
+is recorded in the audit log. The pipeline itself was tested too: this
+build found the deploy watcher silently dead (a bug in the deploy script)
+and the live app running without its operator token, and both were fixed
+and proved on staging before they reached live — the full story is in the
+audit log.
+
+**Final results for this build (Nov 27):** full suite 13 stages green
+(smoke 20/20, policy 16/16, dispute 8/8 with the D7 gap, security 17/17);
+staging proof 46/46 on the public staging URL; live verified the same
+day (settings refuse without the token, headers present, no completion
+codes in lists).
 
 **The oopsie bar:** code works; if it breaks, it breaks because of a small
 mistake we can fix — not a mystery. The test suite exists so breakage is
@@ -229,3 +239,18 @@ forever — both are decisions, not bugs to patch quietly).
 high 2 / moderate 1 (proxy-addr 9.1, body-parser, brace-expansion, qs).
 Fixed by `npm audit fix` + express `^4.21.2` → `^4.22.3` (pins qs
 6.16.2). Post-fix audit: 0 vulnerabilities. Full suite re-run green.
+
+**Pipeline fix (Nov 27, PR #7):** the deploy watcher in `scripts/deploy-watch.sh`
+called `log()` before it was defined, so every watcher tick since the PR #6
+merge died silently and the timer did nothing. The fix moves `log()` above
+its first use (line 18). The merge deploy was run by hand once with the
+fixed script (`Deployed eca9a57 — staging OK, live OK`), after which the
+timer is live again. Lesson recorded: the watcher needs its own smoke test
+in the release checklist.
+
+**Live verification (Nov 27, PR #7):** the live container carries the
+operator token, the "not set" warning is gone, and PUT settings without the
+token now returns 401 — closing the one open item from the PR #6 live check
+(the 03:24 deploy had run the pre-merge script, which never passed the
+token). Dispute window unchanged at 60. Full staging + live record in the
+audit log.
