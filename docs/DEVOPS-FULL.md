@@ -381,3 +381,171 @@ To recreate this whole setup on a fresh repo + Droplet:
 - **Branch protection blocks a legitimate merge:** the block means CI is red
   or the branch is stale — fix that first. Lifting protection is owner-only
   and needs Tee's word.
+
+## 12. Audience layers — the system from each seat
+
+The technical sections above are for the DevOps engineer. These four layers
+explain the same system to the four people who live with it. Same facts, no
+mechanic knowledge needed. Diagrams do the heavy lifting.
+
+### 12.1 The manager
+
+**What the pipeline guarantees you.** Nothing reaches the live app without
+passing the checks, being proved on staging, and leaving a paper trail.
+Every change can be traced back to one pull request with one person's name
+on it. If a change breaks live, the system rolls it back on its own, and
+the log says exactly what it did and when.
+
+```
+  an idea            a pull request        the checks          staging
+  ────────►  work on a branch  ────────►  pass?  ────────►  prove it
+                                                                     │
+  live, healthy ◄── auto-deploy ◄── merge ◄── yes ──────────────────┘
+  (or rolled back on its own if live goes unhealthy)
+```
+
+**What it costs in time.** A change goes from finished code to live in
+minutes, with no phone call to a server and no one typing commands on the
+live box. That is the point: speed comes from the pipeline doing the
+repeating, not from skipping steps.
+
+**What can still go wrong.** The checks only catch what they were written
+to catch. A change can pass every check and still be wrong for the business
+— that is why staging exists (a human looks at it) and why rollback exists
+(a bad live deploy undoes itself). The pipeline is a safety net, not a
+guarantee.
+
+**Security, in one line.** The pipeline protects the *code*. The product's
+own security features — real money, location, phone calls — are V2, before
+the general public (see §12.2). Do not sell the app as secure to the public
+until V2 is in.
+
+### 12.2 Musty — the app owner
+
+**Follow one gig from the intake level, through the back end.**
+
+A client posts a gig on their phone. Here is where it goes, step by step:
+
+```
+  client phone ──HTTPS──► front door (nginx) ──► the app (container)
+        │                                              │
+        │                                     the desk (API routes)
+        │                                              │
+        │                                     the filing cabinet
+        │                                     (giggit.json, in the
+        │                                      live data volume)
+        │                                              │
+        ▼                                              ▼
+  giggers' phones ◄── push notices ◄── matching: closest 3 first
+  (2-minute window), then closest 6, then everyone matching
+```
+
+1. **Intake.** The client's gig arrives at the API — the desk that takes
+   requests. The desk writes it into the filing cabinet: the live data
+   file in the live volume (`nope-nebula-local`). The code never holds
+   anyone's data; the volume does.
+2. **Matching.** The engine asks the closest 3 giggers first (about 2
+   minutes), then the closest 6, then everyone matching in the parish.
+3. **Quotes and pick.** Giggers quote. The client picks one. The app
+   sends an "escrow-funded" notice to the gigger — the money is held
+   (simulated for now: no real money moves in testing).
+4. **The work.** The gigger starts, arrives, and asks to complete. The
+   app sends a "verify" notice to the client: check the work.
+5. **The close.** The client confirms. The money is released after the
+   dispute window (1 hour by default). Both sides rate each other.
+   Messages, photos, promos, and the wallet all live in the same filing
+   cabinet.
+
+**Where everything lives.**
+
+```
+  code (the image)          data (the volume)          the door (nginx)
+  ─────────────────         ──────────────────         ───────────────
+  built from GitHub,        live: nope-nebula-local    live :443 → :3000
+  replaced on every         staging: its own copy      staging :8443 → :3005
+  deploy                    (never the live one)
+```
+
+**Security — what is in place now, and what is V2.**
+
+In place now: the connection is locked (HTTPS, Let's Encrypt); the front
+door only lets real web traffic through; the app inside the container runs
+as a limited user, not as the server's owner; staging physically cannot
+touch live data (separate volumes); no change enters the code except
+through a pull request with green checks; the push-notification keys are
+made on the server and never written into the code; and no real money
+moves — the wallet is simulated, so there is nothing to steal yet.
+
+V2, before the general public: real money rails, location tracking with
+the user's permission, masked phone calls, cameras. These are **not in
+yet**. The January test runs on pretend money on purpose. The pipeline,
+staging, and docs are built to the production standard now; the product's
+security features land in V2.
+
+**What you can check yourself.** Staging:
+`https://taigtsp.duckdns.org:8443/giggit/` — see a change before it goes
+live. The deploy log on the server (`/var/log/taig-deploy.log`) — see
+what deployed and when. The health page (`/health`) — 200 means the app
+is up.
+
+### 12.3 The gigger
+
+**What happens when you use the app.** You see gigs near you first —
+the closest giggers are asked first. You send a quote. If the client
+picks you, the app walks you through each step: start, arrived, ask to
+complete. The client confirms, and your pay is released after the dispute
+window. Your rating is your reputation — it travels with your profile,
+with your gallery and your past work.
+
+```
+  your phone ──► see gigs near you ──► quote ──► picked ──► do the work
+        ▲                                                        │
+        │                                            step by step
+        │                                            in the app
+        └────────── pay released after the client confirms ─────┘
+```
+
+**Your data.** Your profile, gallery, ratings, and wallet live in the
+app's filing cabinet on the server — not on your phone. If you change
+phones, your history is still there. Test data on staging is separate
+from live; nothing you do in a test touches the real app.
+
+**Updates reach you on their own.** The app checks for a new version
+each time it opens (service-worker cache). When a new version ships
+through the pipeline, your phone picks it up — you do nothing.
+
+**Safety.** In-app chat with the client, so you never need to share your
+number. An SOS panel in the app. A dispute window if something goes
+wrong. Your money is held until the client confirms the work — and in
+testing, the money is pretend, so no real cash is at risk.
+
+### 12.4 The client
+
+**What happens when you post a job.** You describe the job and set a
+price or ask for quotes. The app asks the closest giggers first, so the
+person who comes is near you. You pick from the quotes, then you watch
+the job move step by step: accepted, started, arrived, asked to
+complete. You confirm when the work is done — only then is the money
+released.
+
+```
+  your request ──► closest giggers asked first ──► you pick ──► the work
+        ▲                                                        │
+        │                                            you watch each
+        │                                            step in the app
+        └────────── money released only after you confirm ──────┘
+```
+
+**Your money.** It is held (escrow) from the moment the gig is accepted
+until you confirm the work — the gigger is not paid before the job is
+done. In testing the money is pretend: no real cash moves, so nothing is
+at risk while the app is being proved. The dispute window (1 hour after
+completion) is your time to raise a problem.
+
+**Your messages and photos.** They stay inside the app — in the chat on
+the gig, in the app's filing cabinet on the server. Your request, your
+quotes, and your ratings are yours; the app does not sell them.
+
+**What you see when something changes.** The app updates itself on your
+phone. If a new version ships, you get it without doing anything — and
+every version was proved on staging before it reached you.
