@@ -143,7 +143,8 @@
         { label:"Jobs board", anchor:"jobs" },
         { label:"Conversations", anchor:"conversations" },
         { label:"Business money", anchor:"money" },
-        { label:"Stadium build opportunities", storeSub:"Stadium build opportunities" }
+        { label:"Stadium build opportunities", storeSub:"Stadium build opportunities" },
+        { label:"Funding Proposals", ext:HUB+"/funding/" }
       ] },
     { id:"calendar", label:"TAIG Calendar", tile:"TAIG Calendar", url:HUB+"/taig-calendar/",
       subs:[ { label:"Appointments", storeSub:"Appointments" } ] },
@@ -220,6 +221,8 @@
       b.subs.forEach(function (s){
         if (s.storeSub) {
           h += '<a class="sub" href="#/'+b.id+'/'+slug(s.storeSub)+'">'+esc(s.label)+'</a>';
+        } else if (s.ext) {
+          h += '<a class="sub" href="'+esc(s.ext)+'" target="_blank" rel="noopener">'+esc(s.label)+'</a>';
         } else if (s.href) {
           h += '<a class="sub" href="#/hive/pio/39">'+esc(s.label)+'</a>';
         } else {
