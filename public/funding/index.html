@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<meta name="description" content="TAIG & Associates — follow the work live. Five-year destinations, win conditions, live proof, and the ask: 20 minutes. For Jason Engelhardt (Silicon Beach) and Lucas Wyman (Duval Software)." />
+<title>Follow the Work — TAIG Funding, Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --navy:#182941; --navy-deep:#0E1A2C; --navy-panel:#1F3350; --navy-panel2:#243A5C;
+    --gold:#CDA140; --gold-bright:#E7C46A; --ink:#F5F2E9; --muted:#A9B6C9;
+    --line:rgba(205,161,64,.28); --win:#43B581; --loss:#E5534B; --radius:14px;
+  }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; background:
+      radial-gradient(1100px 480px at 85% -120px, rgba(205,161,64,.14), transparent 60%),
+      linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 340px, var(--navy) 100%);
+    background-color:var(--navy-deep); color:var(--ink);
+    font-family:"Barlow", system-ui, sans-serif; font-size:17px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.cond{ font-family:"Barlow Condensed","Barlow",sans-serif; text-transform:uppercase; letter-spacing:.02em; margin:0; }
+  p{ margin:0; } a{ color:var(--gold-bright); }
+  :focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .wrap{ max-width:1120px; margin:0 auto; padding:0 16px; }
+  .eyebrow{ color:var(--gold); font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:13px; }
+  .muted{ color:var(--muted); }
+  .gold{ color:var(--gold-bright); }
+  .livebadge{ display:inline-block; border:1px solid var(--win); border-radius:999px; padding:2px 10px; font-size:13px; color:#7FD6A8; }
+  .v1badge{ display:inline-block; border:1px solid var(--line); border-radius:999px; padding:2px 10px; font-size:13px; color:var(--gold-bright); }
+  .topnav{ position:sticky; top:0; z-index:50; background:rgba(14,26,44,.92); backdrop-filter:blur(8px); border-bottom:2px solid var(--gold); }
+  .topnav-inner{ max-width:1120px; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  .brand{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:26px; letter-spacing:.03em; color:var(--ink); text-decoration:none; padding:10px 8px 10px 0; margin-right:8px; }
+  .brand b{ color:var(--gold); }
+  .topnav a.navlink{ color:var(--ink); text-decoration:none; font-weight:600; padding:10px 10px; border-radius:8px; font-size:15px; }
+  .topnav a.navlink:hover{ background:rgba(205,161,64,.14); }
+  header.hero{ padding:44px 0 8px; }
+  header.hero h1{ font-size:clamp(44px, 9vw, 84px); line-height:.95; }
+  header.hero h1 span{ color:var(--gold); }
+  .tagline{ font-family:"Barlow Condensed",sans-serif; font-size:clamp(22px, 4vw, 30px); text-transform:uppercase; color:var(--gold-bright); margin-top:10px; }
+  .herosub{ max-width:760px; margin-top:12px; font-size:18px; }
+  .herometa{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  section{ padding:34px 0 8px; }
+  section h2{ font-size:clamp(28px, 5vw, 40px); margin-bottom:6px; }
+  section h2 span{ color:var(--gold); }
+  .section-sub{ color:var(--muted); max-width:760px; margin-bottom:18px; }
+  .cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px; }
+  .card{ background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel2)); border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+  .card h3{ font-size:23px; margin-bottom:8px; }
+  .card h3 span{ color:var(--gold); }
+  .card p + p{ margin-top:8px; }
+  .card .kicker{ color:var(--gold); font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:12px; }
+  .card ul{ margin:8px 0 0; padding-left:20px; }
+  .card li{ margin-top:4px; }
+  blockquote.philosophy{
+    margin:22px 0 0; padding:20px 22px; border-left:4px solid var(--gold);
+    background:rgba(205,161,64,.08); border-radius:0 var(--radius) var(--radius) 0;
+    font-size:19px;
+  }
+  blockquote.philosophy .who{ display:block; margin-top:8px; font-size:14px; color:var(--muted); }
+  .table-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); }
+  table.dest{ width:100%; min-width:720px; border-collapse:collapse; font-size:15px; }
+  table.dest th, table.dest td{ padding:10px 12px; text-align:left; border-bottom:1px solid rgba(205,161,64,.16); vertical-align:top; }
+  table.dest thead th{ font-family:"Barlow Condensed",sans-serif; text-transform:uppercase; letter-spacing:.04em; color:var(--gold-bright); font-size:16px; }
+  table.dest tbody tr:last-child th, table.dest tbody tr:last-child td{ border-bottom:none; }
+  table.dest tr.hl td, table.dest tr.hl th{ background:rgba(205,161,64,.10); }
+  table.dest td.num{ font-weight:700; white-space:nowrap; }
+  .updates{ list-style:none; margin:0; padding:0; }
+  .updates li{
+    display:grid; grid-template-columns:130px 1fr; gap:14px; padding:16px 0;
+    border-bottom:1px solid rgba(205,161,64,.16);
+  }
+  .updates li:first-child{ border-top:1px solid rgba(205,161,64,.16); }
+  .updates time{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:19px; color:var(--gold-bright); text-transform:uppercase; letter-spacing:.03em; }
+  .updates h3{ font-size:21px; margin-bottom:4px; }
+  .updates p{ color:var(--ink); }
+  .updates p + p{ margin-top:6px; }
+  .proof-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; }
+  .proof{ background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel2)); border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+  .proof h3{ font-size:22px; margin-bottom:6px; }
+  .proof h3 a{ color:var(--ink); text-decoration:none; }
+  .proof h3 a:hover{ color:var(--gold-bright); }
+  .proof .state{ color:var(--muted); font-size:15px; }
+  .proof .state b{ color:var(--ink); }
+  .ask{ display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:14px; }
+  .door{ border:2px solid var(--gold); border-radius:var(--radius); padding:20px; background:rgba(205,161,64,.07); }
+  .door h3{ font-size:26px; margin-bottom:4px; }
+  .door .who{ color:var(--gold-bright); font-weight:700; }
+  .door p + p{ margin-top:8px; }
+  .checklist{ list-style:none; margin:10px 0 0; padding:0; }
+  .checklist li{ padding:8px 0 8px 30px; position:relative; border-bottom:1px solid rgba(205,161,64,.14); }
+  .checklist li:last-child{ border-bottom:none; }
+  .checklist li::before{ content:"☐"; position:absolute; left:0; top:8px; color:var(--gold); font-size:18px; }
+  footer{ margin:44px 0 0; padding:26px 0 40px; border-top:2px solid var(--gold); color:var(--muted); font-size:15px; }
+  footer p + p{ margin-top:8px; }
+  @media (max-width:640px){
+    .updates li{ grid-template-columns:1fr; gap:4px; }
+  }
+</style>
+</head>
+<body>
+<nav class="topnav"><div class="topnav-inner">
+  <a class="brand" href="/funding/">TAIG <b>FUNDING</b></a>
+  <a class="navlink" href="#updates">Updates</a>
+  <a class="navlink" href="#destinations">Destinations</a>
+  <a class="navlink" href="#win-conditions">Win conditions</a>
+  <a class="navlink" href="#proof">Proof</a>
+  <a class="navlink" href="#ask">The ask</a>
+  <a class="navlink" href="/tag-hub/">Tag Hub →</a>
+</div></nav>
+
+<div class="wrap">
+<header class="hero">
+  <p class="eyebrow">TAIG &amp; Associates · Jacksonville, FL — live, not a deck</p>
+  <h1>Follow <span>the work.</span></h1>
+  <p class="tagline">This is not a presentation you say no to and walk away from.</p>
+  <p class="herosub">This page is where the work happens, in public. New entries go at the top of the log as they happen. The numbers below are real — sourced, or one of my locked prices, or labeled an assumption. If a number is wrong, the source next to it is where to check it. Prove this wrong.</p>
+  <div class="herometa">
+    <span class="livebadge">● LIVE — updated as the work happens</span>
+    <span class="v1badge">Last update: Nov 28, 2026</span>
+    <span class="v1badge">Sanil Dale Tison — TAIG &amp; Associates</span>
+  </div>
+  <blockquote class="philosophy">
+    "I started this thing without a goal in mind. My goal was just recovery — I just did it just to do it. But it's going somewhere."
+    <span class="who">— Sanil "Tee" Tison, Nov 28, 2026</span>
+  </blockquote>
+</header>
+
+<section id="updates">
+  <h2>Latest <span>updates</span></h2>
+  <p class="section-sub">Newest first. This is the log — watch it move.</p>
+  <!-- ADD NEW UPDATES AT THE TOP OF THIS LIST, newest first. One <li> per update: date, title, one or two short paragraphs. -->
+  <ul class="updates">
+    <li>
+      <time>Nov 28, 2026</time>
+      <div>
+        <h3>This page went live</h3>
+        <p>The funding proposals now live here, not in a deck. Jason Engelhardt (Silicon Beach) and Lucas Wyman (Duval Software) get this URL. The log below is where the work shows up from here on.</p>
+      </div>
+    </li>
+    <li>
+      <time>Nov 28, 2026</time>
+      <div>
+        <h3>Five-year destinations published</h3>
+        <p>Seven possible destinations to July 2031, built from real businesses that walked the same paths — small MSPs, sports software, indie labels, local agencies, gig marketplaces. The slow-and-steady road lands at $318K in year 5 and clears the $3,000-a-month profit goal. The MSP-led road lands at $343K. Full projections with sources: <a href="projections-5-year.pdf">Five-Year Destinations — Projections to July 2031 (PDF)</a>.</p>
+      </div>
+    </li>
+    <li>
+      <time>Nov 28, 2026</time>
+      <div>
+        <h3>Win conditions set</h3>
+        <p>Before starting anything, know what winning is. The exact checkable state that counts as a win is now set for every project — and for the overall five-year goal. They are listed below, each one provable with a document, a deposit, or a name.</p>
+      </div>
+    </li>
+  </ul>
+</section>
+
+<section id="destinations">
+  <h2>Five-year <span>destinations</span></h2>
+  <p class="section-sub">July 2026 → July 2031. Not one goal — a list of possible destinations, so the direction gets picked, not assumed. Starting point (Nov 2026): $0 recurring revenue in every lane. About half of new businesses do not reach year five (SBA, 49.2% five-year survival) — these are possibilities, not promises. Year-5 revenue is gross revenue, not profit.</p>
+  <div class="table-scroll">
+  <table class="dest">
+    <thead><tr><th>Destination</th><th>Year 5 base</th><th>Low</th><th>High</th><th>What has to be true</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td><b>G. Slow &amp; steady</b> — the most likely path</td><td class="num">$318K</td><td class="num">—</td><td class="num">—</td><td>MSP + Promotions carry; the rest stay small. Profit about $4,000/mo — above the $3,000/mo goal. <b>Plan the household on this one. The rest is upside.</b></td></tr>
+      <tr><td><b>A. MSP-led</b> — the steady business</td><td class="num">$343K</td><td class="num">$171K</td><td class="num">$500K</td><td>24 retainer clients; Andrea runs Jax, Madison opens. Lands almost exactly on the Datto average for a 1–4 person MSP ($337K).</td></tr>
+      <tr><td><b>B. SaaS-led</b> — Diamond IQ breaks out</td><td class="num">$40K</td><td class="num">$4K</td><td class="num">$132K</td><td>300 paying teams at $11/mo; other sports open after baseball.</td></tr>
+      <tr><td><b>C. Label-led</b> — Jay breaks</td><td class="num">$10K</td><td class="num">$1K</td><td class="num">$100K</td><td>2.5M Spotify streams a year. Streaming is small money; live + merch is the bigger win and is not projected here.</td></tr>
+      <tr><td><b>D. Promotions-led</b> — the marketing shop</td><td class="num">$120K</td><td class="num">$60K</td><td class="num">$270K</td><td>10 local clients on $1,000 a month, kept by results they can see.</td></tr>
+      <tr><td><b>E. Giggit-led</b> — the marketplace scales</td><td class="num">$411K</td><td class="num">$82K</td><td class="num">$1.37M</td><td>150 gigs a day across the Caribbean. Biggest upside, least certain — needs the cold start solved.</td></tr>
+      <tr><td><b>F. All lanes together</b></td><td class="num">$923K</td><td class="num">$318K</td><td class="num">$2.37M</td><td>Every lane hits base at once — and the team grows, because one person cannot run five lanes.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="section-sub" style="margin-top:14px;">Locked prices behind the math: MSP $79 / $119 / $179 per user a month, $500/mo minimum, $100/hr project work. Diamond IQ $11 a month per team. Giggit commissions 15% / 10% / 5%. Profit goal $3,000 a month after costs. Full year-by-year ramps, comps, and sources: <a href="projections-5-year.pdf">the projections PDF</a>.</p>
+</section>
+
+<section id="win-conditions">
+  <h2>Win <span>conditions</span></h2>
+  <p class="section-sub">The exact checkable state that counts as a win. Something you can show someone and they can use — nobody can say "you didn't do that" or "I can't see it."</p>
+  <div class="cards">
+    <div class="card"><p class="kicker">TAIG ITS</p><h3>First signed <span>retainer</span></h3><p>First signed client on a monthly retainer — $500/mo minimum, recurring payment. The G&amp;H Tires $400 one-time job is proof of work, not the win. Showable: signed agreement + deposit.</p></div>
+    <div class="card"><p class="kicker">TAIG Promotions</p><h3>A paying client <span>who got a customer</span></h3><p>A client who paid <i>and</i> got a customer from the work. Cards and demo sites are tools, not the win. Showable: payment + the booking.</p></div>
+    <div class="card"><p class="kicker">Diamond IQ</p><h3>A coach <span>using the read</span></h3><p>A coach or front-office person using the read to make a decision. The Shrimp report existing is real but not the win. What-ifs: 3+ of 5 holding = sustained.</p></div>
+    <div class="card"><p class="kicker">DIME</p><h3>A full season <span>at 52.4%+</span></h3><p>A full season at 52.4% or better against the spread — beats the juice. <b>Not won yet:</b> NFL 50–55–2, −$1,050; college 34–26–1, +$540; 25-season backtest 50.9%. Tracked as a model, not a money model.</p></div>
+    <div class="card"><p class="kicker">COTT / Hive label</p><h3>Jay <span>charting</span></h3><p>Jay charting, or the first dollar of music money. Album out, ISRC confirmed — no chart spot, no royalty yet. Showable: chart listing or royalty statement.</p></div>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <p class="kicker">Overall goal — 5 years, to July 2031</p>
+    <h3>Every item provable <span>with a document, a deposit, or a name</span></h3>
+    <ul class="checklist">
+      <li>Recurring business income covering life + business — $3,000/mo profit after costs, proven by bank statements</li>
+      <li>Job question settled — secure IT leadership role, or the business paying that role's money, stable</li>
+      <li>FSCJ bachelor's done, paper in hand</li>
+      <li>Diamond IQ with real paying teams at $11/mo — strangers paying and keeping paying</li>
+      <li>The label pays — Jay charted or royalties in</li>
+      <li>Nebula runs for other people — level 5</li>
+      <li>The team runs without Tee doing every step — Andrea running Jax, Madison build standing</li>
+    </ul>
+  </div>
+</section>
+
+<section id="proof">
+  <h2>Proof, <span>live now</span></h2>
+  <p class="section-sub">Not slides about work — the work itself, running in public. Each one links out. The honest state is next to each one, good and not-yet.</p>
+  <div class="proof-grid">
+    <div class="proof"><h3><a href="https://taigtsp.duckdns.org/shrimp-report/" target="_blank" rel="noopener">The Shrimp, On Paper →</a></h3><p class="state"><b>Diamond IQ Analyst Report, 6 pages.</b> Reads the Jumbo Shrimp on paper: 2025 champs 89–61, 2026 73–74, five timestamped what-ifs filed Nov 25. The read, the pattern, the what-if — in public.</p></div>
+    <div class="proof"><h3><a href="https://taigtsp.duckdns.org/psis/" target="_blank" rel="noopener">PSIS — Pitch Sequence Intelligence →</a></h3><p class="state"><b>Working app.</b> Log an at-bat, track Good / Bad / Delta outcomes. The Training side of Diamond IQ. Good/Bad are PSIS's own rules, not pitcher-ability measures.</p></div>
+    <div class="proof"><h3><a href="https://taigtsp.duckdns.org/dime/" target="_blank" rel="noopener">DIME →</a></h3><p class="state"><b>Live dashboard, graded in public.</b> NFL 50–55–2, −$1,050; college 34–26–1, +$540. Does not beat the juice yet — shown as a tracking model, not a money model.</p></div>
+    <div class="proof"><h3><a href="https://taigtsp.duckdns.org/giggit/" target="_blank" rel="noopener">Giggit →</a></h3><p class="state"><b>Live MVP.</b> Gig-work marketplace, St. Lucia first. January 2027 test phase: Tee + Musty only, pretend money, no public.</p></div>
+    <div class="proof"><h3><a href="https://taigtsp.duckdns.org/jay-epk/" target="_blank" rel="noopener">Jay Garrett EPK →</a></h3><p class="state"><b>Album out, ISRC confirmed.</b> "Something We Can Stomp To." No chart spot, no royalty yet — that is the win condition, still open.</p></div>
+    <div class="proof"><h3><a href="https://taigtsp.duckdns.org/hive-portal/" target="_blank" rel="noopener">The Hive →</a></h3><p class="state"><b>123 PIOs.</b> The workspace where the work is filed — every project, every bubble, in public.</p></div>
+    <div class="proof"><h3><a href="https://taigtsp.duckdns.org/way-i-use-ai/" target="_blank" rel="noopener">Nebula — the RFC →</a></h3><p class="state"><b>An operating system for building software with AI.</b> Public, CC BY, "prove this wrong" standard. Giggit is the proof it works — built with it, live.</p></div>
+  </div>
+</section>
+
+<section id="ask">
+  <h2>The ask: <span>20 minutes</span></h2>
+  <p class="section-sub">Not money on this call. Twenty minutes, this page open, three questions: does the trajectory hold, what's the weakest link, what proof comes next? Two doors — pick yours.</p>
+  <div class="ask">
+    <div class="door">
+      <p class="who">Jason Engelhardt — Silicon Beach</p>
+      <h3>Invest</h3>
+      <p>The money case. The label + the trajectory. The projections answer your bar — "the business must make money" — head-on: the slow-and-steady road clears the $3,000-a-month profit goal by year 5, and the MSP-led road clears it sooner, on comps from real shops doing the same work.</p>
+      <p><b>Open item, said plainly:</b> you asked to see Jay Garrett perform solo before any investment. That hasn't happened yet. When it does, it goes at the top of the log on this page.</p>
+    </div>
+    <div class="door">
+      <p class="who">Lucas Wyman — Duval Software</p>
+      <h3>Build / work with</h3>
+      <p>The operator door. This is not an investment ask. It's the work: Duval contracts, the fellowship, earning a spot on the team. What to look at is above — the ITS playbook, the live apps, the portfolio — and the trajectory this page tracks.</p>
+      <p><b>What I'm asking:</b> 20 minutes on the work, and your read on the weakest link in it.</p>
+    </div>
+  </div>
+  <blockquote class="philosophy">
+    "The juice has to be worth the squeeze. More juice, less squeeze — that's the whole deal."
+    <span class="who">— Sanil "Tee" Tison, Nov 28, 2026</span>
+  </blockquote>
+</section>
+
+<footer>
+  <p><b>TAIG &amp; Associates</b> — created by Sanil Dale Tison, Jacksonville, FL. Contact: <a href="mailto:taig2k@outlook.com">taig2k@outlook.com</a> · (904) 916-1460.</p>
+  <p>Every number on this page is a sourced figure, one of Tee's locked prices, or labeled an assumption. Locked: MSP $79 / $119 / $179 per user a month, $500/mo minimum, $100/hr project work; Diamond IQ $11 a month per team; Giggit commissions 15% / 10% / 5%. Starting point: $0 recurring revenue in every lane, November 2026.</p>
+  <p>How to follow: new entries go at the top of the log. Nothing here is a promise — it's the work, as it happens. Also filed in the <a href="/tag-hub/">Tag Hub</a> under Business overview → Funding Proposals.</p>
+</footer>
+</div>
+</body>
+</html>
