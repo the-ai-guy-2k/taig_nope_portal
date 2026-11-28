@@ -87,6 +87,17 @@
   .proof h3 a:hover{ color:var(--gold-bright); }
   .proof .state{ color:var(--muted); font-size:15px; }
   .proof .state b{ color:var(--ink); }
+  .menu-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; }
+  .piece{ background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel2)); border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+  .piece.featured{ border:2px solid var(--gold); background:rgba(205,161,64,.07); }
+  .piece h3{ font-size:22px; margin-bottom:4px; }
+  .piece h3 span{ color:var(--gold); }
+  .piece .kicker{ color:var(--gold); font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:12px; }
+  .piece .num{ font-family:"Barlow Condensed",sans-serif; font-size:26px; color:var(--gold-bright); font-weight:700; margin-top:6px; }
+  .piece .num small{ font-size:14px; color:var(--muted); font-family:"Barlow",sans-serif; font-weight:400; }
+  .piece p + p{ margin-top:8px; }
+  .firstdibs{ margin-top:16px; padding:20px 22px; border:2px solid var(--gold); border-radius:var(--radius); background:rgba(205,161,64,.10); font-size:19px; }
+  .firstdibs b{ color:var(--gold-bright); }
   .ask{ display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:14px; }
   .door{ border:2px solid var(--gold); border-radius:var(--radius); padding:20px; background:rgba(205,161,64,.07); }
   .door h3{ font-size:26px; margin-bottom:4px; }
@@ -106,10 +117,13 @@
 <body>
 <nav class="topnav"><div class="topnav-inner">
   <a class="brand" href="/funding/">TAIG <b>FUNDING</b></a>
+  <a class="navlink" href="#umbrella">The whole idea</a>
+  <a class="navlink" href="#menu">Fund a piece</a>
   <a class="navlink" href="#updates">Updates</a>
   <a class="navlink" href="#destinations">Destinations</a>
   <a class="navlink" href="#win-conditions">Win conditions</a>
   <a class="navlink" href="#proof">Proof</a>
+  <a class="navlink" href="#dogfooding">Built with Nebula</a>
   <a class="navlink" href="#ask">The ask</a>
   <a class="navlink" href="/tag-hub/">Tag Hub →</a>
 </div></nav>
@@ -119,7 +133,7 @@
   <p class="eyebrow">TAIG &amp; Associates · Jacksonville, FL — live, not a deck</p>
   <h1>Follow <span>the work.</span></h1>
   <p class="tagline">This is not a presentation you say no to and walk away from.</p>
-  <p class="herosub">This page is where the work happens, in public. New entries go at the top of the log as they happen. The numbers below are real — sourced, or one of my locked prices, or labeled an assumption. If a number is wrong, the source next to it is where to check it. Prove this wrong.</p>
+  <p class="herosub">This page is where the work happens, in public. New entries go at the top of the log as they happen. The numbers below are real — sourced, or one of my locked prices, or labeled an assumption. If a number is wrong, the source next to it is where to check it. Prove this wrong. One system at the top — Nebula — and a menu of pieces below it. Pick one, or fund the whole.</p>
   <div class="herometa">
     <span class="livebadge">● LIVE — updated as the work happens</span>
     <span class="v1badge">Last update: Nov 28, 2026</span>
@@ -131,11 +145,75 @@
   </blockquote>
 </header>
 
+<section id="umbrella">
+  <h2>The whole <span>idea</span></h2>
+  <p class="section-sub">Everything on this page sits under one umbrella.</p>
+  <div class="card">
+    <p class="kicker">Nebula — the operating system for building software with AI</p>
+    <h3>The system that <span>builds all of it</span></h3>
+    <p>Nebula is an operating system for building software with AI — created by Sanil Dale Tison. It is not AI. It is the system that runs the AI: intent first, verified before execution, then the build, with proof at every step. Every piece below — the IT shop, the label, the sports software, the marketplace, the Hive itself — is built with it, and run by it.</p>
+    <p>The whole idea, in one line: <b>one operator, one system, as many pieces as the system can carry.</b> Read the system itself: <a href="https://taigtsp.duckdns.org/way-i-use-ai/" target="_blank" rel="noopener">The RFC — the way I use AI →</a></p>
+  </div>
+</section>
+
+<section id="menu">
+  <h2>Fund a <span>piece</span></h2>
+  <p class="section-sub">Pick one. Each piece is a real business with a real year-5 number behind it — base case, July 2030–July 2031, from the projections. Jason picks which one he wants to fund.</p>
+  <div class="menu-grid">
+    <div class="piece featured">
+      <p class="kicker">Headline lane</p>
+      <h3>Giggit — <span>the marketplace</span></h3>
+      <p class="num">$411K <small>year 5, base case</small></p>
+      <p>Gig-work marketplace — hire a gigger for the job, in the app. St. Lucia first, then the Windward Islands, then the Caribbean. Live MVP, January 2027 test with Tee + Musty. Commissions 15% / 10% / 5%. Biggest upside on this page, least certain — the cold start is the whole game.</p>
+    </div>
+    <div class="piece">
+      <p class="kicker">TAIG ITS</p>
+      <h3>The IT shop — <span>MSP</span></h3>
+      <p class="num">$343K <small>year 5, base case</small></p>
+      <p>Managed IT for small business — $79 / $119 / $179 per user a month, $500/mo minimum. 24 retainer clients by year 5; Andrea runs Jax, Madison opens. The steady business. Lands almost exactly on the Datto average for a 1–4 person MSP.</p>
+    </div>
+    <div class="piece">
+      <p class="kicker">Diamond IQ</p>
+      <h3>The sports <span>software</span></h3>
+      <p class="num">$40K <small>year 5, base case</small></p>
+      <p>Reads a baseball team on paper — the pattern, the what-if, in public. $11 a month per team. 300 paying teams by year 5. The Shrimp report and PSIS are live now.</p>
+    </div>
+    <div class="piece">
+      <p class="kicker">TAIG Promotions</p>
+      <h3>The marketing <span>shop</span></h3>
+      <p class="num">$120K <small>year 5, base case</small></p>
+      <p>Local marketing a client can measure — a paying client who got a customer from the work. 10 local clients on $1,000 a month by year 5.</p>
+    </div>
+    <div class="piece">
+      <p class="kicker">COTT / TAIG TAN</p>
+      <h3>The label — <span>Jay Garrett</span></h3>
+      <p class="num">$10K <small>year 5, base case</small></p>
+      <p>The label. Jay's album is out, ISRC confirmed. Year 5 is 2.5M Spotify streams a year — streaming is small money; live + merch is the bigger win and is not projected here.</p>
+    </div>
+    <div class="piece">
+      <p class="kicker">The Hive</p>
+      <h3>The whole — <span>all of it, together</span></h3>
+      <p class="num">$923K <small>year 5, base case — combined total</small></p>
+      <p>The team and the incubator everything above lives in. Fund the Hive and you're backing all of it at once. The $923K is the all-lanes combined total, not Hive-only revenue — the Hive is the matchmaker: an investor funds a piece attached to a Hive member.</p>
+    </div>
+  </div>
+  <div class="firstdibs">
+    <b>First dibs.</b> Fund one idea and you get first dibs on investing in any of the other ideas — the Hive and the rest.
+  </div>
+</section>
+
 <section id="updates">
   <h2>Latest <span>updates</span></h2>
   <p class="section-sub">Newest first. This is the log — watch it move.</p>
   <!-- ADD NEW UPDATES AT THE TOP OF THIS LIST, newest first. One <li> per update: date, title, one or two short paragraphs. -->
   <ul class="updates">
+    <li>
+      <time>Nov 28, 2026</time>
+      <div>
+        <h3>The whole idea, on one page</h3>
+        <p>Nebula is now the umbrella at the top, the fundable pieces are a pick-and-choose menu, and the first-dibs term is on the page. Giggit is the headline lane. This page is the whole — the individual pages stay as they are and get updated on their own.</p>
+      </div>
+    </li>
     <li>
       <time>Nov 28, 2026</time>
       <div>
@@ -216,6 +294,17 @@
     <div class="proof"><h3><a href="https://taigtsp.duckdns.org/jay-epk/" target="_blank" rel="noopener">Jay Garrett EPK →</a></h3><p class="state"><b>Album out, ISRC confirmed.</b> "Something We Can Stomp To." No chart spot, no royalty yet — that is the win condition, still open.</p></div>
     <div class="proof"><h3><a href="https://taigtsp.duckdns.org/hive-portal/" target="_blank" rel="noopener">The Hive →</a></h3><p class="state"><b>123 PIOs.</b> The workspace where the work is filed — every project, every bubble, in public.</p></div>
     <div class="proof"><h3><a href="https://taigtsp.duckdns.org/way-i-use-ai/" target="_blank" rel="noopener">Nebula — the RFC →</a></h3><p class="state"><b>An operating system for building software with AI.</b> Public, CC BY, "prove this wrong" standard. Giggit is the proof it works — built with it, live.</p></div>
+  </div>
+</section>
+
+<section id="dogfooding">
+  <h2>Built with <span>Nebula</span></h2>
+  <p class="section-sub">Eating our own dog food — and producing quality work with it.</p>
+  <div class="card">
+    <p class="kicker">Nebula OS — the system that built this page</p>
+    <h3>One operator <span>ships this much</span></h3>
+    <p>This page, Giggit, the Shrimp report, PSIS, DIME — all of it was built the Nebula way: intent first, verified before execution, the build guided by the rules, proof at every step, branches and pull requests and staging before anything goes live. That is the pitch underneath the pitch: the OS is how one operator ships this much, this fast, with the receipts to show for it.</p>
+    <p>If the system works for one operator, it works for the next one. That is what "Nebula runs for other people" means — item six on the overall-goal list above. The system itself: <a href="https://taigtsp.duckdns.org/way-i-use-ai/" target="_blank" rel="noopener">The RFC →</a></p>
   </div>
 </section>
 
