@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<meta name="description" content="Nebula OS — the operating system for building software with AI, created by Sanil Dale Tison." />
+<title>Nebula OS — Investor Portfolio — TAIG &amp; Associates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --navy:#182941; --navy-deep:#0E1A2C; --navy-panel:#1F3350; --navy-panel2:#243A5C;
+    --gold:#CDA140; --gold-bright:#E7C46A; --ink:#F5F2E9; --muted:#A9B6C9;
+    --line:rgba(205,161,64,.28); --win:#43B581; --loss:#E5534B; --radius:14px;
+  }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; background:
+      radial-gradient(1100px 480px at 85% -120px, rgba(205,161,64,.14), transparent 60%),
+      linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 340px, var(--navy) 100%);
+    background-color:var(--navy-deep); color:var(--ink);
+    font-family:"Barlow", system-ui, sans-serif; font-size:17px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.cond{ font-family:"Barlow Condensed","Barlow",sans-serif; text-transform:uppercase; letter-spacing:.02em; margin:0; }
+  p{ margin:0; } a{ color:var(--gold-bright); }
+  :focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .wrap{ max-width:1120px; margin:0 auto; padding:0 16px; }
+  .eyebrow{ color:var(--gold); font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:13px; }
+  .muted{ color:var(--muted); }
+  .gold{ color:var(--gold-bright); }
+  .livebadge{ display:inline-block; border:1px solid var(--win); border-radius:999px; padding:2px 10px; font-size:13px; color:#7FD6A8; }
+  .v1badge{ display:inline-block; border:1px solid var(--line); border-radius:999px; padding:2px 10px; font-size:13px; color:var(--gold-bright); }
+  .topnav{ position:sticky; top:0; z-index:50; background:rgba(14,26,44,.92); backdrop-filter:blur(8px); border-bottom:2px solid var(--gold); }
+  .topnav-inner{ max-width:1120px; margin:0 auto; padding:0 16px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  .brand{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:26px; letter-spacing:.03em; color:var(--ink); text-decoration:none; padding:10px 8px 10px 0; margin-right:8px; }
+  .brand b{ color:var(--gold); }
+  .topnav a.navlink{ color:var(--ink); text-decoration:none; font-weight:600; padding:10px 10px; border-radius:8px; font-size:15px; }
+  .topnav a.navlink:hover{ background:rgba(205,161,64,.14); }
+  header.hero{ padding:44px 0 8px; }
+  header.hero h1{ font-size:clamp(44px, 9vw, 84px); line-height:.95; }
+  header.hero h1 span{ color:var(--gold); }
+  .tagline{ font-family:"Barlow Condensed",sans-serif; font-size:clamp(22px, 4vw, 30px); text-transform:uppercase; color:var(--gold-bright); margin-top:10px; }
+  .herosub{ max-width:760px; margin-top:12px; font-size:18px; }
+  .herometa{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  section{ padding:34px 0 8px; }
+  section h2{ font-size:clamp(28px, 5vw, 40px); margin-bottom:6px; }
+  section h2 span{ color:var(--gold); }
+  .section-sub{ color:var(--muted); max-width:760px; margin-bottom:18px; }
+  .cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px; }
+  .card{ background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel2)); border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+  .card h3{ font-size:23px; margin-bottom:8px; }
+  .card h3 span{ color:var(--gold); }
+  .card p + p{ margin-top:8px; }
+  .card .kicker{ color:var(--gold); font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:12px; }
+  .card ul{ margin:8px 0 0; padding-left:20px; }
+  .card li{ margin-top:4px; }
+  blockquote.philosophy{
+    margin:22px 0 0; padding:20px 22px; border-left:4px solid var(--gold);
+    background:rgba(205,161,64,.08); border-radius:0 var(--radius) var(--radius) 0;
+    font-size:19px;
+  }
+  blockquote.philosophy .who{ display:block; margin-top:8px; font-size:14px; color:var(--muted); }
+  .table-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); }
+  table.dest{ width:100%; min-width:720px; border-collapse:collapse; font-size:15px; }
+  table.dest th, table.dest td{ padding:10px 12px; text-align:left; border-bottom:1px solid rgba(205,161,64,.16); vertical-align:top; }
+  table.dest thead th{ font-family:"Barlow Condensed",sans-serif; text-transform:uppercase; letter-spacing:.04em; color:var(--gold-bright); font-size:16px; }
+  table.dest tbody tr:last-child th, table.dest tbody tr:last-child td{ border-bottom:none; }
+  table.dest tr.hl td, table.dest tr.hl th{ background:rgba(205,161,64,.10); }
+  table.dest td.num{ font-weight:700; white-space:nowrap; }
+  .updates{ list-style:none; margin:0; padding:0; }
+  .updates li{
+    display:grid; grid-template-columns:130px 1fr; gap:14px; padding:16px 0;
+    border-bottom:1px solid rgba(205,161,64,.16);
+  }
+  .updates li:first-child{ border-top:1px solid rgba(205,161,64,.16); }
+  .updates time{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:19px; color:var(--gold-bright); text-transform:uppercase; letter-spacing:.03em; }
+  .updates h3{ font-size:21px; margin-bottom:4px; }
+  .updates p{ color:var(--ink); }
+  .updates p + p{ margin-top:6px; }
+  .proof-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; }
+  .proof{ background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel2)); border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+  .proof h3{ font-size:22px; margin-bottom:6px; }
+  .proof h3 a{ color:var(--ink); text-decoration:none; }
+  .proof h3 a:hover{ color:var(--gold-bright); }
+  .proof .state{ color:var(--muted); font-size:15px; }
+  .proof .state b{ color:var(--ink); }
+  .menu-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; }
+  .piece{ background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel2)); border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+  .piece.featured{ border:2px solid var(--gold); background:rgba(205,161,64,.07); }
+  .piece h3{ font-size:22px; margin-bottom:4px; }
+  .piece h3 span{ color:var(--gold); }
+  .piece .kicker{ color:var(--gold); font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:12px; }
+  .piece .num{ font-family:"Barlow Condensed",sans-serif; font-size:26px; color:var(--gold-bright); font-weight:700; margin-top:6px; }
+  .piece .num small{ font-size:14px; color:var(--muted); font-family:"Barlow",sans-serif; font-weight:400; }
+  .piece p + p{ margin-top:8px; }
+  .firstdibs{ margin-top:16px; padding:20px 22px; border:2px solid var(--gold); border-radius:var(--radius); background:rgba(205,161,64,.10); font-size:19px; }
+  .firstdibs b{ color:var(--gold-bright); }
+  .ways{ margin-top:16px; }
+  .ways h3{ font-size:22px; margin-bottom:8px; }
+  .ways h3 span{ color:var(--gold); }
+  .ways .way{ padding:10px 0; border-bottom:1px solid rgba(205,161,64,.14); }
+  .ways .way:last-child{ border-bottom:none; }
+  .ways .way b{ color:var(--gold-bright); }
+  .ask{ display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:14px; }
+  .door{ border:2px solid var(--gold); border-radius:var(--radius); padding:20px; background:rgba(205,161,64,.07); }
+  .door h3{ font-size:26px; margin-bottom:4px; }
+  .door .who{ color:var(--gold-bright); font-weight:700; }
+  .door p + p{ margin-top:8px; }
+  .checklist{ list-style:none; margin:10px 0 0; padding:0; }
+  .checklist li{ padding:8px 0 8px 30px; position:relative; border-bottom:1px solid rgba(205,161,64,.14); }
+  .checklist li:last-child{ border-bottom:none; }
+  .checklist li::before{ content:"☐"; position:absolute; left:0; top:8px; color:var(--gold); font-size:18px; }
+  footer{ margin:44px 0 0; padding:26px 0 40px; border-top:2px solid var(--gold); color:var(--muted); font-size:15px; }
+  footer p + p{ margin-top:8px; }
+  @media (max-width:640px){
+    .updates li{ grid-template-columns:1fr; gap:4px; }
+  }
+</style>
+</head>
+<body>
+<nav class="topnav"><div class="topnav-inner">
+  <a class="brand" href="/investor-portfolio/">TAIG <b>INVESTOR PORTFOLIO</b></a>
+  <a class="navlink" href="/investor-portfolio/">← Back to the Portfolio</a>
+  <a class="navlink" href="/investor-portfolio/#menu">All lanes</a>
+  <a class="navlink" href="/tag-hub/">Tag Hub →</a>
+</div></nav>
+
+<div class="wrap">
+<header class="hero">
+  <p class="eyebrow">Investor Portfolio · Nebula OS · Lane</p>
+  <h1>Nebula OS — <span>the system underneath.</span></h1>
+  <p class="herosub">The operating system for building software with AI. Not AI — the system that runs the AI.</p>
+  <div class="herometa">
+    <span class="livebadge">● LIVE — updated as the work happens</span>
+    <span class="v1badge">Last update: Nov 28, 2026</span>
+  </div>
+</header>
+
+<section>
+  <h2>What <span>it is</span></h2>
+  <div class="card"><h3>The system that <span>builds all of it</span></h3><p>Nebula is an operating system for building software with AI — created by Sanil Dale Tison. It is not AI. It is the system that runs the AI: intent first, verified before execution, then the build, with proof at every step. Every piece of the portfolio — the IT shop, the label, the sports software, the marketplace, the Hive itself — is built with it, and run by it.</p></div>
+</section>
+
+<section>
+  <h2>Honest <span>state</span></h2>
+  <div class="card"><h3>Where it <span>stands</span></h3><p>Nebula runs the whole portfolio today. This page, Giggit, the Shrimp report, PSIS, DIME — all of it was built the Nebula way: intent first, verified before execution, the build guided by the rules, proof at every step, branches and pull requests and staging before anything goes live.</p></div>
+</section>
+
+<section>
+  <h2>Win <span>condition</span></h2>
+  <div class="card"><h3>Runs for <span>other people</span></h3><p>Nebula runs for other people — level 5. If the system works for one operator, it works for the next one. That is item six on the overall five-year goal list.</p></div>
+</section>
+
+<section>
+  <h2>Year-5 <span>number</span></h2>
+  <div class="card"><h3>No separate <span>number</span></h3><p>Nebula carries <b>no separate year-5 number</b>. It is the system underneath the whole — its value shows up inside every lane's number, not as a line of its own.</p></div>
+</section>
+
+<section>
+  <h2>Proof, <span>live now</span></h2>
+  <div class="proof-grid">
+  <div class="proof"><h3><a href="https://taigtsp.duckdns.org/way-i-use-ai/" target="_blank" rel="noopener">Nebula — the RFC →</a></h3><p class="state"><b>The system itself.</b> Public, CC BY, “prove this wrong” standard. Giggit is the proof it works — built with it, live.</p></div>
+  <div class="proof"><h3><a href="https://taigtsp.duckdns.org/giggit/" target="_blank" rel="noopener">Giggit →</a></h3><p class="state"><b>Built with Nebula, live.</b> The marketplace MVP — the proof the OS ships real software.</p></div>
+  <div class="proof"><h3><a href="/investor-portfolio/" target="_blank" rel="noopener">Investor Portfolio — the hub →</a></h3><p class="state"><b>Dogfooding.</b> This page was built the Nebula way too — see “Built with Nebula” on the hub.</p></div>
+  </div>
+</section>
+
+<footer>
+  <p><b>TAIG &amp; Associates</b> — created by Sanil Dale Tison, Jacksonville, FL. Contact: <a href="mailto:taig2k@outlook.com">taig2k@outlook.com</a> · (904) 916-1460.</p>
+  <p>Every number on this page is a sourced figure, one of Tee's locked prices, or labeled an assumption. Starting point: $0 recurring revenue in every lane, November 2026. Nothing here is a promise — it's the work, as it happens.</p>
+  <p><a href="/investor-portfolio/">← Back to the Investor Portfolio</a> · Also filed in the <a href="/tag-hub/">Tag Hub</a> under Business overview → Funding Proposals.</p>
+</footer>
+</div>
+</body>
+</html>

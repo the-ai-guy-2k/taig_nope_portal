@@ -4,8 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="dark" />
-<meta name="description" content="TAIG & Associates — follow the work live. Five-year destinations, win conditions, live proof, and the ask: 20 minutes. For Jason Engelhardt (Silicon Beach) and Lucas Wyman (Duval Software)." />
-<title>Follow the Work — TAIG Funding, Live</title>
+<meta name="description" content="Investor Portfolio — TAIG &amp; Associates. The whole idea under Nebula, the lanes, the funding menu as a system, win conditions, live proof, and the ask: 20 minutes. For Lucas Wyman, Jason Engelhardt, and others like them — builders and backers." />
+<title>Investor Portfolio — TAIG &amp; Associates</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -115,6 +115,12 @@
   .checklist li::before{ content:"☐"; position:absolute; left:0; top:8px; color:var(--gold); font-size:18px; }
   footer{ margin:44px 0 0; padding:26px 0 40px; border-top:2px solid var(--gold); color:var(--muted); font-size:15px; }
   footer p + p{ margin-top:8px; }
+  .piece .lane-link{ display:inline-block; margin-top:12px; font-weight:700; }
+  .piece .state{ color:var(--muted); font-size:15px; }
+  .piece .state b{ color:var(--ink); }
+  .sys-table{ width:100%; border-collapse:collapse; font-size:15px; }
+  .sys-table th, .sys-table td{ padding:10px 12px; text-align:left; border-bottom:1px solid rgba(205,161,64,.16); vertical-align:top; }
+  .sys-table th{ font-family:"Barlow Condensed",sans-serif; text-transform:uppercase; letter-spacing:.04em; color:var(--gold-bright); font-size:16px; white-space:nowrap; }
   @media (max-width:640px){
     .updates li{ grid-template-columns:1fr; gap:4px; }
   }
@@ -122,9 +128,10 @@
 </head>
 <body>
 <nav class="topnav"><div class="topnav-inner">
-  <a class="brand" href="/funding/">TAIG <b>FUNDING</b></a>
+  <a class="brand" href="/investor-portfolio/">TAIG <b>INVESTOR PORTFOLIO</b></a>
   <a class="navlink" href="#umbrella">The whole idea</a>
-  <a class="navlink" href="#menu">Fund a piece</a>
+  <a class="navlink" href="#menu">The lanes</a>
+  <a class="navlink" href="#funding-system">The funding system</a>
   <a class="navlink" href="#updates">Updates</a>
   <a class="navlink" href="#destinations">Destinations</a>
   <a class="navlink" href="#win-conditions">Win conditions</a>
@@ -136,10 +143,10 @@
 
 <div class="wrap">
 <header class="hero">
-  <p class="eyebrow">TAIG &amp; Associates · Made for Lucas, and others like him — builders and backers</p>
-  <h1>Follow <span>the work.</span></h1>
+  <p class="eyebrow">TAIG &amp; Associates · Investor Portfolio — made for Lucas, and others like him — builders and backers</p>
+  <h1>Investor <span>Portfolio.</span></h1>
   <p class="tagline">This is not a presentation you say no to and walk away from.</p>
-  <p class="herosub">This site was made for Lucas and others like him — people who build and people who back — to show them our vision. This page is where the work happens, in public. New entries go at the top of the log as they happen. The numbers below are real — sourced, or one of my locked prices, or labeled an assumption. If a number is wrong, the source next to it is where to check it. Prove this wrong. One system at the top — Nebula — and a menu of pieces below it. Pick one, or fund the whole.</p>
+  <p class="herosub">This site was made for Lucas and others like him — people who build and people who back — to show them our vision. This portfolio is where the work happens, in public. New entries go at the top of the log as they happen. The numbers below are real — sourced, or one of my locked prices, or labeled an assumption. If a number is wrong, the source next to it is where to check it. Prove this wrong. One system at the top — Nebula — and a menu of lanes below it. Each lane has its own page. Pick one, or fund the whole.</p>
   <div class="herometa">
     <span class="livebadge">● LIVE — updated as the work happens</span>
     <span class="v1badge">Last update: Nov 28, 2026</span>
@@ -163,56 +170,96 @@
 </section>
 
 <section id="menu">
-  <h2>Fund a <span>piece</span></h2>
-  <p class="section-sub">Pick one — or fund it any of these five ways. Each piece is a real business with a real year-5 number behind it — base case, July 2030–July 2031, from the projections. What's on this site, straight from the notebook: TAIG ITS, The Hive, COTT, Giggit, other TAIG2K products, TAIG2K as a software company, Nebula OS, the RFC.</p>
+  <h2>The <span>lanes</span></h2>
+  <p class="section-sub">Pick one — or fund it any of the five ways below. Each lane is a real business with a real year-5 number behind it — base case, July 2030–July 2031, from the projections — or an explicit note where there is no number. Every lane has its own page: lanes that already live somewhere keep that page, and the new ones live under this portfolio. What's on this site, straight from the notebook: TAIG ITS, The Hive, COTT, Giggit, other TAIG2K products, TAIG2K as a software company, Nebula OS, the RFC — plus the stadium build.</p>
   <div class="menu-grid">
     <div class="piece featured">
       <p class="kicker">Headline lane</p>
       <h3>Giggit — <span>the marketplace</span></h3>
       <p class="num">$411K <small>year 5, base case</small></p>
-      <p>Gig-work marketplace — hire a gigger for the job, in the app. St. Lucia first, then the Windward Islands, then the Caribbean. Live MVP, January 2027 test with Tee + Musty. Commissions 15% / 10% / 5%. Biggest upside on this page, least certain — the cold start is the whole game.</p>
+      <p class="state"><b>State:</b> Live MVP. January 2027 test with Tee + Musty only, pretend money, no public. Commissions 15% / 10% / 5%.</p>
+      <p class="state"><b>What has to be true:</b> the cold start solved — 150 gigs a day across the Caribbean. Biggest upside on this page, least certain.</p>
+      <a class="lane-link" href="https://taigtsp.duckdns.org/giggit/">Open the Giggit page →</a>
     </div>
     <div class="piece">
       <p class="kicker">TAIG ITS</p>
       <h3>The IT shop — <span>MSP</span></h3>
       <p class="num">$343K <small>year 5, base case</small></p>
-      <p>Managed IT for small business — $79 / $119 / $179 per user a month, $500/mo minimum. 24 retainer clients by year 5; Andrea runs Jax, Madison opens. The steady business. Lands almost exactly on the Datto average for a 1–4 person MSP.</p>
+      <p class="state"><b>State:</b> $0 recurring revenue. Last paid work: G&amp;H Tires, ~$400 one-time — proof of work, not the win.</p>
+      <p class="state"><b>Win:</b> first signed retainer, $500/mo minimum, recurring payment.</p>
+      <a class="lane-link" href="/investor-portfolio/its/">Open the TAIG ITS page →</a>
     </div>
     <div class="piece">
       <p class="kicker">Diamond IQ</p>
       <h3>The sports <span>software</span></h3>
       <p class="num">$40K <small>year 5, base case</small></p>
-      <p>Reads a baseball team on paper — the pattern, the what-if, in public. $11 a month per team. 300 paying teams by year 5. The Shrimp report and PSIS are live now.</p>
+      <p class="state"><b>State:</b> Shrimp Analyst report and PSIS training app live now. $11 a month per team; 300 paying teams by year 5.</p>
+      <p class="state"><b>Win:</b> a coach or front-office person using the read to make a decision.</p>
+      <a class="lane-link" href="https://taigtsp.duckdns.org/shrimp-report/">Analyst report →</a> · <a class="lane-link" href="https://taigtsp.duckdns.org/psis/">PSIS app →</a>
     </div>
     <div class="piece">
       <p class="kicker">TAIG Promotions</p>
       <h3>The marketing <span>shop</span></h3>
       <p class="num">$120K <small>year 5, base case</small></p>
-      <p>Local marketing a client can measure — a paying client who got a customer from the work. 10 local clients on $1,000 a month by year 5.</p>
+      <p class="state"><b>State:</b> cards and demo sites are tools, not the win. The win hasn't landed yet.</p>
+      <p class="state"><b>Win:</b> a client who paid <i>and</i> got a customer from the work.</p>
+      <a class="lane-link" href="/investor-portfolio/promotions/">Open the Promotions page →</a>
     </div>
     <div class="piece">
       <p class="kicker">COTT / TAIG TAN</p>
       <h3>The label — <span>Jay Garrett</span></h3>
       <p class="num">$10K <small>year 5, base case</small></p>
-      <p>The label. Jay's album is out, ISRC confirmed. Year 5 is 2.5M Spotify streams a year — streaming is small money; live + merch is the bigger win and is not projected here.</p>
+      <p class="state"><b>State:</b> album out, ISRC confirmed, Luminate forms filed (Jay's word). No chart spot, no royalty yet.</p>
+      <p class="state"><b>Win:</b> Jay charting, or the first music royalty.</p>
+      <a class="lane-link" href="/investor-portfolio/cott/">Open the COTT page →</a>
     </div>
     <div class="piece">
       <p class="kicker">The Hive</p>
       <h3>The whole — <span>all of it, together</span></h3>
       <p class="num">$923K <small>year 5, base case — combined total</small></p>
-      <p>The team and the incubator everything above lives in. Fund the Hive and you're backing all of it at once. The $923K is the all-lanes combined total, not Hive-only revenue — the Hive is the matchmaker: an investor funds a piece attached to a Hive member.</p>
+      <p class="state"><b>State:</b> 123 PIOs — the workspace where the work is filed, every project, every bubble, in public.</p>
+      <p class="state"><b>Win:</b> fund the Hive and you're backing all of it at once. The $923K is the all-lanes combined total, not Hive-only revenue.</p>
+      <a class="lane-link" href="https://taigtsp.duckdns.org/hive-portal/">Open the Hive →</a>
     </div>
     <div class="piece">
       <p class="kicker">TAIG2K</p>
       <h3>TAIG2K as a <span>software company</span></h3>
       <p class="num">$451K <small>year 5, base case — software products combined</small></p>
-      <p>The company behind the products — Diamond IQ and Giggit, built and shipped by TAIG2K. The $451K is those two lanes added together ($40K + $411K), labeled as combined, not a separate forecast.</p>
+      <p class="state"><b>State:</b> two live products — Diamond IQ and Giggit, built and shipped by TAIG2K.</p>
+      <p class="state"><b>Win:</b> no separate win — TAIG2K wins when its products win. The $451K is those two lanes added together ($40K + $411K), labeled as combined, not a separate forecast.</p>
+      <a class="lane-link" href="/investor-portfolio/taig2k/">Open the TAIG2K page →</a>
     </div>
     <div class="piece">
       <p class="kicker">Other TAIG2K products</p>
       <h3>The next <span>products</span></h3>
       <p class="num">No number <small>yet</small></p>
-      <p>PSIS lives inside Diamond IQ; DIME is a tracking model, not a money model yet. Whatever comes next gets its own number when it earns one — it does not get one invented here.</p>
+      <p class="state"><b>State:</b> DIME is a tracking model, not a money model yet — NFL 50–55–2, −$1,050; college 34–26–1, +$540. PSIS lives inside Diamond IQ.</p>
+      <p class="state"><b>Win:</b> DIME — a full season at 52.4%+ against the spread.</p>
+      <a class="lane-link" href="/investor-portfolio/other-products/">Open the products page →</a>
+    </div>
+    <div class="piece">
+      <p class="kicker">Nebula OS</p>
+      <h3>The system <span>underneath</span></h3>
+      <p class="num">No separate <small>number</small></p>
+      <p class="state"><b>State:</b> runs the whole portfolio — this page, Giggit, the Shrimp report, PSIS, DIME, all built the Nebula way.</p>
+      <p class="state"><b>Win:</b> runs for other people — level 5. No separate year-5 number: it is the system underneath the whole.</p>
+      <a class="lane-link" href="/investor-portfolio/nebula/">Open the Nebula page →</a>
+    </div>
+    <div class="piece">
+      <p class="kicker">The RFC</p>
+      <h3>The way <span>I use AI</span></h3>
+      <p class="num">The system <small>document</small></p>
+      <p class="state"><b>State:</b> public, CC BY, “prove this wrong” standard. The rules Nebula runs on, written down.</p>
+      <p class="state"><b>Win:</b> the standard every document and build on this page is held to.</p>
+      <a class="lane-link" href="https://taigtsp.duckdns.org/way-i-use-ai/">Read the RFC →</a>
+    </div>
+    <div class="piece">
+      <p class="kicker">Stadium</p>
+      <h3>The stadium <span>build</span></h3>
+      <p class="num">No separate <small>number</small></p>
+      <p class="state"><b>State:</b> capitalizing on the Jacksonville stadium build — vendor doors, JSEB, second-tier work. Small money now with potential to grow, not prime contracts.</p>
+      <p class="state"><b>What counts:</b> vendor doors opening, second-tier work landing. All active Jaguars pitches are on hold — this is the build, not a pitch.</p>
+      <a class="lane-link" href="/investor-portfolio/stadium/">Open the stadium page →</a>
     </div>
   </div>
   <div class="ways">
@@ -228,11 +275,64 @@
   </div>
 </section>
 
+<section id="funding-system">
+  <h2>The funding <span>system</span></h2>
+  <p class="section-sub">The funding menu is a system, not a list. Name the system, then run the same eight questions Tee runs on every build. In plain language:</p>
+  <div class="table-scroll">
+  <table class="sys-table">
+    <thead><tr><th>Property</th><th>What it is here</th></tr></thead>
+    <tbody>
+      <tr><td><b>Inputs</b></td><td>A backer's pick — which lane, package, Hive member, or bubble — plus the amount and a way to reach them. The pick comes in by email or phone to Tee: <a href="mailto:taig2k@outlook.com">taig2k@outlook.com</a> · (904) 916-1460.</td></tr>
+      <tr><td><b>Engine</b></td><td>Tee matches the pick to the lane, package, member, or bubble, and prices the work. Nothing moves without Tee's word — no pick funds itself.</td></tr>
+      <tr><td><b>Outputs</b></td><td>Funded work, proof in the updates log, and first-dibs standing for the backer on the other ideas.</td></tr>
+      <tr><td><b>Feedback</b></td><td>The updates log at the top of this page shows what the money did, newest first, with the proof linked next to it. If the work stalls, the log shows that too.</td></tr>
+      <tr><td><b>Controls</b></td><td>Tee approves every entry before it shows. Nothing auto-lists a funder or a commitment. The first-dibs term is the standing rule: fund one idea, get first dibs on any of the others.</td></tr>
+      <tr><td><b>Memory</b></td><td>The funding-intent log below. Every pick that Tee approves is recorded here, so the history of who backed what is on the page, not in somebody's inbox.</td></tr>
+      <tr><td><b>Boundary</b></td><td>What it funds: the lanes on this page, and only them. What it doesn't fund: no guaranteed returns — no return figure is promised anywhere on this page — and no Jaguars pitch; all active Jaguars pitches are on hold.</td></tr>
+      <tr><td><b>Environment</b></td><td>This portfolio, the Hive it lives in, and the markets the lanes live in — Jacksonville small business, the Caribbean gig market, baseball, music, and the stadium build going up around all of it.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="ways">
+    <h3>The five ways, <span>spelled out</span></h3>
+    <div class="way"><b>Fund all</b> — <b>What it funds:</b> the whole thing, the Hive, $923K combined year 5. <b>What the funder gets:</b> a stake in every lane at once, and the updates log as the record of all of it. <b>First dibs:</b> already holds first dibs on everything, because everything is funded. <b>How it's recorded:</b> one entry in the funding-intent log, approved by Tee, listing the whole.</div>
+    <div class="way"><b>Fund some</b> — <b>What it funds:</b> two or three lanes off the menu, picked by the backer. <b>What the funder gets:</b> those lanes' work and proof, and first dibs on the lanes not picked. <b>First dibs:</b> applies to every other idea, including the ones not funded this round. <b>How it's recorded:</b> one log entry per lane picked, approved by Tee.</div>
+    <div class="way"><b>Fund a package</b> — <b>What it funds:</b> a bundle of lanes put together as one — e.g. the software pair (Diamond IQ + Giggit) or the steady pair (ITS + Promotions). <b>What the funder gets:</b> the bundle as one piece, priced as one piece. <b>First dibs:</b> applies to every idea outside the bundle. <b>How it's recorded:</b> one log entry naming the bundle and its lanes, approved by Tee.</div>
+    <div class="way"><b>Fund a Hive member</b> — <b>What it funds:</b> one person on the team and their work — the Hive is the matchmaker, an investor funds a piece attached to a Hive member. <b>What the funder gets:</b> that member's work, and first dibs on the rest of the Hive. <b>First dibs:</b> applies to the other members' ideas too. <b>How it's recorded:</b> one log entry naming the member and the piece, approved by Tee.</div>
+    <div class="way"><b>Fund a bubble</b> — <b>What it funds:</b> the smallest fundable unit: one tree bubble, one PIO idea. One idea, one price, one result. <b>What the funder gets:</b> that one idea built, and first dibs on every other idea on the tree. <b>First dibs:</b> this is where it starts — fund one bubble, get first dibs on the rest. <b>How it's recorded:</b> one log entry naming the bubble / PIO, approved by Tee.</div>
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <p class="kicker">Funding-intent log</p>
+    <h3>No entries <span>yet</span></h3>
+    <p>This log starts empty, on purpose. How it works, in plain language:</p>
+    <ul>
+      <li><b>You pick.</b> Tell Tee which lane, package, Hive member, or bubble — by email or phone.</li>
+      <li><b>Tee confirms.</b> He matches the pick to the work and agrees the amount and what it funds.</li>
+      <li><b>Then it shows here.</b> Only after Tee approves it does an entry appear in this log.</li>
+    </ul>
+    <p>Nothing here auto-lists a funder or a commitment. No name and no number appears on this page until Tee puts it here.</p>
+  </div>
+</section>
+
 <section id="updates">
   <h2>Latest <span>updates</span></h2>
   <p class="section-sub">Newest first. This is the log — watch it move.</p>
   <!-- ADD NEW UPDATES AT THE TOP OF THIS LIST, newest first. One <li> per update: date, title, one or two short paragraphs. -->
   <ul class="updates">
+    <li>
+      <time>Nov 28, 2026</time>
+      <div>
+        <h3>Now the Investor Portfolio</h3>
+        <p>This page is now the Investor Portfolio — the website for Lucas and others like him, builders and backers. Same content, new name, new address: /investor-portfolio/. The old /funding/ address still works — it redirects here. Every lane now has its own page, linked from the menu below, and the funding menu is now written up as a system, with a funding-intent log that starts empty.</p>
+      </div>
+    </li>
+    <li>
+      <time>Nov 28, 2026</time>
+      <div>
+        <h3>The stadium build joins the lanes</h3>
+        <p>The Jacksonville stadium build is now a lane: capitalizing on the build — vendor doors, JSEB, second-tier work off the Jacksonville build. Small money now with potential to grow, not prime contracts or big-ticket bids. The stadium timelapse app is the proof. All active Jaguars pitches stay on hold — this is the build, not a pitch.</p>
+      </div>
+    </li>
     <li>
       <time>Nov 28, 2026</time>
       <div>
@@ -367,7 +467,7 @@
 <footer>
   <p><b>TAIG &amp; Associates</b> — created by Sanil Dale Tison, Jacksonville, FL. Contact: <a href="mailto:taig2k@outlook.com">taig2k@outlook.com</a> · (904) 916-1460.</p>
   <p>Every number on this page is a sourced figure, one of Tee's locked prices, or labeled an assumption. Locked: MSP $79 / $119 / $179 per user a month, $500/mo minimum, $100/hr project work; Diamond IQ $11 a month per team; Giggit commissions 15% / 10% / 5%. Starting point: $0 recurring revenue in every lane, November 2026.</p>
-  <p>How to follow: new entries go at the top of the log. Nothing here is a promise — it's the work, as it happens. Also filed in the <a href="/tag-hub/">Tag Hub</a> under Business overview → Funding Proposals.</p>
+  <p>How to follow: new entries go at the top of the log. Nothing here is a promise — it's the work, as it happens. Also filed in the <a href="/tag-hub/">Tag Hub</a> under Business overview → Funding Proposals. The old /funding/ address redirects here.</p>
 </footer>
 </div>
 </body>
